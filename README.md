@@ -37,7 +37,8 @@ Then visit `http://localhost:8080`.
 
 ## Notes
 
-- **Orders** sync with Firebase Firestore across devices. See [FIREBASE-SETUP.md](FIREBASE-SETUP.md).
+- **Orders** and **categories** sync with Firebase Firestore across devices. See [FIREBASE-SETUP.md](FIREBASE-SETUP.md).
+- Data loads from browser cache first, then syncs in the background.
 - Without Firebase, data stays in the browser (`localStorage`).
 - Export JSON backups from Orders regularly.
 - `.nojekyll` disables Jekyll processing on GitHub Pages.

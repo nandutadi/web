@@ -1,6 +1,6 @@
 # Firebase setup for Thanvis Orders
 
-Orders sync through **Cloud Firestore** so phone and laptop share the same data.
+Orders and categories sync through **Cloud Firestore** so phone and laptop share the same data.
 
 ## 1. Create a Firebase project
 
@@ -30,18 +30,26 @@ Orders sync through **Cloud Firestore** so phone and laptop share the same data.
 
 ## 5. Security rules + page allowlist
 
-Firestore → **Rules** → publish (example):
+Firestore → **Rules** → publish (use your real emails):
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /orders/{orderId} {
-      allow read, write: if request.auth != null
+    function isAllowed() {
+      return request.auth != null
         && request.auth.token.email in [
-          "you@gmail.com",
-          "partner@gmail.com"
+          "nandatadi12344@gmail.com",
+          "sathvis4@gmail.com"
         ];
+    }
+
+    match /orders/{orderId} {
+      allow read, write: if isAllowed();
+    }
+
+    match /settings/{docId} {
+      allow read, write: if isAllowed();
     }
   }
 }
@@ -51,31 +59,40 @@ Also put the **same emails** in `auth-config.js`:
 
 ```js
 window.THANVIS_ALLOWED_EMAILS = [
-  "you@gmail.com",
-  "partner@gmail.com"
+  "nandatadi12344@gmail.com",
+  "sathvis4@gmail.com"
 ];
 ```
 
-- Firestore rules protect order data
+- Firestore rules protect orders + categories (`settings/categories`)
 - `auth-config.js` locks every page (home, orders) behind Google sign-in for those emails only
 
 ## 6. Connect the website
 
-The Thanvi Arts Firebase config is already built into `orders.html`, so every device that opens the site syncs automatically — no paste step.
+The Thanvi Arts Firebase config is already built into the app, so every signed-in device syncs automatically.
 
 1. Open `orders.html` (local or GitHub Pages)
 2. Click **Sign in with Google**
 3. Status pill should say **Synced · your@email.com**
-4. Existing local orders upload once automatically
+4. Existing local orders and categories upload once automatically
+
+## What syncs
+
+| Data | Firestore path |
+|------|----------------|
+| Orders | `orders/{orderId}` |
+| Categories (types + nested subs + images) | `settings/categories` |
 
 ## 7. Test
 
 1. Add an order on your laptop
 2. Open the same site on your phone → order should appear
-3. Toggle Completed / Delivered / Paid → should update everywhere
+3. Edit categories → should appear on the other device
+4. Toggle Completed / Delivered / Paid → should update everywhere
 
 ## Notes
 
-- Config is stored in that browser’s `localStorage` (not in the git repo)
+- The app loads from **browser cache first** (`localStorage` + Firestore IndexedDB persistence), then syncs in the background
+- Status pill shows `Cached` while serving local data, then `Synced` after the server confirms
 - Export JSON backups still work from the ↓ button
-- Large tile images count toward each Firestore document size limit (1 MB). Keep photos small (the app already compresses uploads)
+- Large subcategory images count toward the Firestore document size limit (1 MB for `settings/categories`). Keep photos small (the app already compresses uploads)

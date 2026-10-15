@@ -303,6 +303,116 @@
   .image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .image-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .image-actions .hint { width: 100%; }
+  #catDlg { width: min(680px, 96vw); }
+  .cat-type-bar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px;
+  }
+  .cat-type-chip {
+    border: 1px solid var(--border); background: var(--panel-soft); color: var(--text);
+    border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 700;
+  }
+  .cat-type-chip.on {
+    border-color: var(--accent); color: var(--accent-strong);
+    background: var(--accent-soft);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .cat-section {
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--panel-soft);
+    overflow: hidden;
+  }
+  .cat-section-toggle {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; border: 0; background: transparent; color: inherit;
+    text-align: left; cursor: pointer;
+  }
+  .cat-section-toggle:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .cat-section-toggle h3 { margin: 0; font-size: 13px; letter-spacing: -.01em; }
+  .cat-section-toggle p { margin: 3px 0 0; font-size: 11px; color: var(--muted); }
+  .cat-section-meta {
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0; color: var(--muted); font-size: 11px; font-weight: 700;
+  }
+  .cat-section-count {
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px 8px;
+    background: var(--panel); color: var(--text);
+  }
+  .cat-section-chevron {
+    width: 28px; height: 28px; display: grid; place-items: center;
+    border-radius: 8px; border: 1px solid var(--border); background: var(--panel);
+    font-size: 12px; transition: transform .15s ease;
+  }
+  .cat-section.open .cat-section-chevron { transform: rotate(90deg); color: var(--accent); border-color: var(--accent); }
+  .cat-section-body { display: none; padding: 0 12px 12px; }
+  .cat-section.open .cat-section-body { display: block; }
+  .cat-poll {
+    display: flex; flex-direction: column; gap: 8px;
+    border: 1px solid var(--border); border-radius: 12px; padding: 10px;
+    background: var(--panel); max-height: min(36vh, 320px); overflow: auto;
+  }
+  .cat-row {
+    display: grid; grid-template-columns: 36px 1fr auto auto; gap: 8px; align-items: center;
+  }
+  .cat-row.simple { grid-template-columns: 36px 1fr auto; }
+  .cat-row.shape-row {
+    grid-template-columns: 56px 1fr auto auto; gap: 8px; align-items: center;
+  }
+  .cat-row.shape-row.simple { grid-template-columns: 56px 1fr auto; }
+  .cat-thumb-wrap {
+    position: relative; width: 36px; height: 36px; flex: none;
+  }
+  .cat-row.shape-row .cat-thumb-wrap { width: 56px; height: 56px; }
+  .cat-thumb {
+    width: 100%; height: 100%; border-radius: 10px; border: 1px dashed var(--border);
+    background: var(--panel); display: grid; place-items: center; overflow: hidden;
+    padding: 0; color: var(--muted); font-size: 14px; cursor: pointer;
+  }
+  .cat-row.shape-row .cat-thumb {
+    border-radius: 12px; font-size: 12px; font-weight: 700;
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  }
+  .cat-thumb.has-image { border-style: solid; }
+  .cat-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cat-thumb-del {
+    position: absolute; top: -6px; right: -6px; z-index: 2;
+    width: 22px; height: 22px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--panel); color: var(--bad); font-size: 12px; font-weight: 800;
+    display: none; place-items: center; padding: 0; line-height: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,.18);
+  }
+  .cat-thumb-wrap:hover .cat-thumb-del,
+  .cat-thumb-wrap:focus-within .cat-thumb-del,
+  .cat-thumb-del:focus-visible { display: grid; }
+  .cat-thumb-del:hover {
+    background: color-mix(in srgb, var(--bad) 14%, var(--panel));
+    border-color: color-mix(in srgb, var(--bad) 45%, var(--border));
+  }
+  @media (hover: none) {
+    .cat-thumb-wrap.has-image .cat-thumb-del { display: grid; opacity: .92; }
+  }
+  .cat-row input[type="text"] {
+    width: 100%; border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 11px; color: var(--text); background: var(--panel); outline: none; font-size: 13px;
+  }
+  .cat-row input[type="text"]:focus { border-color: var(--accent); }
+  .cat-row input[type="text"]::placeholder { color: var(--muted); }
+  .cat-nest {
+    margin: 2px 0 6px 18px; padding-left: 10px;
+    border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .cat-hint { margin: 0 0 10px; font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .cat-check {
+    display: flex; align-items: center; gap: 8px; margin: 0 0 14px;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--panel-soft); font-size: 12px; font-weight: 650;
+  }
+  .cat-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+  #orderAttrFields { display: flex; flex-direction: column; gap: 0; }
+  .order-kind.pipe { color: #b45309; background: #fff4df; }
+  html[data-theme="dark"] .order-kind.pipe { color: #f4bd65; background: #3b2e1c; }
+  .kind-icon.pipe { background: var(--warn-soft); }
   .order-content { min-width: 0; flex: 1; }
   .order-title { font-size: 12.5px; line-height: 1.35; font-weight: 760; overflow-wrap: anywhere; }
   .order-meta { margin-top: 3px; font-size: 10.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
@@ -361,7 +471,11 @@
   .sync-pill.cloud .sync-dot { background: var(--good); }
   .sync-pill.local .sync-dot { background: var(--warn); }
   .sync-pill.error .sync-dot { background: var(--bad); }
-  .sync-pill.connecting .sync-dot { background: var(--accent); }
+  .sync-pill.connecting .sync-dot { background: var(--accent); animation: sync-pulse 1.2s ease-in-out infinite; }
+  @keyframes sync-pulse {
+    0%, 100% { opacity: .45; }
+    50% { opacity: 1; }
+  }
   @media (max-width: 1100px) {
     .stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   }
@@ -494,6 +608,7 @@
       <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search orders…" autocomplete="off" aria-label="Search orders" /></div>
       <select id="filterPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
       <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> <span>Add order</span></button>
+      <button class="btn" id="manageCategories" type="button" title="Create or edit categories (press C)">＋ Category</button>
     </nav>
 
     <section class="workspace">
@@ -540,18 +655,9 @@
       </div>
       <div class="field">
         <label for="f-kind">Order type <span aria-hidden="true">*</span></label>
-        <select id="f-kind" required><option value="candle">Candle</option><option value="resin">Resin art</option></select>
+        <select id="f-kind" required></select>
       </div>
-      <div id="candleFields">
-        <div class="field"><label for="f-candleType">Candle shape <span aria-hidden="true">*</span></label><select id="f-candleType"><option value="">Choose a shape</option></select></div>
-        <div class="field-row">
-          <div class="field"><label for="f-color">Color</label><select id="f-color"><option value="">Choose a color</option></select></div>
-          <div class="field"><label for="f-scent">Scent</label><select id="f-scent"><option value="">Choose a scent</option></select></div>
-        </div>
-      </div>
-      <div id="resinFields" class="hidden">
-        <div class="field"><label for="f-resin">Resin art details <span aria-hidden="true">*</span></label><textarea id="f-resin" placeholder="Describe the piece, size, colours, finish…"></textarea></div>
-      </div>
+      <div id="orderAttrFields"></div>
       <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Quantity, deadline, custom request…"></textarea></div>
       <div class="dialog-actions">
         <button type="button" class="btn" id="cancel">Cancel</button>
@@ -560,6 +666,28 @@
     </div>
   </form>
 </dialog>
+
+<dialog id="catDlg">
+  <form id="catForm">
+    <div class="dialog-head">
+      <div>
+        <h2>Categories</h2>
+        <p>Candle, Resin, and Pipe Cleaner options.</p>
+      </div>
+      <button type="button" class="mini-btn" id="closeCatDialog" aria-label="Close dialog">✕</button>
+    </div>
+    <div class="dialog-body">
+      <p class="cat-hint">Manage shapes, colors, scents, and sizes. Every shape has an image upload. Fill a row to add the next one. For resin shapes, expand a row to add dimensions.</p>
+      <div class="cat-type-bar" id="catTypeBar"></div>
+      <div id="catTypeEditor"></div>
+      <div class="dialog-actions" style="margin-top:16px">
+        <button type="button" class="btn" id="catCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save categories</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+<input type="file" id="catImageFile" accept="image/*" hidden />
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -569,10 +697,13 @@
 <script src="auth-gate.js"></script>
 <script>
 const STORE = "my-orders-v1";
+const CAT_STORE = "my-order-catalog-v2";
 const THEME = "my-orders-theme";
-const CANDLE_SHAPES = ["Teddy Bear","Closed rose","Open rose","Sea shell","Jasmine set","Couple","Mothichoor laddo","Sunflower"];
-const CANDLE_COLORS = ["Pink","Orange","Blue","Red","Violet","Yellow","Green","Mustard","Burgundy"];
-const CANDLE_SCENTS = ["Sea Breeze","Strawberry","Intimate"];
+const FIXED_TYPES = [
+  { id: "candle", name: "Candle" },
+  { id: "resin", name: "Resin" },
+  { id: "pipeCleaner", name: "Pipe Cleaner" }
+];
 const CANDLE_COLOR_HEX = {
   Pink: "#ec4899",
   Orange: "#f97316",
@@ -594,16 +725,220 @@ const SHAPE_ICONS = {
   "Mothichoor laddo": "🟡",
   "Sunflower": "🌻"
 };
-const RESIN_ICON = "✨";
-const CANDLE_FALLBACK_ICON = "🕯️";
+const KIND_ICONS = { candle: "🕯️", resin: "✨", pipeCleaner: "🧶" };
 let orders = [];
+let catalog = null;
+let draftCatalog = null;
+let activeTypeId = "candle";
+let catSectionOpen = {};
+let catImageTarget = null;
 let editingId = null;
 let typeFilter = "";
 let statusFilter = "";
 let toastTimer;
 let db = null;
 let unsubOrders = null;
+let unsubCategories = null;
 let cloudEnabled = false;
+let firestorePersistenceReady = null;
+let localOrdersUploadDone = false;
+let localCatalogUploadDone = false;
+const SYNC_META_STORE = "my-orders-sync-meta-v1";
+
+function readSyncMeta() {
+  try { return JSON.parse(localStorage.getItem(SYNC_META_STORE) || "{}") || {}; }
+  catch (e) { return {}; }
+}
+function writeSyncMeta(patch) {
+  try {
+    localStorage.setItem(SYNC_META_STORE, JSON.stringify({ ...readSyncMeta(), ...patch, updatedAt: Date.now() }));
+  } catch (e) { /* ignore quota */ }
+}
+function hydrateFromBrowserCache() {
+  orders = loadLocal();
+  catalog = loadCatalog();
+  saveCatalogLocal();
+  renderTypeFilter();
+  populateKindSelect();
+  if (typeof render === "function") {
+    try { render(); } catch (e) { /* render may not be defined yet during early boot */ }
+  }
+  const meta = readSyncMeta();
+  if (orders.length || meta.lastSyncedAt) {
+    setSyncStatus("local", meta.lastSyncedAt ? "Cached · opening…" : "Local cache");
+  }
+}
+async function ensureFirestorePersistence() {
+  if (firestorePersistenceReady) return firestorePersistenceReady;
+  firestorePersistenceReady = (async () => {
+    const fs = firebase.firestore();
+    try {
+      fs.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
+    } catch (err) {
+      // Already initialized in this page lifetime
+    }
+    try {
+      await fs.enablePersistence({ synchronizeTabs: true });
+      return true;
+    } catch (err) {
+      // failed-precondition: multiple tabs; unimplemented: browser lacks IndexedDB
+      console.warn("Firestore persistence unavailable", err?.code || err);
+      return false;
+    }
+  })();
+  return firestorePersistenceReady;
+}
+
+function newOpt(name = "", extra = {}) {
+  return { id: crypto.randomUUID(), name, image: "", ...extra };
+}
+function optionList(names) {
+  return names.map(n => newOpt(n));
+}
+function defaultCatalog() {
+  return {
+    version: 2,
+    candle: {
+      shapes: optionList(["Teddy Bear","Closed rose","Open rose","Sea shell","Jasmine set","Couple","Mothichoor laddo","Sunflower"]),
+      colors: optionList(["Pink","Orange","Blue","Red","Violet","Yellow","Green","Mustard","Burgundy"]),
+      scents: optionList(["Sea Breeze","Strawberry","Intimate"])
+    },
+    resin: {
+      useCandleShapes: false,
+      shapes: [],
+      colors: []
+    },
+    pipeCleaner: {
+      shapes: [],
+      sizes: [],
+      colors: []
+    }
+  };
+}
+function normalizeOpt(raw, withSizes = false) {
+  const opt = {
+    id: raw?.id || crypto.randomUUID(),
+    name: String(raw?.name || "").trim(),
+    image: raw?.image || "",
+    expanded: !!raw?.expanded
+  };
+  if (withSizes) {
+    opt.sizes = Array.isArray(raw?.sizes)
+      ? raw.sizes.map(s => normalizeOpt(s, false)).filter(s => s.name)
+      : Array.isArray(raw?.children)
+        ? raw.children.map(s => normalizeOpt(s, false)).filter(s => s.name)
+        : [];
+  }
+  return opt;
+}
+function normalizeOptList(list, withSizes = false) {
+  return (Array.isArray(list) ? list : []).map(item => normalizeOpt(item, withSizes)).filter(o => o.name);
+}
+function normalizeCatalog(raw) {
+  const base = defaultCatalog();
+  if (!raw || typeof raw !== "object") return base;
+  // Migrate old array tree format
+  if (Array.isArray(raw)) {
+    const candle = raw.find(t => t.id === "candle" || /candle/i.test(t.name || ""));
+    const resin = raw.find(t => t.id === "resin" || /resin/i.test(t.name || ""));
+    if (candle?.children?.length) base.candle.shapes = normalizeOptList(candle.children);
+    if (resin?.children?.length) base.resin.shapes = normalizeOptList(resin.children, true);
+    return base;
+  }
+  return {
+    version: 2,
+    candle: {
+      shapes: normalizeOptList(raw.candle?.shapes),
+      colors: normalizeOptList(raw.candle?.colors),
+      scents: normalizeOptList(raw.candle?.scents)
+    },
+    resin: {
+      useCandleShapes: !!raw.resin?.useCandleShapes,
+      shapes: normalizeOptList(raw.resin?.shapes, true),
+      colors: normalizeOptList(raw.resin?.colors)
+    },
+    pipeCleaner: {
+      shapes: normalizeOptList(raw.pipeCleaner?.shapes),
+      sizes: normalizeOptList(raw.pipeCleaner?.sizes),
+      colors: normalizeOptList(raw.pipeCleaner?.colors)
+    }
+  };
+}
+function pruneOptList(list, withSizes = false) {
+  return (list || [])
+    .map(o => {
+      const next = { id: o.id || crypto.randomUUID(), name: (o.name || "").trim(), image: o.image || "" };
+      if (withSizes) next.sizes = pruneOptList(o.sizes || [], false);
+      return next;
+    })
+    .filter(o => o.name);
+}
+function cleanCatalog(raw) {
+  const c = normalizeCatalog(raw);
+  return {
+    version: 2,
+    candle: {
+      shapes: pruneOptList(c.candle.shapes),
+      colors: pruneOptList(c.candle.colors),
+      scents: pruneOptList(c.candle.scents)
+    },
+    resin: {
+      useCandleShapes: !!c.resin.useCandleShapes,
+      shapes: pruneOptList(c.resin.shapes, true),
+      colors: pruneOptList(c.resin.colors)
+    },
+    pipeCleaner: {
+      shapes: pruneOptList(c.pipeCleaner.shapes),
+      sizes: pruneOptList(c.pipeCleaner.sizes),
+      colors: pruneOptList(c.pipeCleaner.colors)
+    }
+  };
+}
+function loadCatalog() {
+  try {
+    const raw = localStorage.getItem(CAT_STORE);
+    if (raw) return normalizeCatalog(JSON.parse(raw));
+    const legacy = localStorage.getItem("my-order-categories-v1");
+    if (legacy) return normalizeCatalog(JSON.parse(legacy));
+  } catch (e) { console.warn("Could not read catalog", e); }
+  return defaultCatalog();
+}
+function saveCatalogLocal() {
+  try { localStorage.setItem(CAT_STORE, JSON.stringify(catalog)); }
+  catch (e) { showToast("Could not cache categories locally."); }
+}
+function categoriesPayload(data) {
+  return { catalog: cleanCatalog(data), updatedAt: Date.now() };
+}
+async function persistCategories(data, { quiet = false } = {}) {
+  catalog = cleanCatalog(data);
+  saveCatalogLocal();
+  if (cloudEnabled && db) {
+    await db.collection("settings").doc("categories").set(categoriesPayload(catalog));
+  }
+  renderTypeFilter();
+  const kindEl = document.getElementById("f-kind");
+  if (kindEl) {
+    populateKindSelect(kindEl.value);
+    if (!dlg.open) updateKindFields(null);
+  }
+  render();
+  if (!quiet) showToast(cloudEnabled ? "Categories saved to Firebase" : "Categories saved");
+}
+function typeMeta(id) {
+  return FIXED_TYPES.find(t => t.id === id) || FIXED_TYPES[0];
+}
+function cloneCatalog(data) {
+  return JSON.parse(JSON.stringify(normalizeCatalog(data)));
+}
+function findOpt(list, idOrName) {
+  if (!idOrName) return null;
+  return (list || []).find(o => o.id === idOrName || o.name === idOrName) || null;
+}
+function resinShapes() {
+  if (catalog?.resin?.useCandleShapes) return catalog.candle.shapes || [];
+  return catalog?.resin?.shapes || [];
+}
 
 function loadLocal() {
   try { const raw = localStorage.getItem(STORE); if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; } }
@@ -620,16 +955,33 @@ function setSyncStatus(mode, label) {
   pill.className = "sync-pill " + mode;
   text.textContent = label;
 }
+function normalizeKind(rawKind) {
+  const k = String(rawKind || "candle");
+  if (FIXED_TYPES.some(t => t.id === k)) return k;
+  if (/resin/i.test(k)) return "resin";
+  if (/pipe/i.test(k)) return "pipeCleaner";
+  return "candle";
+}
 function normalizeOrder(raw, id) {
+  const kind = normalizeKind(raw.kind);
+  const meta = typeMeta(kind);
   return {
     id: id || raw.id || crypto.randomUUID(),
     createdAt: Number(raw.createdAt) || Date.now(),
     person: String(raw.person || ""),
-    kind: raw.kind === "resin" ? "resin" : "candle",
-    candleType: raw.candleType || "",
+    kind,
+    kindName: raw.kindName || meta.name,
+    shape: raw.shape || raw.candleType || "",
+    shapeId: raw.shapeId || "",
     color: raw.color || "",
+    colorId: raw.colorId || "",
     scent: raw.scent || "",
+    scentId: raw.scentId || "",
+    size: raw.size || "",
+    sizeId: raw.sizeId || "",
+    candleType: raw.candleType || raw.shape || "",
     resinText: raw.resinText || "",
+    categoryPath: Array.isArray(raw.categoryPath) ? raw.categoryPath : [],
     completed: !!raw.completed,
     delivered: !!raw.delivered,
     paid: !!raw.paid,
@@ -641,11 +993,19 @@ function orderPayload(o) {
   return {
     createdAt: o.createdAt || Date.now(),
     person: o.person || "",
-    kind: o.kind === "resin" ? "resin" : "candle",
-    candleType: o.candleType || "",
+    kind: o.kind || "",
+    kindName: o.kindName || "",
+    shape: o.shape || "",
+    shapeId: o.shapeId || "",
     color: o.color || "",
+    colorId: o.colorId || "",
     scent: o.scent || "",
+    scentId: o.scentId || "",
+    size: o.size || "",
+    sizeId: o.sizeId || "",
+    candleType: o.candleType || o.shape || "",
     resinText: o.resinText || "",
+    categoryPath: Array.isArray(o.categoryPath) ? o.categoryPath : [],
     completed: !!o.completed,
     delivered: !!o.delivered,
     paid: !!o.paid,
@@ -678,40 +1038,128 @@ async function removeOrder(id) {
 function stopOrdersListener() {
   if (unsubOrders) { unsubOrders(); unsubOrders = null; }
 }
+function stopCategoriesListener() {
+  if (unsubCategories) { unsubCategories(); unsubCategories = null; }
+}
+function stopAllSync() {
+  stopOrdersListener();
+  stopCategoriesListener();
+}
+
+async function uploadMissingLocalOrders(cloudIds) {
+  if (localOrdersUploadDone) return;
+  localOrdersUploadDone = true;
+  const local = loadLocal();
+  let uploaded = 0;
+  for (const item of local) {
+    const o = normalizeOrder(item);
+    if (!cloudIds.has(o.id)) {
+      await db.collection("orders").doc(o.id).set(orderPayload(o), { merge: true });
+      uploaded++;
+    }
+  }
+  if (uploaded) showToast(`Uploaded ${uploaded} local order${uploaded === 1 ? "" : "s"} to Firebase`);
+}
+
+async function startCategoriesSync() {
+  stopCategoriesListener();
+  if (!db || !firebase.auth().currentUser) return;
+  const ref = db.collection("settings").doc("categories");
+
+  unsubCategories = ref.onSnapshot({ includeMetadataChanges: true }, async doc => {
+    if (document.getElementById("catDlg")?.open) return;
+    const fromCache = !!doc.metadata?.fromCache;
+
+    if (!doc.exists) {
+      if (!fromCache && !localCatalogUploadDone) {
+        localCatalogUploadDone = true;
+        try { await ref.set(categoriesPayload(loadCatalog())); }
+        catch (err) { console.error(err); showToast("Categories sync setup failed: " + err.message); }
+      }
+      return;
+    }
+
+    const data = doc.data() || {};
+    const cloudCatalog = data.catalog || data.types || null;
+    if (!cloudCatalog) {
+      if (!fromCache && !localCatalogUploadDone) {
+        localCatalogUploadDone = true;
+        try { await ref.set(categoriesPayload(loadCatalog())); }
+        catch (err) { console.error(err); }
+      }
+      return;
+    }
+
+    if (!fromCache && (Array.isArray(cloudCatalog) || !cloudCatalog.version) && !localCatalogUploadDone) {
+      localCatalogUploadDone = true;
+      try {
+        await ref.set(categoriesPayload(normalizeCatalog(cloudCatalog)));
+      } catch (err) { console.error(err); }
+      return;
+    }
+
+    catalog = normalizeCatalog(cloudCatalog);
+    saveCatalogLocal();
+    writeSyncMeta({ catalogCachedAt: Date.now() });
+    renderTypeFilter();
+    const kindEl = document.getElementById("f-kind");
+    if (kindEl && !dlg.open) {
+      populateKindSelect(kindEl.value);
+      updateKindFields(readOrderAttrsFromForm());
+    }
+    render();
+  }, err => {
+    console.error(err);
+    catalog = loadCatalog();
+    renderTypeFilter();
+    populateKindSelect();
+    showToast("Categories sync error: " + err.message);
+  });
+}
 
 async function startOrdersSync() {
-  stopOrdersListener();
+  stopAllSync();
   if (!firebase.auth().currentUser) return;
-  db = firebase.firestore();
 
-  setSyncStatus("connecting", "Syncing…");
+  // Show browser cache immediately; sync continues in background.
+  orders = loadLocal();
+  catalog = loadCatalog();
+  renderTypeFilter();
+  populateKindSelect();
+  render();
+  setSyncStatus("connecting", orders.length ? "Cached · syncing…" : "Syncing…");
+
   try {
-    const existingSnap = await db.collection("orders").get();
-    const cloudIds = new Set(existingSnap.docs.map(d => d.id));
-    const local = loadLocal();
-    let uploaded = 0;
+    await ensureFirestorePersistence();
+    db = firebase.firestore();
     cloudEnabled = true;
-    for (const item of local) {
-      const o = normalizeOrder(item);
-      if (!cloudIds.has(o.id)) {
-        await db.collection("orders").doc(o.id).set(orderPayload(o), { merge: true });
-        uploaded++;
-      }
-    }
-    if (uploaded) showToast(`Uploaded ${uploaded} local order${uploaded === 1 ? "" : "s"} to Firebase`);
+    localOrdersUploadDone = false;
+    localCatalogUploadDone = false;
 
-    unsubOrders = db.collection("orders").onSnapshot(snap => {
+    startCategoriesSync();
+
+    unsubOrders = db.collection("orders").onSnapshot({ includeMetadataChanges: true }, async snap => {
+      const fromCache = !!snap.metadata?.fromCache;
       orders = snap.docs.map(doc => normalizeOrder(doc.data(), doc.id));
       cacheLocal();
       cloudEnabled = true;
+      writeSyncMeta({ lastSyncedAt: Date.now(), fromCache: !!fromCache });
+
       const email = firebase.auth().currentUser?.email;
-      setSyncStatus("cloud", email ? `Synced · ${email}` : "Synced with Firebase");
+      if (fromCache) {
+        setSyncStatus("local", email ? `Cached · ${email}` : "Cached data");
+      } else {
+        setSyncStatus("cloud", email ? `Synced · ${email}` : "Synced with Firebase");
+        const cloudIds = new Set(snap.docs.map(d => d.id));
+        try { await uploadMissingLocalOrders(cloudIds); }
+        catch (err) { console.error(err); }
+      }
       render();
     }, err => {
       console.error(err);
       cloudEnabled = false;
       orders = loadLocal();
-      setSyncStatus("error", "Permission error");
+      setSyncStatus("error", "Permission error · using cache");
       render();
       showToast("Firebase error: " + err.message);
     });
@@ -719,7 +1167,8 @@ async function startOrdersSync() {
     console.error(err);
     cloudEnabled = false;
     orders = loadLocal();
-    setSyncStatus("error", "Not synced");
+    catalog = loadCatalog();
+    setSyncStatus("error", "Offline · using cache");
     render();
     showToast("Could not sync: " + err.message);
   }
@@ -731,34 +1180,131 @@ function showToast(message) {
   const el = document.getElementById("toast"); el.textContent = message; el.classList.add("show");
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2400);
 }
-function fillSelect(id, values, placeholder) {
-  const el = document.getElementById(id), current = el.value;
-  el.innerHTML = `<option value="">${esc(placeholder)}</option>` + values.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
-  if ([...el.options].some(o => o.value === current)) el.value = current;
-}
-function initCandleOptions() {
-  fillSelect("f-candleType", CANDLE_SHAPES, "Choose a shape");
-  fillSelect("f-color", CANDLE_COLORS, "Choose a color");
-  fillSelect("f-scent", CANDLE_SCENTS, "Choose a scent");
-}
 function isFullyDone(o) { return !!(o.completed && o.delivered && o.paid); }
 function orderTitle(o) {
-  if (o.kind === "resin") return o.resinText?.trim() || "Resin art";
-  const parts = [o.candleType, o.color, o.scent].map(x => x?.trim()).filter(Boolean);
-  return parts.length ? parts.join(" · ") : "Candle";
+  const parts = [o.shape || o.candleType, o.size, o.color, o.scent].map(x => x?.trim()).filter(Boolean);
+  if (parts.length) return parts.join(" · ");
+  if (Array.isArray(o.categoryPath) && o.categoryPath.length) {
+    return o.categoryPath.map(p => p.name).join(" · ");
+  }
+  return o.kindName || typeMeta(o.kind).name;
 }
 function orderSearchText(o) {
-  return [o.person,o.kind,o.candleType,o.color,o.scent,o.resinText,o.notes].join(" ").toLowerCase();
+  return [o.person, o.kind, o.kindName, o.shape, o.candleType, o.size, o.color, o.scent, o.resinText, o.notes].join(" ").toLowerCase();
 }
 function uniqueValues(key) {
   return [...new Set(orders.map(o => (o[key] || "").trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b));
 }
-function updateKindFields() {
-  const kind = document.getElementById("f-kind").value;
-  document.getElementById("candleFields").classList.toggle("hidden", kind !== "candle");
-  document.getElementById("resinFields").classList.toggle("hidden", kind !== "resin");
-  document.getElementById("f-candleType").required = kind === "candle";
-  document.getElementById("f-resin").required = kind === "resin";
+function populateKindSelect(selectedId) {
+  const el = document.getElementById("f-kind");
+  const preferred = normalizeKind(selectedId || el.value || "candle");
+  el.innerHTML = FIXED_TYPES.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+  el.value = preferred;
+}
+function makeAttrSelect(id, label, options, selectedId, selectedName, { required = false, onChange = null } = {}) {
+  const field = document.createElement("div");
+  field.className = "field";
+  const lab = document.createElement("label");
+  lab.htmlFor = id;
+  lab.innerHTML = required ? `${esc(label)} <span aria-hidden="true">*</span>` : esc(label);
+  const sel = document.createElement("select");
+  sel.id = id;
+  if (required) sel.required = true;
+  sel.innerHTML = `<option value="">Choose ${esc(label.toLowerCase())}…</option>` +
+    options.map(o => `<option value="${esc(o.id)}" data-name="${esc(o.name)}">${esc(o.name)}</option>`).join("");
+  const match = findOpt(options, selectedId) || findOpt(options, selectedName);
+  if (match) sel.value = match.id;
+  if (onChange) sel.addEventListener("change", onChange);
+  field.append(lab, sel);
+  return field;
+}
+function readOrderAttrsFromForm() {
+  const pick = id => {
+    const el = document.getElementById(id);
+    if (!el || !el.value) return { id: "", name: "" };
+    const opt = el.selectedOptions[0];
+    return { id: el.value, name: opt?.dataset.name || opt?.textContent || "" };
+  };
+  return {
+    shape: pick("f-shape"),
+    color: pick("f-color"),
+    scent: pick("f-scent"),
+    size: pick("f-size")
+  };
+}
+function updateKindFields(preset = null) {
+  const wrap = document.getElementById("orderAttrFields");
+  wrap.innerHTML = "";
+  const kind = normalizeKind(document.getElementById("f-kind").value);
+  const values = preset || {};
+  if (kind === "candle") {
+    wrap.append(
+      makeAttrSelect("f-shape", "Shape", catalog.candle.shapes, values.shapeId || values.shape?.id, values.shapeName || values.shape?.name || values.shape, {
+        required: !!catalog.candle.shapes.length
+      }),
+      makeAttrSelect("f-color", "Color", catalog.candle.colors, values.colorId || values.color?.id, values.colorName || values.color?.name || values.color),
+      makeAttrSelect("f-scent", "Scent", catalog.candle.scents, values.scentId || values.scent?.id, values.scentName || values.scent?.name || values.scent)
+    );
+    return;
+  }
+  if (kind === "resin") {
+    const shapes = resinShapes();
+    const shapeField = makeAttrSelect("f-shape", "Shape", shapes, values.shapeId || values.shape?.id, values.shapeName || values.shape?.name || values.shape, {
+      required: !!shapes.length,
+      onChange: () => {
+        const current = readOrderAttrsFromForm();
+        updateKindFields({
+          shapeId: current.shape.id, shapeName: current.shape.name,
+          colorId: current.color.id, colorName: current.color.name,
+          sizeId: "", sizeName: ""
+        });
+      }
+    });
+    wrap.appendChild(shapeField);
+    const selectedShape = findOpt(shapes, document.getElementById("f-shape")?.value) ||
+      findOpt(shapes, values.shapeId) || findOpt(shapes, values.shapeName || values.shape);
+    const sizes = (!catalog.resin.useCandleShapes && selectedShape?.sizes) ? selectedShape.sizes : [];
+    if (sizes.length) {
+      wrap.appendChild(makeAttrSelect("f-size", "Size / dimension", sizes, values.sizeId || values.size?.id, values.sizeName || values.size?.name || values.size));
+    }
+    wrap.appendChild(makeAttrSelect("f-color", "Color", catalog.resin.colors, values.colorId || values.color?.id, values.colorName || values.color?.name || values.color));
+    return;
+  }
+  if (kind === "pipeCleaner") {
+    wrap.append(
+      makeAttrSelect("f-shape", "Shape", catalog.pipeCleaner.shapes, values.shapeId || values.shape?.id, values.shapeName || values.shape?.name || values.shape, {
+        required: !!catalog.pipeCleaner.shapes.length
+      }),
+      makeAttrSelect("f-size", "Size", catalog.pipeCleaner.sizes, values.sizeId || values.size?.id, values.sizeName || values.size?.name || values.size),
+      makeAttrSelect("f-color", "Color", catalog.pipeCleaner.colors, values.colorId || values.color?.id, values.colorName || values.color?.name || values.color)
+    );
+  }
+}
+function renderTypeFilter() {
+  const host = document.getElementById("typeFilter");
+  const current = typeFilter;
+  host.innerHTML = `<button type="button" data-type="" class="${current ? "" : "on"}">All items</button>` +
+    FIXED_TYPES.map(t => `<button type="button" data-type="${esc(t.id)}" class="${current === t.id ? "on" : ""}">${esc(t.name)}</button>`).join("");
+}
+function orderOptionImage(kind, attrs) {
+  const shapeName = attrs.shape || attrs.shapeName;
+  const colorName = attrs.color || attrs.colorName;
+  if (kind === "candle") {
+    return findOpt(catalog.candle.shapes, attrs.shapeId || shapeName)?.image
+      || findOpt(catalog.candle.colors, attrs.colorId || colorName)?.image
+      || findOpt(catalog.candle.scents, attrs.scentId || attrs.scent)?.image
+      || "";
+  }
+  if (kind === "resin") {
+    const shapes = resinShapes();
+    const shape = findOpt(shapes, attrs.shapeId || shapeName);
+    const size = findOpt(shape?.sizes || [], attrs.sizeId || attrs.size);
+    return size?.image || shape?.image || findOpt(catalog.resin.colors, attrs.colorId || colorName)?.image || "";
+  }
+  return findOpt(catalog.pipeCleaner.shapes, attrs.shapeId || shapeName)?.image
+    || findOpt(catalog.pipeCleaner.sizes, attrs.sizeId || attrs.size)?.image
+    || findOpt(catalog.pipeCleaner.colors, attrs.colorId || colorName)?.image
+    || "";
 }
 function getVisibleOrders() {
   const q = document.getElementById("search").value.trim().toLowerCase();
@@ -775,14 +1321,17 @@ function getVisibleOrders() {
 }
 function renderStats(visible) {
   const open = visible.filter(o => !isFullyDone(o)).length;
-  const candles = visible.filter(o => o.kind === "candle").length;
-  const resin = visible.filter(o => o.kind === "resin").length;
   const unpaid = visible.filter(o => !o.paid).length;
+  const typeStats = FIXED_TYPES.map((t, i) => {
+    const count = visible.filter(o => o.kind === t.id).length;
+    const cls = t.id === "candle" ? "candles" : t.id === "resin" ? "resin" : "open";
+    const icon = t.id === "candle" ? "♨" : t.id === "resin" ? "✧" : "◍";
+    return `<article class="stat ${cls}"><div class="stat-head"><span class="stat-label">${esc(t.name)}</span><span class="stat-icon">${icon}</span></div><div class="stat-value">${count}</div><div class="stat-sub">By order type</div></article>`;
+  }).join("");
   document.getElementById("stats").innerHTML = `
     <article class="stat"><div class="stat-head"><span class="stat-label">Total orders</span><span class="stat-icon">▦</span></div><div class="stat-value">${visible.length}</div><div class="stat-sub">Across all customers</div></article>
     <article class="stat open"><div class="stat-head"><span class="stat-label">In progress</span><span class="stat-icon">◷</span></div><div class="stat-value">${open}</div><div class="stat-sub">Need at least one step</div></article>
-    <article class="stat candles"><div class="stat-head"><span class="stat-label">Candles</span><span class="stat-icon">♨</span></div><div class="stat-value">${candles}</div><div class="stat-sub">Candle creations</div></article>
-    <article class="stat resin"><div class="stat-head"><span class="stat-label">Resin art</span><span class="stat-icon">✧</span></div><div class="stat-value">${resin}</div><div class="stat-sub">Custom resin pieces</div></article>
+    ${typeStats}
     <article class="stat unpaid"><div class="stat-head"><span class="stat-label">Unpaid</span><span class="stat-icon">₹</span></div><div class="stat-value">${unpaid}</div><div class="stat-sub">Payment to follow up</div></article>`;
 }
 function render() {
@@ -831,7 +1380,8 @@ function render() {
 }
 function orderCard(o) {
   const el = document.createElement("article"); el.className = "order" + (isFullyDone(o) ? " done" : "");
-  const candleHex = o.kind === "candle" ? CANDLE_COLOR_HEX[o.color] : null;
+  const colorHint = o.color || "";
+  const candleHex = CANDLE_COLOR_HEX[colorHint] || null;
   if (candleHex) {
     el.classList.add("tinted");
     el.style.setProperty("--tile-color", candleHex);
@@ -849,28 +1399,31 @@ function orderCard(o) {
   });
   const top = document.createElement("div"); top.className = "order-top";
   const icon = document.createElement("div");
-  icon.className = "kind-icon " + (o.kind === "resin" ? "resin" : "candle");
+  const kindClass = o.kind === "resin" ? "resin" : o.kind === "pipeCleaner" ? "pipe" : "candle";
+  icon.className = "kind-icon " + kindClass;
   icon.setAttribute("aria-hidden", "true");
-  if (o.image) {
+  const catImage = o.image || orderOptionImage(o.kind, o);
+  if (catImage) {
     icon.classList.add("has-image");
     const img = document.createElement("img");
-    img.src = o.image;
+    img.src = catImage;
     img.alt = "";
     img.loading = "lazy";
     icon.appendChild(img);
   } else {
-    icon.textContent = o.kind === "resin"
-      ? RESIN_ICON
-      : (SHAPE_ICONS[o.candleType] || CANDLE_FALLBACK_ICON);
+    const shapeName = o.shape || o.candleType;
+    icon.textContent = SHAPE_ICONS[shapeName] || KIND_ICONS[o.kind] || "✦";
   }
   const content = document.createElement("div"); content.className = "order-content";
   const title = document.createElement("div"); title.className = "order-title"; title.textContent = orderTitle(o); content.appendChild(title);
-  if (o.kind === "candle") {
-    const bits = []; if (o.candleType?.trim()) bits.push(o.candleType.trim()); if (o.color?.trim()) bits.push("Color: " + o.color.trim()); if (o.scent?.trim()) bits.push("Scent: " + o.scent.trim());
-    if (bits.length) { const meta = document.createElement("div"); meta.className = "order-meta"; meta.textContent = bits.join(" · "); content.appendChild(meta); }
-  }
+  const bits = [];
+  if (o.shape?.trim() || o.candleType?.trim()) bits.push((o.shape || o.candleType).trim());
+  if (o.size?.trim()) bits.push("Size: " + o.size.trim());
+  if (o.color?.trim()) bits.push("Color: " + o.color.trim());
+  if (o.scent?.trim()) bits.push("Scent: " + o.scent.trim());
+  if (bits.length) { const meta = document.createElement("div"); meta.className = "order-meta"; meta.textContent = bits.join(" · "); content.appendChild(meta); }
   if (o.notes?.trim()) { const notes = document.createElement("div"); notes.className = "order-meta"; notes.textContent = "Note: " + o.notes.trim(); content.appendChild(notes); }
-  const kind = document.createElement("span"); kind.className = "order-kind " + (o.kind === "resin" ? "resin" : "candle"); kind.textContent = o.kind === "resin" ? "Resin art" : "Candle"; content.appendChild(kind);
+  const kind = document.createElement("span"); kind.className = "order-kind " + kindClass; kind.textContent = o.kindName || typeMeta(o.kind).name; content.appendChild(kind);
   const actions = document.createElement("div"); actions.className = "order-actions";
   const edit = document.createElement("button"); edit.type = "button"; edit.className = "mini-btn"; edit.textContent = "✎"; edit.title = "Edit order"; edit.setAttribute("aria-label","Edit order"); edit.onclick = e => { e.stopPropagation(); openDialog(o); };
   const del = document.createElement("button"); del.type = "button"; del.className = "mini-btn delete"; del.textContent = "🗑"; del.title = "Delete order"; del.setAttribute("aria-label","Delete order"); del.onclick = async e => {
@@ -916,54 +1469,71 @@ function fromDatetimeLocalValue(value) {
   return Number.isFinite(t) ? t : Date.now();
 }
 
+function attrsFromOrder(order) {
+  if (!order) return {};
+  return {
+    shapeId: order.shapeId, shapeName: order.shape || order.candleType,
+    colorId: order.colorId, colorName: order.color,
+    scentId: order.scentId, scentName: order.scent,
+    sizeId: order.sizeId, sizeName: order.size
+  };
+}
 function openDialog(order) {
   const isEdit = !!(order && order.id);
   editingId = isEdit ? order.id : null;
   document.getElementById("dlgTitle").textContent = isEdit ? "Edit order" : "Add an order";
   document.getElementById("f-person").value = order?.person ?? "";
   document.getElementById("f-ordered").value = toDatetimeLocalValue(isEdit ? (order.createdAt || Date.now()) : Date.now());
-  document.getElementById("f-kind").value = isEdit ? (order.kind ?? "candle") : "candle";
-  initCandleOptions();
-  ensureSelectValue("f-candleType", order?.candleType); ensureSelectValue("f-color", order?.color); ensureSelectValue("f-scent", order?.scent);
-  document.getElementById("f-candleType").value = isEdit ? (order.candleType ?? "") : "";
-  document.getElementById("f-color").value = isEdit ? (order.color ?? "") : "";
-  document.getElementById("f-scent").value = isEdit ? (order.scent ?? "") : "";
-  document.getElementById("f-resin").value = isEdit ? (order.resinText ?? "") : "";
+  populateKindSelect(isEdit ? order.kind : "candle");
   document.getElementById("f-notes").value = isEdit ? (order.notes ?? "") : "";
-  updateKindFields();
+  updateKindFields(isEdit ? attrsFromOrder(order) : null);
   dlg.showModal();
   if (!isEdit && order?.person) document.getElementById("f-kind").focus();
   else document.getElementById("f-person").focus();
 }
-function ensureSelectValue(id,value) {
-  if (!value) return; const el = document.getElementById(id);
-  if (![...el.options].some(o => o.value === value)) { const opt = document.createElement("option"); opt.value = value; opt.textContent = value; el.appendChild(opt); }
-}
-document.getElementById("f-kind").addEventListener("change", updateKindFields);
+document.getElementById("f-kind").addEventListener("change", () => updateKindFields(null));
 document.getElementById("add").onclick = () => openDialog(null);
 document.getElementById("cancel").onclick = () => dlg.close();
 document.getElementById("closeDialog").onclick = () => dlg.close();
 document.getElementById("form").addEventListener("submit", async e => {
   e.preventDefault();
-  const kind = document.getElementById("f-kind").value, person = document.getElementById("f-person").value.trim();
+  const kind = normalizeKind(document.getElementById("f-kind").value);
+  const person = document.getElementById("f-person").value.trim();
   if (!person) { document.getElementById("f-person").focus(); return; }
   if (!document.getElementById("f-ordered").value) { document.getElementById("f-ordered").focus(); return; }
-  if (kind === "candle" && !document.getElementById("f-candleType").value.trim()) { document.getElementById("f-candleType").focus(); return; }
-  if (kind === "resin" && !document.getElementById("f-resin").value.trim()) { document.getElementById("f-resin").focus(); return; }
+  const attrs = readOrderAttrsFromForm();
+  const shapeRequired = !!document.getElementById("f-shape")?.required;
+  if (shapeRequired && !attrs.shape.id) {
+    document.getElementById("f-shape")?.focus();
+    showToast("Choose a shape");
+    return;
+  }
   const existing = editingId ? orders.find(o => o.id === editingId) : null;
   const order = normalizeOrder({
     id: editingId || crypto.randomUUID(),
     createdAt: fromDatetimeLocalValue(document.getElementById("f-ordered").value),
-    person, kind,
-    candleType: kind === "candle" ? document.getElementById("f-candleType").value.trim() : "",
-    color: kind === "candle" ? document.getElementById("f-color").value.trim() : "",
-    scent: kind === "candle" ? document.getElementById("f-scent").value.trim() : "",
-    resinText: kind === "resin" ? document.getElementById("f-resin").value.trim() : "",
+    person,
+    kind,
+    kindName: typeMeta(kind).name,
+    shape: attrs.shape.name,
+    shapeId: attrs.shape.id,
+    color: attrs.color.name,
+    colorId: attrs.color.id,
+    scent: kind === "candle" ? attrs.scent.name : "",
+    scentId: kind === "candle" ? attrs.scent.id : "",
+    size: (kind === "resin" || kind === "pipeCleaner") ? attrs.size.name : "",
+    sizeId: (kind === "resin" || kind === "pipeCleaner") ? attrs.size.id : "",
+    candleType: kind === "candle" ? attrs.shape.name : "",
     completed: existing ? !!existing.completed : false,
     delivered: existing ? !!existing.delivered : false,
     paid: existing ? !!existing.paid : false,
     notes: document.getElementById("f-notes").value.trim(),
-    image: existing?.image || ""
+    image: existing?.image || orderOptionImage(kind, {
+      shapeId: attrs.shape.id, shape: attrs.shape.name,
+      colorId: attrs.color.id, color: attrs.color.name,
+      scentId: attrs.scent.id, scent: attrs.scent.name,
+      sizeId: attrs.size.id, size: attrs.size.name
+    }) || ""
   });
   try {
     await upsertOrder(order);
@@ -988,16 +1558,23 @@ document.getElementById("statusFilter").addEventListener("click",e => {
 });
 document.addEventListener("keydown",e => {
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
-  if (e.key === "/" && !typing && !dlg.open) {
+  if (e.key === "/" && !typing && !dlg.open && !catDlg.open) {
     e.preventDefault();
     document.getElementById("search").focus();
   }
   if (
-    e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !dlg.open
+    e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !dlg.open && !catDlg.open
   ) {
     e.preventDefault();
     openDialog(null);
   }
+  if (
+    e.key.toLowerCase() === "c" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !dlg.open && !catDlg.open
+  ) {
+    e.preventDefault();
+    openCategoryDialog();
+  }
+  if (e.key === "Escape" && catDlg.open) { catDlg.close(); return; }
   if (e.key === "Escape" && dlg.open) dlg.close();
 });
 const themeBtn = document.getElementById("theme");
@@ -1033,12 +1610,328 @@ document.getElementById("importFile").addEventListener("change",async e => {
 });
 
 document.getElementById("googleSignOut").onclick = async () => {
-  stopOrdersListener();
+  stopAllSync();
   cloudEnabled = false;
   await ThanvisAuth.signOut();
 };
 
-initCandleOptions();
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) {
+      reject(new Error("Please choose an image file"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read image"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 240;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.onerror = () => reject(new Error("Invalid image"));
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const catDlg = document.getElementById("catDlg");
+const catImageFile = document.getElementById("catImageFile");
+
+function ensureTrailingPlaceholder(list, withSizes = false) {
+  if (!list.length || (list[list.length - 1].name || "").trim()) {
+    const row = newOpt("");
+    row.placeholder = true;
+    if (withSizes) row.sizes = [];
+    list.push(row);
+  }
+}
+function renderCatTypeBar() {
+  const bar = document.getElementById("catTypeBar");
+  bar.innerHTML = "";
+  FIXED_TYPES.forEach(t => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "cat-type-chip" + (t.id === activeTypeId ? " on" : "");
+    btn.textContent = t.name;
+    btn.onclick = () => {
+      activeTypeId = t.id;
+      renderCatTypeBar();
+      renderCatTypeEditor();
+    };
+    bar.appendChild(btn);
+  });
+}
+function filledOptCount(list) {
+  return (list || []).filter(o => (o.name || "").trim()).length;
+}
+function makeCatSection(title, hint, list, { withSizes = false, sizeLabel = "Sizes / dimensions", shapeImages = false, openByDefault = false } = {}) {
+  const key = `${activeTypeId}:${title}`;
+  if (catSectionOpen[key] === undefined) catSectionOpen[key] = !!openByDefault;
+  const isOpen = !!catSectionOpen[key];
+  const count = filledOptCount(list);
+
+  const section = document.createElement("section");
+  section.className = "cat-section" + (isOpen ? " open" : "");
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "cat-section-toggle";
+  toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  toggle.innerHTML = `
+    <div>
+      <h3>${esc(title)}</h3>
+      <p>${esc(hint)}</p>
+    </div>
+    <div class="cat-section-meta">
+      <span class="cat-section-count">${count}</span>
+      <span class="cat-section-chevron" aria-hidden="true">▸</span>
+    </div>
+  `;
+  toggle.onclick = () => {
+    catSectionOpen[key] = !catSectionOpen[key];
+    section.classList.toggle("open", catSectionOpen[key]);
+    toggle.setAttribute("aria-expanded", catSectionOpen[key] ? "true" : "false");
+  };
+
+  const body = document.createElement("div");
+  body.className = "cat-section-body";
+  const poll = document.createElement("div");
+  poll.className = "cat-poll";
+  renderOptPoll(list, poll, {
+    withSizes,
+    sizeLabel,
+    shapeImages,
+    placeholder: `Add ${title.toLowerCase().replace(/s$/, "")}…`
+  });
+  body.appendChild(poll);
+  section.append(toggle, body);
+  return section;
+}
+function pickCatImage(target) {
+  catImageTarget = target;
+  catImageFile.value = "";
+  catImageFile.click();
+}
+function renderOptPoll(list, container, {
+  withSizes = false,
+  sizeLabel = "Sizes",
+  placeholder = "Add option…",
+  shapeImages = false
+} = {}) {
+  container.innerHTML = "";
+  ensureTrailingPlaceholder(list, withSizes);
+  list.forEach((node, index) => {
+    const row = document.createElement("div");
+    row.className = "cat-row"
+      + (withSizes ? "" : " simple")
+      + (shapeImages ? " shape-row" : "");
+
+    const thumbWrap = document.createElement("div");
+    thumbWrap.className = "cat-thumb-wrap" + (node.image ? " has-image" : "");
+    const thumb = document.createElement("button");
+    thumb.type = "button";
+    thumb.className = "cat-thumb" + (node.image ? " has-image" : "");
+    thumb.title = node.image ? "Change image" : (shapeImages ? "Upload shape image" : "Upload image");
+    thumb.setAttribute("aria-label", thumb.title);
+    if (node.image) {
+      const img = document.createElement("img");
+      img.src = node.image;
+      img.alt = "";
+      thumb.appendChild(img);
+    } else {
+      thumb.textContent = shapeImages ? "IMG" : "＋";
+    }
+    const pollOpts = { withSizes, sizeLabel, placeholder, shapeImages };
+    thumb.onclick = () => pickCatImage({ node, list, container, ...pollOpts });
+    thumbWrap.appendChild(thumb);
+    if (node.image) {
+      const delImg = document.createElement("button");
+      delImg.type = "button";
+      delImg.className = "cat-thumb-del";
+      delImg.title = "Remove image";
+      delImg.setAttribute("aria-label", "Remove image");
+      delImg.textContent = "✕";
+      delImg.onclick = ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        node.image = "";
+        renderOptPoll(list, container, pollOpts);
+      };
+      thumbWrap.appendChild(delImg);
+    }
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = node.name || "";
+    input.placeholder = index === list.length - 1 ? placeholder : "Name";
+    input.autocomplete = "off";
+
+    let nestBtn = null;
+    if (withSizes) {
+      nestBtn = document.createElement("button");
+      nestBtn.type = "button";
+      nestBtn.className = "btn btn-icon";
+      nestBtn.title = sizeLabel;
+      nestBtn.textContent = node.expanded ? "▾" : "▸";
+      nestBtn.disabled = !(node.name || "").trim();
+      nestBtn.onclick = () => {
+        if (!(node.name || "").trim()) return;
+        node.expanded = !node.expanded;
+        if (!Array.isArray(node.sizes)) node.sizes = [];
+        renderOptPoll(list, container, pollOpts);
+      };
+    }
+
+    input.addEventListener("input", () => {
+      node.name = input.value;
+      node.placeholder = false;
+      if (nestBtn) nestBtn.disabled = !(node.name || "").trim();
+      const isLast = index === list.length - 1;
+      if (isLast && input.value.trim()) {
+        ensureTrailingPlaceholder(list, withSizes);
+        renderOptPoll(list, container, pollOpts);
+        const rows = [...container.children].filter(el => el.classList.contains("cat-row"));
+        const focusInput = rows[index]?.querySelector("input[type='text']");
+        if (focusInput) {
+          focusInput.focus();
+          const len = focusInput.value.length;
+          focusInput.setSelectionRange(len, len);
+        }
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "mini-btn delete";
+    delBtn.title = "Remove";
+    delBtn.textContent = "✕";
+    delBtn.onclick = () => {
+      if (!(node.name || "").trim() && index === list.length - 1) return;
+      list.splice(index, 1);
+      renderOptPoll(list, container, pollOpts);
+    };
+
+    if (withSizes) row.append(thumbWrap, input, nestBtn, delBtn);
+    else row.append(thumbWrap, input, delBtn);
+    container.appendChild(row);
+
+    if (withSizes && node.expanded && (node.name || "").trim()) {
+      if (!Array.isArray(node.sizes)) node.sizes = [];
+      const nest = document.createElement("div");
+      nest.className = "cat-nest";
+      const nestHead = document.createElement("div");
+      nestHead.className = "field-label";
+      nestHead.style.marginBottom = "6px";
+      nestHead.textContent = sizeLabel + " for " + node.name;
+      nest.appendChild(nestHead);
+      const nestPoll = document.createElement("div");
+      nestPoll.className = "cat-poll";
+      renderOptPoll(node.sizes, nestPoll, { withSizes: false, placeholder: "Add size / dimension…" });
+      nest.appendChild(nestPoll);
+      container.appendChild(nest);
+    }
+  });
+}
+function renderCatTypeEditor() {
+  const editor = document.getElementById("catTypeEditor");
+  editor.innerHTML = "";
+  if (!draftCatalog) return;
+
+  if (activeTypeId === "candle") {
+    editor.append(
+      makeCatSection("Shapes", "Candle mould shapes — upload an image for each shape", draftCatalog.candle.shapes, { shapeImages: true }),
+      makeCatSection("Colors", "Candle colors", draftCatalog.candle.colors),
+      makeCatSection("Scents", "Candle scents", draftCatalog.candle.scents)
+    );
+    return;
+  }
+
+  if (activeTypeId === "resin") {
+    const check = document.createElement("label");
+    check.className = "cat-check";
+    check.innerHTML = `<input type="checkbox" id="catUseCandleShapes" ${draftCatalog.resin.useCandleShapes ? "checked" : ""} /><span>Use Candle shapes for Resin orders</span>`;
+    check.querySelector("input").addEventListener("change", e => {
+      draftCatalog.resin.useCandleShapes = e.target.checked;
+      renderCatTypeEditor();
+    });
+    editor.appendChild(check);
+    if (draftCatalog.resin.useCandleShapes) {
+      const note = document.createElement("p");
+      note.className = "cat-hint";
+      note.textContent = "Resin orders will use Candle shapes (including their images). Manage shapes under the Candle tab. You can still set Resin colors below.";
+      editor.appendChild(note);
+    } else {
+      editor.appendChild(makeCatSection(
+        "Shapes",
+        "Resin moulds / types — upload an image for each shape. Expand a shape to add optional sizes.",
+        draftCatalog.resin.shapes,
+        { withSizes: true, sizeLabel: "Sizes / dimensions", shapeImages: true }
+      ));
+    }
+    editor.appendChild(makeCatSection("Colors", "Resin colors", draftCatalog.resin.colors));
+    return;
+  }
+
+  if (activeTypeId === "pipeCleaner") {
+    editor.append(
+      makeCatSection("Shapes", "Pipe cleaner shapes — upload an image for each shape", draftCatalog.pipeCleaner.shapes, { shapeImages: true }),
+      makeCatSection("Sizes", "Pipe cleaner sizes", draftCatalog.pipeCleaner.sizes),
+      makeCatSection("Colors", "Pipe cleaner colors", draftCatalog.pipeCleaner.colors)
+    );
+  }
+}
+function openCategoryDialog() {
+  draftCatalog = cloneCatalog(catalog);
+  activeTypeId = "candle";
+  catSectionOpen = {};
+  renderCatTypeBar();
+  renderCatTypeEditor();
+  catDlg.showModal();
+}
+document.getElementById("manageCategories").onclick = openCategoryDialog;
+document.getElementById("catCancel").onclick = () => catDlg.close();
+document.getElementById("closeCatDialog").onclick = () => catDlg.close();
+catImageFile.addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file || !catImageTarget) return;
+  try {
+    catImageTarget.node.image = await readImageFile(file);
+    renderOptPoll(catImageTarget.list, catImageTarget.container, {
+      withSizes: catImageTarget.withSizes,
+      sizeLabel: catImageTarget.sizeLabel,
+      placeholder: catImageTarget.placeholder,
+      shapeImages: catImageTarget.shapeImages
+    });
+    showToast("Shape image added");
+  } catch (err) {
+    alert(err.message);
+  }
+  e.target.value = "";
+  catImageTarget = null;
+});
+document.getElementById("catForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
+  try {
+    catDlg.close();
+    await persistCategories(draftCatalog);
+  } catch (err) {
+    alert("Could not save categories: " + err.message);
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
+});
+
+hydrateFromBrowserCache();
 ThanvisAuth.onReady(() => {
   startOrdersSync();
 });
