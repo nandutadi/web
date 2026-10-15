@@ -1,0 +1,126 @@
+/* Soft studio atmosphere — animated mesh + drifting blobs */
+.live-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 10% -10%, #f8e9e4 0%, transparent 55%),
+    radial-gradient(90% 70% at 100% 0%, #efe6d8 0%, transparent 50%),
+    radial-gradient(80% 60% at 50% 100%, #e8f0ea 0%, transparent 45%),
+    #f4efe8;
+}
+html[data-theme="dark"] .live-bg {
+  background:
+    radial-gradient(120% 80% at 10% -10%, #2a2228 0%, transparent 55%),
+    radial-gradient(90% 70% at 100% 0%, #1f2420 0%, transparent 50%),
+    radial-gradient(80% 60% at 50% 100%, #1a2228 0%, transparent 45%),
+    #14181c;
+}
+.live-bg__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: .55;
+  will-change: transform;
+  mix-blend-mode: multiply;
+}
+html[data-theme="dark"] .live-bg__blob {
+  mix-blend-mode: screen;
+  opacity: .28;
+  filter: blur(56px);
+}
+.live-bg__blob--a {
+  width: min(52vw, 520px);
+  height: min(52vw, 520px);
+  left: -8%;
+  top: -12%;
+  background: #e8a4b0;
+  animation: live-drift-a 22s ease-in-out infinite alternate;
+}
+.live-bg__blob--b {
+  width: min(48vw, 480px);
+  height: min(48vw, 480px);
+  right: -10%;
+  top: 18%;
+  background: #d4c0a0;
+  animation: live-drift-b 28s ease-in-out infinite alternate;
+}
+.live-bg__blob--c {
+  width: min(56vw, 560px);
+  height: min(56vw, 560px);
+  left: 28%;
+  bottom: -18%;
+  background: #9fc5b5;
+  animation: live-drift-c 26s ease-in-out infinite alternate;
+}
+html[data-theme="dark"] .live-bg__blob--a { background: #c97b8a; }
+html[data-theme="dark"] .live-bg__blob--b { background: #b89a6a; }
+html[data-theme="dark"] .live-bg__blob--c { background: #5f9e8a; }
+
+.live-bg__petal {
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  border-radius: 60% 60% 40% 40%;
+  opacity: .35;
+  background: #d98996;
+  animation: live-float linear infinite;
+}
+html[data-theme="dark"] .live-bg__petal { opacity: .2; background: #e4a0ad; }
+.live-bg__petal:nth-child(4) { left: 12%; top: 110%; width: 8px; height: 11px; animation-duration: 18s; animation-delay: 0s; }
+.live-bg__petal:nth-child(5) { left: 28%; top: 110%; width: 12px; height: 16px; background: #c4b08a; animation-duration: 24s; animation-delay: -4s; }
+.live-bg__petal:nth-child(6) { left: 46%; top: 110%; width: 7px; height: 10px; background: #8fb9a8; animation-duration: 20s; animation-delay: -9s; }
+.live-bg__petal:nth-child(7) { left: 63%; top: 110%; width: 11px; height: 15px; animation-duration: 26s; animation-delay: -2s; }
+.live-bg__petal:nth-child(8) { left: 78%; top: 110%; width: 9px; height: 12px; background: #c4b08a; animation-duration: 21s; animation-delay: -12s; }
+.live-bg__petal:nth-child(9) { left: 88%; top: 110%; width: 8px; height: 11px; background: #8fb9a8; animation-duration: 23s; animation-delay: -6s; }
+
+.live-bg__wash {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--bg, #f4efe8) 55%, transparent) 100%),
+    repeating-linear-gradient(
+      -12deg,
+      transparent 0 14px,
+      rgba(255,255,255,.035) 14px 15px
+    );
+  opacity: .7;
+}
+html[data-theme="dark"] .live-bg__wash {
+  background:
+    linear-gradient(180deg, transparent 30%, rgba(17,20,27,.55) 100%),
+    repeating-linear-gradient(
+      -12deg,
+      transparent 0 14px,
+      rgba(255,255,255,.02) 14px 15px
+    );
+}
+
+@keyframes live-drift-a {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(12%, 18%) scale(1.12); }
+}
+@keyframes live-drift-b {
+  0% { transform: translate(0, 0) scale(1.05); }
+  100% { transform: translate(-16%, 10%) scale(1); }
+}
+@keyframes live-drift-c {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-8%, -14%) scale(1.15); }
+}
+@keyframes live-float {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: .4; }
+  90% { opacity: .25; }
+  100% { transform: translate3d(-40px, -120vh, 0) rotate(180deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-bg__blob,
+  .live-bg__petal {
+    animation: none !important;
+  }
+  .live-bg__petal { display: none; }
+}

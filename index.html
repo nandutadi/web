@@ -6,6 +6,7 @@
 <meta name="color-scheme" content="light dark" />
 <meta name="description" content="Thanvis Art Gallery tools — orders, expenses, and links." />
 <title>Thanvis · Studio Tools</title>
+<link rel="stylesheet" href="live-bg.css" />
 <style>
   :root {
     --bg: #f7f1ea;
@@ -34,18 +35,13 @@
     min-height: 100dvh;
     color: var(--text);
     font-family: "Segoe UI", ui-sans-serif, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg);
-    background-image:
-      linear-gradient(180deg, color-mix(in srgb, var(--bg) 55%, transparent), color-mix(in srgb, var(--bg) 78%, transparent)),
-      url("thanvis-bg.jpg");
-    background-size: cover;
-    background-position: center;
-    background-attachment: scroll;
-    background-repeat: no-repeat;
+    background: transparent;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
   .wrap {
+    position: relative;
+    z-index: 1;
     max-width: 920px;
     margin: 0 auto;
     padding: 48px max(16px, env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
@@ -148,6 +144,18 @@
 </style>
 </head>
 <body>
+  <div class="live-bg" aria-hidden="true">
+    <div class="live-bg__blob live-bg__blob--a"></div>
+    <div class="live-bg__blob live-bg__blob--b"></div>
+    <div class="live-bg__blob live-bg__blob--c"></div>
+    <div class="live-bg__petal"></div>
+    <div class="live-bg__petal"></div>
+    <div class="live-bg__petal"></div>
+    <div class="live-bg__petal"></div>
+    <div class="live-bg__petal"></div>
+    <div class="live-bg__petal"></div>
+    <div class="live-bg__wash"></div>
+  </div>
   <div class="wrap">
     <header>
       <div class="brand">

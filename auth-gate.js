@@ -35,15 +35,33 @@
         display: grid; place-items: center;
         padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
         overflow: auto;
-        background:
-          linear-gradient(180deg, rgba(247,241,234,.92), rgba(247,241,234,.96)),
-          #f7f1ea;
+        background: transparent;
         color: #3a2a28;
         font-family: "Segoe UI", ui-sans-serif, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
       }
-      html[data-theme="dark"] #auth-gate {
-        background: linear-gradient(180deg, rgba(26,21,20,.94), rgba(26,21,20,.97)), #1a1514;
-        color: #f3e8e4;
+      html[data-theme="dark"] #auth-gate { color: #f3e8e4; }
+      #auth-gate::before {
+        content: "";
+        position: absolute; inset: 0; z-index: -1;
+        background:
+          radial-gradient(120% 80% at 10% -10%, #f8e9e4 0%, transparent 55%),
+          radial-gradient(90% 70% at 100% 0%, #efe6d8 0%, transparent 50%),
+          radial-gradient(80% 60% at 50% 100%, #e8f0ea 0%, transparent 45%),
+          #f4efe8;
+        animation: auth-bg-shift 18s ease-in-out infinite alternate;
+      }
+      html[data-theme="dark"] #auth-gate::before {
+        background:
+          radial-gradient(120% 80% at 10% -10%, #2a2228 0%, transparent 55%),
+          radial-gradient(90% 70% at 100% 0%, #1f2420 0%, transparent 50%),
+          #14181c;
+      }
+      @keyframes auth-bg-shift {
+        0% { filter: hue-rotate(0deg) saturate(1); transform: scale(1); }
+        100% { filter: hue-rotate(12deg) saturate(1.08); transform: scale(1.04); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #auth-gate::before { animation: none; }
       }
       #auth-gate .card {
         width: min(420px, 100%);
