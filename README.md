@@ -1,15 +1,13 @@
-# Thanvis studio tools
+# Thanvis order tracking
 
-Static web apps for orders, expenses, and links. Ready for [GitHub Pages](https://pages.github.com/).
+Static site for Thanvis Art Gallery order tracking, with room for upcoming studio modules. Ready for [GitHub Pages](https://pages.github.com/).
 
 ## Pages
 
 | Path | App |
 |------|-----|
-| `/` | Hub |
+| `/` | Hub — Orders + upcoming modules |
 | `/orders.html` | Candle & resin order tracker |
-| `/expenses.html` | Expense tracker |
-| `/links.html` | Link bookmarks |
 
 All paths are relative, so the site works at both:
 
@@ -39,7 +37,7 @@ Then visit `http://localhost:8080`.
 
 ## Notes
 
-- **Orders** can sync with Firebase Firestore across devices. See [FIREBASE-SETUP.md](FIREBASE-SETUP.md).
+- **Orders** sync with Firebase Firestore across devices. See [FIREBASE-SETUP.md](FIREBASE-SETUP.md).
 - Without Firebase, data stays in the browser (`localStorage`).
-- Export JSON backups from each app regularly.
+- Export JSON backups from Orders regularly.
 - `.nojekyll` disables Jekyll processing on GitHub Pages.

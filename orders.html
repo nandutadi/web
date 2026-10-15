@@ -8,15 +8,17 @@
 <link rel="stylesheet" href="live-bg.css" />
 <style>
   :root {
-    --bg: #f6f7fb;
-    --panel: #ffffff;
-    --panel-soft: #fafbff;
-    --text: #182230;
-    --muted: #788396;
-    --border: #e7eaf1;
-    --accent: #6558d3;
-    --accent-strong: #5144bf;
-    --accent-soft: #f0eeff;
+    --bg: #f4f7fc;
+    --panel: rgba(255, 255, 255, .86);
+    --panel-soft: #f3f7ff;
+    --text: #142033;
+    --muted: #667892;
+    --border: rgba(20, 40, 70, .12);
+    --accent: #00a890;
+    --accent-strong: #008f7a;
+    --accent-soft: #e4faf5;
+    --neon: #00c9ad;
+    --neon-hot: #e91e8c;
     --good: #16845b;
     --good-soft: #e8f7f0;
     --warn: #b86b13;
@@ -26,19 +28,22 @@
     --candle-soft: #fff0e9;
     --resin: #138b8a;
     --resin-soft: #e6f8f7;
-    --shadow: 0 2px 5px rgba(29, 38, 59, .025), 0 12px 30px rgba(29, 38, 59, .045);
+    --shadow: 0 2px 5px rgba(29, 38, 59, .04), 0 12px 30px rgba(29, 38, 59, .06);
     --radius: 18px;
+    --glass: rgba(255, 255, 255, .72);
   }
   html[data-theme="dark"] {
-    --bg: #11141b;
-    --panel: #191e28;
-    --panel-soft: #1d2330;
-    --text: #eef1f8;
-    --muted: #9aa5b7;
-    --border: #2a3241;
-    --accent: #a59bff;
-    --accent-strong: #b7afff;
-    --accent-soft: #2c2947;
+    --bg: #070b14;
+    --panel: rgba(16, 22, 36, .78);
+    --panel-soft: rgba(22, 30, 48, .9);
+    --text: #eef4ff;
+    --muted: #8ea0bd;
+    --border: rgba(0, 255, 208, .14);
+    --accent: #00ffd0;
+    --accent-strong: #5dffdf;
+    --accent-soft: rgba(0, 255, 208, .12);
+    --neon: #00ffd0;
+    --neon-hot: #ff2d95;
     --good: #5dd6a0;
     --good-soft: #17392f;
     --warn: #f4bd65;
@@ -48,7 +53,8 @@
     --candle-soft: #402a27;
     --resin: #5ed8d1;
     --resin-soft: #173b3d;
-    --shadow: 0 4px 22px rgba(0, 0, 0, .16);
+    --shadow: 0 0 0 1px rgba(0, 255, 208, .06), 0 8px 32px rgba(0, 0, 0, .35);
+    --glass: rgba(10, 16, 28, .72);
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -67,49 +73,138 @@
   .app-shell { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; }
   .topbar {
     position: sticky; top: 0; z-index: 20;
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
-    backdrop-filter: blur(18px); border-bottom: 1px solid var(--border);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .topbar-fade {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: calc(100% + 56px);
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg) 52%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 28%, transparent) 42%,
+      color-mix(in srgb, var(--bg) 10%, transparent) 72%,
+      transparent 100%
+    );
+    backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 38%, rgba(0,0,0,.55) 68%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 38%, rgba(0,0,0,.55) 68%, transparent 100%);
   }
   .topbar-inner {
-    max-width: 1240px; min-height: 78px; margin: auto;
-    padding: 14px max(16px, env(safe-area-inset-right)) 14px max(16px, env(safe-area-inset-left));
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    position: relative; z-index: 1;
+    max-width: 1240px; min-height: 76px; margin: auto;
+    padding: 14px max(16px, env(safe-area-inset-right)) 18px max(16px, env(safe-area-inset-left));
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
   }
-  .brand { display: flex; align-items: center; gap: 11px; flex-shrink: 0; text-decoration: none; color: inherit; }
-  .brand:hover .brand-mark { filter: brightness(1.06); }
+  .topbar-side { display: flex; align-items: center; min-width: 0; }
+  .topbar-side--right { justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+  .brand-center {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-decoration: none; color: inherit; text-align: center; gap: 2px;
+    padding: 4px 10px; min-width: 0;
+  }
+  .brand-orb {
+    position: relative; width: 44px; height: 44px; display: grid; place-items: center;
+    margin-bottom: 2px;
+  }
+  .brand-orb::before, .brand-orb::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid var(--neon);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--neon) 55%, transparent),
+                inset 0 0 10px color-mix(in srgb, var(--neon) 25%, transparent);
+    animation: orb-spin 10s linear infinite;
+  }
+  .brand-orb::after {
+    inset: 5px; border-color: var(--neon-hot);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--neon-hot) 50%, transparent);
+    animation-direction: reverse; animation-duration: 7s;
+  }
   .brand-mark {
-    width: 42px; height: 42px; display: grid; place-items: center;
-    color: white; border-radius: 14px; font-size: 20px;
-    background: linear-gradient(145deg, #887bf2, #5546c4);
-    box-shadow: 0 7px 16px rgba(101, 88, 211, .25);
+    position: relative; z-index: 1;
+    width: 28px; height: 28px; display: grid; place-items: center;
+    color: var(--text); border-radius: 50%; font-size: 14px;
+    background: color-mix(in srgb, var(--panel) 90%, transparent);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--neon) 60%, transparent);
   }
-  .brand h1 { margin: 0; font-size: clamp(15px, 2.4vw, 17px); letter-spacing: -.045em; font-weight: 780; }
-  .brand p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
-  .topbar-tools { margin-left: auto; display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1 1 280px; flex-wrap: wrap; justify-content: flex-end; }
-  .search-wrap { position: relative; flex: 1 1 160px; min-width: 0; max-width: 300px; }
+  .brand-center h1 {
+    margin: 0; font-size: clamp(14px, 2.2vw, 17px); letter-spacing: .04em;
+    font-weight: 780; text-transform: uppercase;
+    background: linear-gradient(90deg, var(--neon), var(--neon-hot), var(--neon));
+    background-size: 200% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: neon-title 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--neon) 35%, transparent));
+  }
+  .brand-center p {
+    margin: 0; color: var(--muted); font-size: 10px; letter-spacing: .18em;
+    text-transform: uppercase; font-weight: 700;
+  }
+  @keyframes orb-spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes neon-title {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .search-wrap { position: relative; flex: 1 1 160px; min-width: 0; max-width: none; }
   .search-wrap span { position: absolute; top: 50%; left: 13px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
   .search-wrap input {
     width: 100%; padding: 11px 13px 11px 38px; border: 1px solid var(--border);
     background: var(--panel); color: var(--text); border-radius: 12px; outline: none;
   }
-  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent),
+                0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  .topbar .btn, .topbar .btn-signout {
+    background: color-mix(in srgb, var(--panel) 78%, transparent);
+    backdrop-filter: blur(10px);
+  }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     border: 1px solid var(--border); border-radius: 12px; padding: 10px 13px;
     background: var(--panel); color: var(--text); font-weight: 650; font-size: 13px;
-    transition: transform .15s, border-color .15s, background .15s;
+    transition: transform .15s, border-color .15s, background .15s, box-shadow .15s;
   }
   .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
-  .btn-primary { color: #fff; border-color: transparent; background: var(--accent); box-shadow: 0 6px 15px rgba(101,88,211,.2); }
+  .btn-primary {
+    color: #04120f; border-color: transparent; background: var(--accent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  html[data-theme="light"] .btn-primary { color: #fff; }
   .btn-primary:hover { background: var(--accent-strong); }
-  .btn-icon { width: 40px; height: 40px; padding: 0; font-size: 16px; }
+  .btn-icon { width: 40px; height: 40px; padding: 0; font-size: 16px; flex: none; }
+  .btn-signout {
+    padding: 9px 12px; font-size: 12px; white-space: nowrap;
+    border-color: color-mix(in srgb, var(--neon-hot) 35%, var(--border));
+  }
+  .btn-signout:hover {
+    border-color: var(--neon-hot);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--neon-hot) 30%, transparent);
+  }
   .person-filter {
     border: 1px solid var(--border); border-radius: 12px; padding: 10px 30px 10px 12px;
-    color: var(--text); background: var(--panel); max-width: 155px; font-size: 13px; min-width: 0;
+    color: var(--text); background: var(--panel); max-width: 170px; font-size: 13px; min-width: 0;
+  }
+  .toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin: 0 0 22px; padding: 12px;
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(1.15);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow), 0 0 28px color-mix(in srgb, var(--neon) 8%, transparent);
   }
   main {
     max-width: 1240px; margin: 0 auto;
-    padding: 30px max(16px, env(safe-area-inset-right)) calc(80px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    padding: 12px max(16px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   }
   .welcome {
     display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 24px; flex-wrap: wrap;
@@ -120,7 +215,7 @@
   .welcome p { margin: 9px 0 0; color: var(--muted); font-size: 13px; }
   .today-pill { border: 1px solid var(--border); border-radius: 999px; padding: 9px 13px; background: var(--panel); color: var(--muted); font-size: 12px; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
   .stats {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 13px; margin-bottom: 27px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 13px; margin-bottom: 14px;
   }
   .stat {
     position: relative; overflow: hidden; background: var(--panel); border: 1px solid var(--border);
@@ -248,7 +343,12 @@
   .check-grid { display: flex; flex-wrap: wrap; gap: 11px 16px; }
   .dialog-actions { display: flex; justify-content: flex-end; gap: 9px; padding-top: 7px; }
   .hidden { display: none !important; }
-  .toast { position: fixed; z-index: 50; bottom: 22px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--text); color: var(--panel); border-radius: 12px; padding: 11px 16px; font-size: 12px; box-shadow: var(--shadow); transition: .22s ease; }
+  .toast {
+    position: fixed; z-index: 50; bottom: calc(22px + env(safe-area-inset-bottom)); left: 50%;
+    transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+    background: var(--text); color: var(--bg); border-radius: 12px; padding: 11px 16px;
+    font-size: 12px; box-shadow: var(--shadow); transition: .22s ease;
+  }
   .toast.show { transform: translate(-50%, 0); opacity: 1; }
   .footer-note { text-align: center; color: var(--muted); font-size: 10.5px; padding-top: 20px; }
   .sync-pill {
@@ -266,26 +366,30 @@
     .stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   }
   @media (max-width: 950px) {
-    .topbar-inner { padding: 13px max(14px, env(safe-area-inset-right)) 13px max(14px, env(safe-area-inset-left)); }
-    .topbar-tools { width: 100%; margin-left: 0; justify-content: stretch; }
-    .search-wrap { flex: 1 1 100%; max-width: none; }
+    .topbar-inner { padding: 12px max(14px, env(safe-area-inset-right)) 12px max(14px, env(safe-area-inset-left)); }
+    .toolbar { gap: 8px; }
+    .search-wrap { flex: 1 1 100%; }
     .person-filter { max-width: none; flex: 1 1 140px; }
     #add { flex: 1 1 140px; }
-    main { padding: 24px max(14px, env(safe-area-inset-right)) 60px max(14px, env(safe-area-inset-left)); }
+    main { padding: 24px max(14px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
     .welcome-meta { width: 100%; justify-content: flex-start; }
   }
   @media (max-width: 650px) {
-    .topbar-inner { padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left)); gap: 11px; }
-    .brand { width: 100%; }
-    .brand p { display: none; }
-    .brand-mark { width: 38px; height: 38px; }
-    .topbar-tools { gap: 7px; }
+    .topbar-inner {
+      grid-template-columns: 1fr; justify-items: center; gap: 10px;
+      padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+    }
+    .topbar-side--left { display: none; }
+    .topbar-side--right { width: 100%; justify-content: center; }
+    .brand-center p { display: none; }
     .person-filter, #add { flex: 1 1 calc(50% - 4px); }
     .btn-primary span { display: none; }
-    main { padding: 18px max(12px, env(safe-area-inset-right)) calc(45px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+    .btn-signout { padding: 9px 10px; font-size: 11px; }
+    main { padding: 18px max(12px, env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
     .welcome { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 18px; }
     .welcome h2 { font-size: clamp(22px, 7vw, 28px); }
-    .stats { gap: 9px; margin-bottom: 18px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .stats { gap: 9px; margin-bottom: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .toolbar { margin-bottom: 16px; padding: 10px; }
     .stat { min-height: 96px; padding: 13px; border-radius: 15px; }
     .stat-value { font-size: clamp(22px, 6vw, 25px); }
     .stat-label { font-size: 9px; }
@@ -303,9 +407,11 @@
     .dialog-head { padding: 19px 16px 15px; }
     .dialog-body { padding: 16px; }
     dialog { width: min(520px, 100vw); max-height: min(92vh, 100dvh); border-radius: 18px 18px 0 0; margin: auto 0 0; }
-    .toast { left: 12px; right: 12px; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateY(20px); width: auto; text-align: center; }
+    .toast {
+      left: 12px; right: 12px; bottom: max(16px, env(safe-area-inset-bottom));
+      transform: translateY(20px); width: auto; text-align: center;
+    }
     .toast.show { transform: translateY(0); }
-    #googleSignOut { width: 100%; }
   }
   @media (max-width: 380px) {
     .stats { grid-template-columns: 1fr 1fr; }
@@ -318,7 +424,9 @@
     .stat { min-height: 88px; padding: 12px; }
     dialog { max-height: 96dvh; }
   }
-  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -326,25 +434,39 @@
   <div class="live-bg__blob live-bg__blob--a"></div>
   <div class="live-bg__blob live-bg__blob--b"></div>
   <div class="live-bg__blob live-bg__blob--c"></div>
-  <div class="live-bg__petal"></div>
-  <div class="live-bg__petal"></div>
-  <div class="live-bg__petal"></div>
-  <div class="live-bg__petal"></div>
-  <div class="live-bg__petal"></div>
-  <div class="live-bg__petal"></div>
+  <div class="live-bg__grid"></div>
+  <div class="live-bg__ring"></div>
+  <div class="live-bg__beam live-bg__beam--a"></div>
+  <div class="live-bg__beam live-bg__beam--b"></div>
+  <div class="live-bg__beam live-bg__beam--c"></div>
+  <div class="live-bg__horizon"></div>
+  <div class="live-bg__sparks">
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+  </div>
+  <div class="live-bg__scan"></div>
   <div class="live-bg__wash"></div>
 </div>
 <div class="app-shell">
   <header class="topbar">
+    <div class="topbar-fade" aria-hidden="true"></div>
     <div class="topbar-inner">
-      <a class="brand" href="index.html" title="Back to home">
-        <div class="brand-mark" aria-hidden="true">✦</div>
-        <div><h1>Thanvi Art Gallery</h1><p>Handmade studio manager</p></div>
+      <div class="topbar-side topbar-side--left" aria-hidden="true"></div>
+      <a class="brand-center" href="index.html" title="Back to home">
+        <div class="brand-orb" aria-hidden="true">
+          <div class="brand-mark">✦</div>
+        </div>
+        <h1>Thanvi Art Gallery</h1>
+        <p>Order tracking</p>
       </a>
-      <div class="topbar-tools">
-        <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search orders…" autocomplete="off" aria-label="Search orders" /></div>
-        <select id="filterPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
-        <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> Add order</button>
+      <div class="topbar-side topbar-side--right">
+        <button type="button" class="btn btn-signout" id="googleSignOut">Sign out</button>
         <button class="btn btn-icon utility" id="theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
         <button class="btn btn-icon utility" id="export" title="Export JSON" aria-label="Export orders">↓</button>
         <button class="btn btn-icon utility" id="import" title="Import JSON" aria-label="Import orders">↑</button>
@@ -363,11 +485,16 @@
       <div class="welcome-meta">
         <div class="today-pill" id="todayLabel">✦ Your order workspace</div>
         <div class="sync-pill local" id="syncPill" title="Data sync status"><span class="sync-dot" aria-hidden="true"></span><span id="syncLabel">Connecting…</span></div>
-        <button type="button" class="btn" id="googleSignOut">Sign out</button>
       </div>
     </section>
 
     <section class="stats" id="stats" aria-label="Order statistics"></section>
+
+    <nav class="toolbar" aria-label="Order controls">
+      <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search orders…" autocomplete="off" aria-label="Search orders" /></div>
+      <select id="filterPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
+      <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> <span>Add order</span></button>
+    </nav>
 
     <section class="workspace">
       <div class="workspace-head">
@@ -396,7 +523,7 @@
 <dialog id="dlg">
   <form id="form">
     <div class="dialog-head">
-      <div><h2 id="dlgTitle">Add an order</h2><p>Capture the details now. Update progress any time.</p></div>
+      <div><h2 id="dlgTitle">Add an order</h2><p>Customer, date, and order details.</p></div>
       <button type="button" class="mini-btn" id="closeDialog" aria-label="Close dialog">✕</button>
     </div>
     <div class="dialog-body">
@@ -405,6 +532,11 @@
         <input id="f-person" list="people" required placeholder="e.g. Priya" autocomplete="off" />
         <datalist id="people"></datalist>
         <span class="hint">Orders are grouped by customer name.</span>
+      </div>
+      <div class="field">
+        <label for="f-ordered">Date ordered <span aria-hidden="true">*</span></label>
+        <input id="f-ordered" type="datetime-local" required />
+        <span class="hint">Defaults to now. Change if the order came in earlier.</span>
       </div>
       <div class="field">
         <label for="f-kind">Order type <span aria-hidden="true">*</span></label>
@@ -419,26 +551,6 @@
       </div>
       <div id="resinFields" class="hidden">
         <div class="field"><label for="f-resin">Resin art details <span aria-hidden="true">*</span></label><textarea id="f-resin" placeholder="Describe the piece, size, colours, finish…"></textarea></div>
-      </div>
-      <div class="field">
-        <span class="field-label">Order progress</span>
-        <div class="status-box"><div class="check-grid">
-          <label class="check"><input type="checkbox" id="f-completed" /> Made / completed</label>
-          <label class="check"><input type="checkbox" id="f-delivered" /> Delivered</label>
-          <label class="check paid"><input type="checkbox" id="f-paid" /> Payment received</label>
-        </div></div>
-      </div>
-      <div class="field">
-        <span class="field-label">Tile image</span>
-        <div class="image-picker">
-          <div class="image-preview" id="imagePreview" aria-hidden="true">📷</div>
-          <div class="image-actions">
-            <button type="button" class="btn" id="pickImage">Choose image</button>
-            <button type="button" class="btn hidden" id="clearImage">Remove</button>
-            <input type="file" id="f-image" accept="image/*" hidden />
-            <span class="hint">Optional. Shape icons are used when no image is set.</span>
-          </div>
-        </div>
       </div>
       <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Quantity, deadline, custom request…"></textarea></div>
       <div class="dialog-actions">
@@ -484,7 +596,6 @@ const SHAPE_ICONS = {
 };
 const RESIN_ICON = "✨";
 const CANDLE_FALLBACK_ICON = "🕯️";
-let pendingImage = null;
 let orders = [];
 let editingId = null;
 let typeFilter = "";
@@ -795,77 +906,31 @@ function makeCheck(o,key,label,paid=false) {
 }
 const dlg = document.getElementById("dlg");
 
-function defaultIconForForm() {
-  const kind = document.getElementById("f-kind").value;
-  if (kind === "resin") return RESIN_ICON;
-  return SHAPE_ICONS[document.getElementById("f-candleType").value] || CANDLE_FALLBACK_ICON;
+function toDatetimeLocalValue(ms) {
+  const d = new Date(ms);
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-
-function updateImagePreview() {
-  const preview = document.getElementById("imagePreview");
-  const clearBtn = document.getElementById("clearImage");
-  preview.innerHTML = "";
-  if (pendingImage) {
-    const img = document.createElement("img");
-    img.src = pendingImage;
-    img.alt = "";
-    preview.appendChild(img);
-    clearBtn.classList.remove("hidden");
-  } else {
-    preview.textContent = defaultIconForForm();
-    clearBtn.classList.add("hidden");
-  }
-}
-
-function readImageFile(file) {
-  return new Promise((resolve, reject) => {
-    if (!file || !file.type.startsWith("image/")) {
-      reject(new Error("Please choose an image file"));
-      return;
-    }
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read image"));
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const max = 160;
-        const scale = Math.min(1, max / Math.max(img.width, img.height));
-        const w = Math.max(1, Math.round(img.width * scale));
-        const h = Math.max(1, Math.round(img.height * scale));
-        const canvas = document.createElement("canvas");
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.78));
-      };
-      img.onerror = () => reject(new Error("Invalid image"));
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
+function fromDatetimeLocalValue(value) {
+  const t = new Date(value).getTime();
+  return Number.isFinite(t) ? t : Date.now();
 }
 
 function openDialog(order) {
   const isEdit = !!(order && order.id);
   editingId = isEdit ? order.id : null;
-  pendingImage = isEdit ? (order.image || null) : null;
-  document.getElementById("f-image").value = "";
   document.getElementById("dlgTitle").textContent = isEdit ? "Edit order" : "Add an order";
   document.getElementById("f-person").value = order?.person ?? "";
+  document.getElementById("f-ordered").value = toDatetimeLocalValue(isEdit ? (order.createdAt || Date.now()) : Date.now());
   document.getElementById("f-kind").value = isEdit ? (order.kind ?? "candle") : "candle";
   initCandleOptions();
-  ensureSelectValue("f-candleType",order?.candleType); ensureSelectValue("f-color",order?.color); ensureSelectValue("f-scent",order?.scent);
+  ensureSelectValue("f-candleType", order?.candleType); ensureSelectValue("f-color", order?.color); ensureSelectValue("f-scent", order?.scent);
   document.getElementById("f-candleType").value = isEdit ? (order.candleType ?? "") : "";
   document.getElementById("f-color").value = isEdit ? (order.color ?? "") : "";
   document.getElementById("f-scent").value = isEdit ? (order.scent ?? "") : "";
   document.getElementById("f-resin").value = isEdit ? (order.resinText ?? "") : "";
-  document.getElementById("f-completed").checked = isEdit ? !!order.completed : false;
-  document.getElementById("f-delivered").checked = isEdit ? !!order.delivered : false;
-  document.getElementById("f-paid").checked = isEdit ? !!order.paid : false;
   document.getElementById("f-notes").value = isEdit ? (order.notes ?? "") : "";
   updateKindFields();
-  updateImagePreview();
   dlg.showModal();
   if (!isEdit && order?.person) document.getElementById("f-kind").focus();
   else document.getElementById("f-person").focus();
@@ -874,25 +939,7 @@ function ensureSelectValue(id,value) {
   if (!value) return; const el = document.getElementById(id);
   if (![...el.options].some(o => o.value === value)) { const opt = document.createElement("option"); opt.value = value; opt.textContent = value; el.appendChild(opt); }
 }
-document.getElementById("f-kind").addEventListener("change", () => { updateKindFields(); updateImagePreview(); });
-document.getElementById("f-candleType").addEventListener("change", updateImagePreview);
-document.getElementById("pickImage").onclick = () => document.getElementById("f-image").click();
-document.getElementById("clearImage").onclick = () => {
-  pendingImage = null;
-  document.getElementById("f-image").value = "";
-  updateImagePreview();
-};
-document.getElementById("f-image").addEventListener("change", async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    pendingImage = await readImageFile(file);
-    updateImagePreview();
-  } catch (err) {
-    alert(err.message);
-    e.target.value = "";
-  }
-});
+document.getElementById("f-kind").addEventListener("change", updateKindFields);
 document.getElementById("add").onclick = () => openDialog(null);
 document.getElementById("cancel").onclick = () => dlg.close();
 document.getElementById("closeDialog").onclick = () => dlg.close();
@@ -900,29 +947,29 @@ document.getElementById("form").addEventListener("submit", async e => {
   e.preventDefault();
   const kind = document.getElementById("f-kind").value, person = document.getElementById("f-person").value.trim();
   if (!person) { document.getElementById("f-person").focus(); return; }
+  if (!document.getElementById("f-ordered").value) { document.getElementById("f-ordered").focus(); return; }
   if (kind === "candle" && !document.getElementById("f-candleType").value.trim()) { document.getElementById("f-candleType").focus(); return; }
   if (kind === "resin" && !document.getElementById("f-resin").value.trim()) { document.getElementById("f-resin").focus(); return; }
   const existing = editingId ? orders.find(o => o.id === editingId) : null;
   const order = normalizeOrder({
     id: editingId || crypto.randomUUID(),
-    createdAt: existing?.createdAt || Date.now(),
+    createdAt: fromDatetimeLocalValue(document.getElementById("f-ordered").value),
     person, kind,
     candleType: kind === "candle" ? document.getElementById("f-candleType").value.trim() : "",
     color: kind === "candle" ? document.getElementById("f-color").value.trim() : "",
     scent: kind === "candle" ? document.getElementById("f-scent").value.trim() : "",
     resinText: kind === "resin" ? document.getElementById("f-resin").value.trim() : "",
-    completed: document.getElementById("f-completed").checked,
-    delivered: document.getElementById("f-delivered").checked,
-    paid: document.getElementById("f-paid").checked,
+    completed: existing ? !!existing.completed : false,
+    delivered: existing ? !!existing.delivered : false,
+    paid: existing ? !!existing.paid : false,
     notes: document.getElementById("f-notes").value.trim(),
-    image: pendingImage || ""
+    image: existing?.image || ""
   });
   try {
     await upsertOrder(order);
     dlg.close();
     showToast(editingId ? "Order updated" : "Order added");
     editingId = null;
-    pendingImage = null;
   } catch (err) {
     alert("Save failed: " + err.message);
   }

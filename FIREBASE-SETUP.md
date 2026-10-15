@@ -57,7 +57,7 @@ window.THANVIS_ALLOWED_EMAILS = [
 ```
 
 - Firestore rules protect order data
-- `auth-config.js` locks every page (home, orders, expenses, links) behind Google sign-in for those emails only
+- `auth-config.js` locks every page (home, orders) behind Google sign-in for those emails only
 
 ## 6. Connect the website
 

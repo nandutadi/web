@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
-<meta name="description" content="Thanvis Art Gallery tools — orders, expenses, and links." />
-<title>Thanvis · Studio Tools</title>
+<meta name="description" content="Thanvis Art Gallery — order tracking and studio modules." />
+<title>Thanvis · Order Tracking</title>
 <link rel="stylesheet" href="live-bg.css" />
 <style>
   :root {
@@ -79,7 +79,7 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
     gap: 14px;
   }
-  a.card {
+  a.card, .card.soon {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -98,6 +98,14 @@
   a.card:hover {
     transform: translateY(-2px);
     border-color: var(--accent);
+  }
+  .card.soon {
+    opacity: .72;
+    cursor: default;
+  }
+  .card.soon .go {
+    color: var(--muted);
+    font-weight: 600;
   }
   .icon {
     width: 44px; height: 44px;
@@ -131,7 +139,7 @@
   @media (max-width: 760px) {
     .wrap { padding-top: 28px; }
     header { margin-bottom: 24px; }
-    a.card { min-height: 150px; }
+    a.card, .card.soon { min-height: 150px; }
   }
   @media (max-width: 420px) {
     .grid { grid-template-columns: 1fr; }
@@ -139,7 +147,7 @@
   }
   @media (max-height: 500px) and (orientation: landscape) {
     .wrap { padding-top: 20px; padding-bottom: 28px; }
-    a.card { min-height: 120px; }
+    a.card, .card.soon { min-height: 120px; }
   }
 </style>
 </head>
@@ -148,45 +156,50 @@
     <div class="live-bg__blob live-bg__blob--a"></div>
     <div class="live-bg__blob live-bg__blob--b"></div>
     <div class="live-bg__blob live-bg__blob--c"></div>
-    <div class="live-bg__petal"></div>
-    <div class="live-bg__petal"></div>
-    <div class="live-bg__petal"></div>
-    <div class="live-bg__petal"></div>
-    <div class="live-bg__petal"></div>
-    <div class="live-bg__petal"></div>
+    <div class="live-bg__grid"></div>
+    <div class="live-bg__ring"></div>
+    <div class="live-bg__beam live-bg__beam--a"></div>
+    <div class="live-bg__beam live-bg__beam--b"></div>
+    <div class="live-bg__beam live-bg__beam--c"></div>
+    <div class="live-bg__horizon"></div>
+    <div class="live-bg__sparks">
+      <div class="live-bg__spark"></div>
+      <div class="live-bg__spark"></div>
+      <div class="live-bg__spark"></div>
+      <div class="live-bg__spark"></div>
+      <div class="live-bg__spark"></div>
+      <div class="live-bg__spark"></div>
+      <div class="live-bg__spark"></div>
+      <div class="live-bg__spark"></div>
+    </div>
+    <div class="live-bg__scan"></div>
     <div class="live-bg__wash"></div>
   </div>
   <div class="wrap">
     <header>
       <div class="brand">
         <h1>Thanvis Art Gallery</h1>
-        <p>Studio tools for orders, expenses, and saved links — hosted as a static site.</p>
+        <p>Order tracking for the studio — more modules coming here next.</p>
       </div>
       <button class="theme-btn" id="theme" type="button" title="Toggle theme" aria-label="Toggle theme">☾</button>
   </header>
 
-    <nav class="grid" aria-label="Apps">
+    <nav class="grid" aria-label="Modules">
       <a class="card" href="orders.html">
         <div class="icon" aria-hidden="true">🕯️</div>
         <h2>Orders</h2>
         <p>Track candle and resin orders by customer, status, and payment.</p>
         <span class="go">Open orders →</span>
       </a>
-      <a class="card" href="expenses.html">
-        <div class="icon" aria-hidden="true">💸</div>
-        <h2>Expenses</h2>
-        <p>Log spending, filter by category, and keep a simple money summary.</p>
-        <span class="go">Open expenses →</span>
-      </a>
-      <a class="card" href="links.html">
-        <div class="icon" aria-hidden="true">🔗</div>
-        <h2>Links</h2>
-        <p>Save and group useful links for quick access on any device.</p>
-        <span class="go">Open links →</span>
-      </a>
+      <div class="card soon" aria-disabled="true">
+        <div class="icon" aria-hidden="true">◇</div>
+        <h2>Upcoming</h2>
+        <p>New studio modules will land here as they are ready.</p>
+        <span class="go">Coming soon</span>
+      </div>
     </nav>
 
-    <footer>Data stays in your browser (localStorage). Export backups from each app when needed.</footer>
+    <footer>Orders sync with Firebase when signed in. Export JSON backups anytime from the Orders app.</footer>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
