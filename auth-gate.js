@@ -42,23 +42,23 @@
       html[data-theme="dark"] #auth-gate { color: #f3e8e4; }
       #auth-gate::before {
         content: "";
-        position: absolute; inset: 0; z-index: -1;
+        position: absolute; inset: -4%; z-index: -1;
         background:
-          radial-gradient(120% 80% at 10% -10%, #f8e9e4 0%, transparent 55%),
-          radial-gradient(90% 70% at 100% 0%, #efe6d8 0%, transparent 50%),
-          radial-gradient(80% 60% at 50% 100%, #e8f0ea 0%, transparent 45%),
-          #f4efe8;
-        animation: auth-bg-shift 18s ease-in-out infinite alternate;
+          radial-gradient(90% 70% at 0% 0%, #f3ddd8 0%, transparent 58%),
+          radial-gradient(80% 65% at 100% 8%, #ebe0cf 0%, transparent 55%),
+          radial-gradient(75% 55% at 70% 100%, #d9e6df 0%, transparent 50%),
+          linear-gradient(165deg, #f7f1ea 0%, #f3ebe3 45%, #eef2ef 100%);
+        animation: auth-bg-shift 28s cubic-bezier(.45, .05, .55, .95) infinite alternate;
       }
       html[data-theme="dark"] #auth-gate::before {
         background:
-          radial-gradient(120% 80% at 10% -10%, #2a2228 0%, transparent 55%),
-          radial-gradient(90% 70% at 100% 0%, #1f2420 0%, transparent 50%),
-          #14181c;
+          radial-gradient(90% 70% at 0% 0%, #3a2a30 0%, transparent 58%),
+          radial-gradient(80% 65% at 100% 8%, #2f2a22 0%, transparent 55%),
+          linear-gradient(165deg, #16141a 0%, #14181c 100%);
       }
       @keyframes auth-bg-shift {
-        0% { filter: hue-rotate(0deg) saturate(1); transform: scale(1); }
-        100% { filter: hue-rotate(12deg) saturate(1.08); transform: scale(1.04); }
+        0% { transform: scale(1) translate(0, 0); }
+        100% { transform: scale(1.05) translate(-1.5%, 1%); }
       }
       @media (prefers-reduced-motion: reduce) {
         #auth-gate::before { animation: none; }
