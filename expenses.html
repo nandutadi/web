@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Expenses</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --text: #1c1e21;
+    --muted: #6b7280;
+    --border: #e3e5e8;
+    --accent: #2563eb;
+    --good: #15803d;
+    --bad: #b91c1c;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 12px rgba(16, 24, 40, .06);
+    --radius: 14px;
+  }
+  html[data-theme="dark"] {
+    --bg: #14161a;
+    --panel: #1d2025;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #2c3037;
+    --accent: #6ea8fe;
+    --good: #4ade80;
+    --bad: #f87171;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 14px rgba(0, 0, 0, .35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+  }
+  .bar {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  h1 { font-size: 17px; margin: 0 12px 0 0; font-weight: 650; letter-spacing: -.01em; }
+  input, button, textarea {
+    font: inherit;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 8px 11px;
+    outline: none;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  #search { flex: 1 1 200px; min-width: 150px; }
+  button { cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+  button:hover { border-color: var(--accent); }
+  .primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .primary:hover { filter: brightness(1.08); }
+  .icon-btn { padding: 8px 10px; line-height: 1; }
+  main { max-width: 1200px; margin: 0 auto; padding: 22px 20px 80px; }
+
+  .filters {
+    display: flex; gap: 14px 20px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .filters .group { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .filters .group > .hint { flex: none; }
+
+  .seg {
+    display: inline-flex; gap: 3px; padding: 3px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .seg button {
+    border: none; background: none; padding: 5px 11px; border-radius: 7px;
+    font-size: 12.5px; font-weight: 600; color: var(--muted);
+  }
+  .seg button.on { background: var(--accent); color: #fff; }
+
+  .chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+  .fchip {
+    padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    background: var(--panel); border: 1px solid var(--border); color: var(--muted);
+    white-space: nowrap;
+  }
+  .fchip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .fchip.clear { color: var(--bad); }
+  .fchip.clear:hover { border-color: var(--bad); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 15px 16px;
+    box-shadow: var(--shadow);
+  }
+  .card .label {
+    font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--muted); margin-bottom: 7px;
+  }
+  .card .value { font-size: 22px; font-weight: 660; letter-spacing: -.02em; }
+  .card .sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .value.good { color: var(--good); }
+  .value.bad { color: var(--bad); }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    margin-bottom: 22px;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .panel-head h2 { font-size: 14px; margin: 0; font-weight: 650; }
+  .panel-head .spacer { flex: 1; }
+
+  .chart-wrap { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+  #chart { flex: none; }
+  #chart svg { display: block; overflow: visible; }
+  .slice { transition: opacity .15s; cursor: pointer; }
+  .slice.dim { opacity: .28; }
+  .center-total { font-size: 19px; font-weight: 680; fill: var(--text); }
+  .center-label { font-size: 10.5px; fill: var(--muted); }
+
+  .legend { flex: 1 1 260px; min-width: 240px; display: flex; flex-direction: column; gap: 2px; }
+  .legend-row {
+    display: flex; align-items: center; gap: 10px;
+    background: none; border: 1px solid transparent; border-radius: 9px;
+    padding: 7px 9px; text-align: left; width: 100%;
+  }
+  .legend-row:hover, .legend-row.active { background: var(--bg); border-color: var(--border); }
+  .legend-row.picked { background: var(--bg); border-color: var(--accent); }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+  .legend-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-amt { font-size: 13px; font-weight: 620; font-variant-numeric: tabular-nums; }
+  .legend-pct { font-size: 11.5px; color: var(--muted); width: 42px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); font-weight: 700; padding: 0 10px 9px; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:hover { background: var(--bg); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 620; white-space: nowrap; }
+  td.num.income { color: var(--good); }
+  td.num.expense { color: var(--bad); }
+  .pill {
+    display: inline-block; font-size: 11px; font-weight: 650; padding: 2px 8px;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+  }
+  .cell-filter {
+    background: none; border: 1px solid transparent; padding: 2px 6px;
+    border-radius: 7px; font-size: 13px; color: inherit;
+  }
+  .cell-filter:hover { border-color: var(--accent); color: var(--accent); }
+  .row-actions { display: flex; gap: 5px; justify-content: flex-end; }
+  .row-actions button { padding: 3px 7px; font-size: 12px; border-radius: 7px; }
+  .empty { color: var(--muted); text-align: center; padding: 44px 20px; font-size: 14px; }
+
+  dialog {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--panel); color: var(--text);
+    padding: 22px; width: min(470px, 92vw);
+    box-shadow: 0 20px 50px rgba(0,0,0,.3);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  dialog h2 { margin: 0 0 16px; font-size: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 13px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .label-row { display: flex; align-items: center; gap: 8px; }
+  .label-row label { flex: 1; }
+  .field input { width: 100%; }
+  .link-btn {
+    border: none; background: none; padding: 0; font-size: 11.5px;
+    font-weight: 700; color: var(--accent); letter-spacing: .01em;
+  }
+  .link-btn:hover { text-decoration: underline; }
+  .suggest { display: flex; gap: 6px; flex-wrap: wrap; }
+  .suggest .fchip { padding: 3px 9px; font-size: 12px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
+  .hint { font-size: 11.5px; color: var(--muted); }
+  .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .manage-grid h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 9px; }
+  .chip-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+  .chip {
+    display: flex; align-items: center; gap: 8px; font-size: 13px;
+    border: 1px solid var(--border); border-radius: 9px; padding: 6px 8px 6px 11px;
+  }
+  .chip span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip button { padding: 2px 7px; font-size: 12px; border-radius: 7px; }
+  .add-row { display: flex; gap: 7px; margin-top: 9px; }
+  .add-row input { flex: 1; min-width: 0; }
+  .danger { color: var(--bad); border-color: var(--border); }
+  @media (max-width: 620px) {
+    .manage-grid, .row2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>💸 My Expenses</h1>
+    <input id="search" type="search" placeholder="Search notes…  (press /)" autocomplete="off" />
+    <button class="primary" id="add" title="Add transaction (press N)">+ Add transaction</button>
+    <button id="createNew" title="Create categories and payment modes">＋ Create new</button>
+    <button class="icon-btn" id="theme" title="Toggle theme">🌙</button>
+    <button class="icon-btn" id="export" title="Export JSON">⬇</button>
+    <button class="icon-btn" id="import" title="Import JSON">⬆</button>
+    <input type="file" id="importFile" accept="application/json" hidden />
+  </div>
+</header>
+
+<main>
+  <section class="filters">
+    <div class="group">
+      <span class="hint">Period</span>
+      <div class="chip-row" id="periodChips"></div>
+    </div>
+    <div class="group">
+      <span class="hint">Type</span>
+      <div class="seg" id="typeSeg">
+        <button type="button" data-value="">All</button>
+        <button type="button" data-value="expense">Expenses</button>
+        <button type="button" data-value="income">Income</button>
+      </div>
+    </div>
+    <div class="group" id="activeGroup">
+      <span class="hint">Filter</span>
+      <div class="chip-row" id="activeFilters"></div>
+    </div>
+  </section>
+
+  <section class="cards" id="cards"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Breakdown</h2>
+      <span class="spacer"></span>
+      <div class="seg" id="flowSeg">
+        <button type="button" data-value="expense">Expenses</button>
+        <button type="button" data-value="income">Income</button>
+      </div>
+      <div class="seg" id="dimSeg">
+        <button type="button" data-value="category">By category</button>
+        <button type="button" data-value="mode">By payment mode</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <div id="chart"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Transactions</h2>
+      <span class="spacer"></span>
+      <span class="hint" id="count"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Payment mode</th>
+            <th>Note</th>
+            <th style="text-align:right">Amount</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="empty" hidden>No transactions match the current filters.</p>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <form id="form" method="dialog">
+    <h2 id="dlgTitle">Add transaction</h2>
+    <div class="row2">
+      <div class="field">
+        <label>Type *</label>
+        <div class="seg" id="formType">
+          <button type="button" data-value="expense">Expense</button>
+          <button type="button" data-value="income">Income</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-amount">Amount *</label>
+        <input id="f-amount" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="0.00" />
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-date">Date *</label>
+        <input id="f-date" type="date" required />
+      </div>
+      <div class="field">
+        <div class="label-row">
+          <label for="f-mode">Payment mode</label>
+          <button type="button" class="link-btn" data-create="modes">＋ Create new</button>
+        </div>
+        <input id="f-mode" placeholder="e.g. Cash, Card, UPI" autocomplete="off" />
+        <div class="suggest" id="modeSuggest"></div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="label-row">
+        <label for="f-cat">Category</label>
+        <button type="button" class="link-btn" data-create="categories">＋ Create new</button>
+      </div>
+      <input id="f-cat" placeholder="e.g. Food, Rent, Salary" autocomplete="off" />
+      <div class="suggest" id="catSuggest"></div>
+    </div>
+    <div class="field">
+      <label for="f-note">Note</label>
+      <input id="f-note" placeholder="Optional description" autocomplete="off" />
+    </div>
+    <p class="hint">Values you type are saved automatically. Use “Create new” to manage the lists.</p>
+    <div class="dialog-actions">
+      <button type="button" id="cancel">Cancel</button>
+      <button type="submit" class="primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="createDlg">
+  <h2>Create new</h2>
+  <div class="manage-grid">
+    <div>
+      <h3>Categories</h3>
+      <div class="chip-list" id="catList"></div>
+      <div class="add-row">
+        <input id="newCat" placeholder="New category" autocomplete="off" />
+        <button type="button" id="addCat">Create</button>
+      </div>
+    </div>
+    <div>
+      <h3>Payment modes</h3>
+      <div class="chip-list" id="modeList"></div>
+      <div class="add-row">
+        <input id="newMode" placeholder="New payment mode" autocomplete="off" />
+        <button type="button" id="addMode">Create</button>
+      </div>
+    </div>
+  </div>
+  <div class="field" style="margin-top:20px">
+    <label for="f-currency">Currency code</label>
+    <input id="f-currency" maxlength="3" placeholder="INR" autocomplete="off" />
+    <span class="hint">Three-letter code, e.g. INR, USD, EUR.</span>
+  </div>
+  <div class="dialog-actions">
+    <button type="button" class="danger" id="clearAll">Delete all transactions</button>
+    <span style="flex:1"></span>
+    <button type="button" class="primary" id="createClose">Done</button>
+  </div>
+</dialog>
+
+<script>
+const STORE = "my-expenses-v1";
+const THEME = "my-expenses-theme";
+
+const PALETTE = [
+  "#2563eb", "#f97316", "#16a34a", "#db2777", "#7c3aed", "#0891b2",
+  "#ca8a04", "#dc2626", "#0d9488", "#9333ea", "#65a30d", "#e11d48"
+];
+
+const ui = {
+  period: "",
+  type: "",
+  category: "",
+  mode: "",
+  flow: "expense",
+  dim: "category"
+};
+
+function iso(d) {
+  const p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function seedState() {
+  const now = new Date();
+  const day = n => iso(new Date(now.getFullYear(), now.getMonth(), n));
+  const t = (type, amount, date, category, mode, note) =>
+    ({ id: crypto.randomUUID(), type, amount, date, category, mode, note });
+  return {
+    currency: "INR",
+    categories: ["Housing", "Food", "Transport", "Utilities", "Entertainment", "Health", "Salary", "Other"],
+    modes: ["Cash", "Card", "UPI", "Bank Transfer", "Wallet"],
+    transactions: [
+      t("income", 85000, day(1), "Salary", "Bank Transfer", "Monthly salary"),
+      t("expense", 22000, day(2), "Housing", "Bank Transfer", "Rent"),
+      t("expense", 4200, day(4), "Food", "Card", "Groceries"),
+      t("expense", 320, day(5), "Food", "Cash", "Coffee"),
+      t("expense", 1800, day(7), "Transport", "Card", "Fuel"),
+      t("expense", 1450, day(9), "Utilities", "UPI", "Electricity bill"),
+      t("expense", 600, day(11), "Entertainment", "Card", "Movie night"),
+      t("expense", 1500, day(12), "Health", "UPI", "Gym membership")
+    ]
+  };
+}
+
+let state = load();
+let editingId = null;
+let pendingType = "expense";
+let hoverIndex = null;
+let slices = [];
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        currency: parsed.currency || "INR",
+        categories: Array.isArray(parsed.categories) ? parsed.categories : [],
+        modes: Array.isArray(parsed.modes) ? parsed.modes : [],
+        transactions: Array.isArray(parsed.transactions) ? parsed.transactions : []
+      };
+    }
+  } catch (e) { console.warn("Could not read saved expenses", e); }
+  return seedState();
+}
+
+function save() {
+  localStorage.setItem(STORE, JSON.stringify(state));
+}
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function money(n) {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency", currency: state.currency, maximumFractionDigits: 2
+    }).format(n);
+  } catch {
+    return `${state.currency} ${n.toFixed(2)}`;
+  }
+}
+
+function moneyShort(n) {
+  const abs = Math.abs(n);
+  const compact = (v, suffix) => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency", currency: state.currency, maximumFractionDigits: 1
+      }).format(v) + suffix;
+    } catch {
+      return `${state.currency} ${v.toFixed(1)}${suffix}`;
+    }
+  };
+  if (abs >= 1e7) return compact(n / 1e7, "Cr");
+  if (abs >= 1e5) return compact(n / 1e5, "L");
+  if (abs >= 1e3) return compact(n / 1e3, "K");
+  return money(n);
+}
+
+function parseDate(s) {
+  const [y, m, d] = String(s).split("-").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+}
+
+function formatDate(s) {
+  return parseDate(s).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
+function monthLabel(key) {
+  const [y, m] = key.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+
+function allCategories() {
+  return [...new Set([...state.categories, ...state.transactions.map(t => t.category).filter(Boolean)])]
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function allModes() {
+  return [...new Set([...state.modes, ...state.transactions.map(t => t.mode).filter(Boolean)])]
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function filtered(opts = {}) {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  return state.transactions.filter(t => {
+    if (ui.period && String(t.date).slice(0, 7) !== ui.period) return false;
+    if (!opts.ignoreType && ui.type && t.type !== ui.type) return false;
+    if (ui.category && (t.category || "") !== ui.category) return false;
+    if (ui.mode && (t.mode || "") !== ui.mode) return false;
+    if (q && !String(t.note || "").toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function setSegment(id, value) {
+  document.getElementById(id).querySelectorAll("button").forEach(b => {
+    b.classList.toggle("on", b.dataset.value === value);
+  });
+}
+
+function render() {
+  renderControls();
+  renderSummary();
+  renderChart();
+  renderTable();
+}
+
+function renderControls() {
+  const months = [...new Set(state.transactions.map(t => String(t.date).slice(0, 7)))].sort().reverse();
+  const items = [["", "All time"], ...months.map(m => [m, monthLabel(m)])];
+  document.getElementById("periodChips").innerHTML = items.map(([value, label]) =>
+    `<button type="button" class="fchip ${ui.period === value ? "on" : ""}" data-period="${esc(value)}">${esc(label)}</button>`
+  ).join("");
+
+  setSegment("typeSeg", ui.type);
+  setSegment("flowSeg", ui.flow);
+  setSegment("dimSeg", ui.dim);
+  setSegment("formType", pendingType);
+
+  const active = [];
+  if (ui.category) active.push(`<button type="button" class="fchip clear" data-clear="category">Category · ${esc(ui.category)} ✕</button>`);
+  if (ui.mode) active.push(`<button type="button" class="fchip clear" data-clear="mode">Payment mode · ${esc(ui.mode)} ✕</button>`);
+  document.getElementById("activeGroup").hidden = active.length === 0;
+  document.getElementById("activeFilters").innerHTML = active.join("");
+
+  renderSuggestions();
+}
+
+function renderSuggestions() {
+  const catValue = document.getElementById("f-cat").value.trim();
+  const modeValue = document.getElementById("f-mode").value.trim();
+
+  const chop = (list, value) => list.map(name =>
+    `<button type="button" class="fchip ${name === value ? "on" : ""}" data-suggest="${esc(name)}">${esc(name)}</button>`
+  ).join("");
+
+  document.getElementById("catSuggest").innerHTML = chop(allCategories(), catValue);
+  document.getElementById("modeSuggest").innerHTML = chop(allModes(), modeValue);
+}
+
+function renderSummary() {
+  const rows = filtered({ ignoreType: true });
+  const income = rows.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const expense = rows.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  const net = income - expense;
+
+  const byCat = new Map();
+  for (const t of rows) {
+    if (t.type !== "expense") continue;
+    const key = (t.category || "").trim() || "Uncategorised";
+    byCat.set(key, (byCat.get(key) || 0) + t.amount);
+  }
+  const top = [...byCat].sort((a, b) => b[1] - a[1])[0];
+  const expenseCount = rows.filter(t => t.type === "expense").length;
+  const period = ui.period ? monthLabel(ui.period) : "All time";
+
+  document.getElementById("cards").innerHTML = `
+    <div class="card">
+      <div class="label">Income</div>
+      <div class="value good">${esc(money(income))}</div>
+      <div class="sub">${esc(period)}</div>
+    </div>
+    <div class="card">
+      <div class="label">Expenses</div>
+      <div class="value bad">${esc(money(expense))}</div>
+      <div class="sub">${esc(period)}</div>
+    </div>
+    <div class="card">
+      <div class="label">Net</div>
+      <div class="value ${net >= 0 ? "good" : "bad"}">${esc(money(net))}</div>
+      <div class="sub">${net >= 0 ? "Saved" : "Overspent"} this period</div>
+    </div>
+    <div class="card">
+      <div class="label">Top spending</div>
+      <div class="value" style="font-size:17px">${top ? esc(top[0]) : "—"}</div>
+      <div class="sub">${top ? esc(money(top[1])) + " · " + expenseCount + (expenseCount === 1 ? " expense" : " expenses") : "No expenses yet"}</div>
+    </div>`;
+}
+
+function renderChart() {
+  const rows = filtered({ ignoreType: true }).filter(t => t.type === ui.flow);
+
+  const groups = new Map();
+  for (const t of rows) {
+    const raw = ui.dim === "category" ? t.category : t.mode;
+    const key = (raw || "").trim() || (ui.dim === "category" ? "Uncategorised" : "Unspecified");
+    groups.set(key, (groups.get(key) || 0) + t.amount);
+  }
+
+  const total = [...groups.values()].reduce((s, v) => s + v, 0);
+  const names = [...groups.keys()].sort((a, b) => a.localeCompare(b));
+  const colorOf = name => PALETTE[names.indexOf(name) % PALETTE.length];
+
+  slices = [...groups]
+    .map(([name, value]) => ({ name, value, color: colorOf(name) }))
+    .sort((a, b) => b.value - a.value);
+
+  const chart = document.getElementById("chart");
+  const legend = document.getElementById("legend");
+
+  if (!slices.length || total <= 0) {
+    chart.innerHTML = "";
+    legend.innerHTML = `<p class="empty" style="padding:20px">Nothing to chart for the current filters.</p>`;
+    return;
+  }
+
+  const size = 220, cx = size / 2, cy = size / 2, r = 78, w = 30;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+
+  const arcs = slices.map((s, i) => {
+    const len = (s.value / total) * circ;
+    const seg = `<circle class="slice" data-i="${i}" cx="${cx}" cy="${cy}" r="${r}"
+        fill="none" stroke="${s.color}" stroke-width="${w}"
+        stroke-dasharray="${len.toFixed(3)} ${(circ - len).toFixed(3)}"
+        stroke-dashoffset="${(-offset).toFixed(3)}"><title>${esc(s.name)}: ${esc(money(s.value))}</title></circle>`;
+    offset += len;
+    return seg;
+  }).join("");
+
+  chart.innerHTML = `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Breakdown chart">
+      <g transform="rotate(-90 ${cx} ${cy})">${arcs}</g>
+      <text class="center-total" x="${cx}" y="${cy - 2}" text-anchor="middle" id="centerTotal">${esc(moneyShort(total))}</text>
+      <text class="center-label" x="${cx}" y="${cy + 16}" text-anchor="middle" id="centerLabel">${esc(ui.flow === "income" ? "Total income" : "Total spend")}</text>
+    </svg>`;
+
+  const isPicked = name =>
+    (ui.dim === "category" && ui.category === name) ||
+    (ui.dim === "mode" && ui.mode === name);
+
+  legend.innerHTML = slices.map((s, i) => `
+    <button type="button" class="legend-row ${isPicked(s.name) ? "picked" : ""}" data-i="${i}" title="Filter by ${esc(s.name)}">
+      <span class="swatch" style="background:${s.color}"></span>
+      <span class="legend-name">${esc(s.name)}</span>
+      <span class="legend-amt">${esc(money(s.value))}</span>
+      <span class="legend-pct">${((s.value / total) * 100).toFixed(1)}%</span>
+    </button>`).join("");
+
+  chart.querySelectorAll(".slice").forEach(el => {
+    el.addEventListener("mouseenter", () => setHover(+el.dataset.i));
+    el.addEventListener("mouseleave", () => setHover(null));
+    el.addEventListener("click", () => pick(slices[+el.dataset.i].name));
+  });
+  legend.querySelectorAll(".legend-row").forEach(el => {
+    el.addEventListener("mouseenter", () => setHover(+el.dataset.i));
+    el.addEventListener("mouseleave", () => setHover(null));
+    el.addEventListener("focus", () => setHover(+el.dataset.i));
+    el.addEventListener("blur", () => setHover(null));
+    el.addEventListener("click", () => pick(slices[+el.dataset.i].name));
+  });
+
+  setHover(hoverIndex);
+}
+
+function pick(name) {
+  if (ui.dim === "category") ui.category = ui.category === name ? "" : name;
+  else ui.mode = ui.mode === name ? "" : name;
+  hoverIndex = null;
+  render();
+}
+
+function setHover(index) {
+  hoverIndex = index;
+  const chart = document.getElementById("chart");
+  const legend = document.getElementById("legend");
+  if (!chart.querySelector("svg")) return;
+
+  chart.querySelectorAll(".slice").forEach(el => {
+    el.classList.toggle("dim", index !== null && +el.dataset.i !== index);
+  });
+  legend.querySelectorAll(".legend-row").forEach(el => {
+    el.classList.toggle("active", index !== null && +el.dataset.i === index);
+  });
+
+  const total = slices.reduce((s, x) => s + x.value, 0);
+  const totalEl = document.getElementById("centerTotal");
+  const labelEl = document.getElementById("centerLabel");
+  if (index === null || !slices[index]) {
+    totalEl.textContent = moneyShort(total);
+    labelEl.textContent = ui.flow === "income" ? "Total income" : "Total spend";
+  } else {
+    totalEl.textContent = moneyShort(slices[index].value);
+    labelEl.textContent = slices[index].name;
+  }
+}
+
+function renderTable() {
+  const rows = filtered().sort((a, b) =>
+    b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)));
+
+  const cell = (value, kind) => {
+    const name = (value || "").trim();
+    if (!name) return "—";
+    return `<button type="button" class="cell-filter" data-pick="${kind}" data-value="${esc(name)}" title="Filter by ${esc(name)}">${esc(name)}</button>`;
+  };
+
+  document.getElementById("tbody").innerHTML = rows.map(t => `
+    <tr>
+      <td>${esc(formatDate(t.date))}</td>
+      <td><span class="pill">${t.type === "income" ? "Income" : "Expense"}</span></td>
+      <td>${cell(t.category, "category")}</td>
+      <td>${cell(t.mode, "mode")}</td>
+      <td>${esc(t.note || "")}</td>
+      <td class="num ${t.type}">${t.type === "income" ? "+" : "−"}${esc(money(t.amount))}</td>
+      <td>
+        <div class="row-actions">
+          <button type="button" data-edit="${esc(t.id)}" title="Edit">✎</button>
+          <button type="button" data-del="${esc(t.id)}" title="Delete">🗑</button>
+        </div>
+      </td>
+    </tr>`).join("");
+
+  document.getElementById("empty").hidden = rows.length > 0;
+  document.getElementById("count").textContent =
+    `${rows.length} transaction${rows.length === 1 ? "" : "s"}`;
+}
+
+document.getElementById("tbody").addEventListener("click", e => {
+  const pickBtn = e.target.closest("[data-pick]");
+  const editId = e.target.closest("[data-edit]")?.dataset.edit;
+  const delId = e.target.closest("[data-del]")?.dataset.del;
+
+  if (pickBtn) {
+    const key = pickBtn.dataset.pick;
+    ui[key] = ui[key] === pickBtn.dataset.value ? "" : pickBtn.dataset.value;
+    hoverIndex = null;
+    render();
+  } else if (editId) {
+    const t = state.transactions.find(x => x.id === editId);
+    if (t) openDialog(t);
+  } else if (delId) {
+    const t = state.transactions.find(x => x.id === delId);
+    if (t && confirm(`Delete this ${t.type} of ${money(t.amount)}?`)) {
+      state.transactions = state.transactions.filter(x => x.id !== delId);
+      save();
+      render();
+    }
+  }
+});
+
+document.getElementById("periodChips").addEventListener("click", e => {
+  const btn = e.target.closest("[data-period]");
+  if (!btn) return;
+  ui.period = btn.dataset.period;
+  render();
+});
+
+document.getElementById("activeFilters").addEventListener("click", e => {
+  const btn = e.target.closest("[data-clear]");
+  if (!btn) return;
+  ui[btn.dataset.clear] = "";
+  render();
+});
+
+document.getElementById("typeSeg").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-value]");
+  if (!btn) return;
+  ui.type = btn.dataset.value;
+  render();
+});
+
+document.getElementById("flowSeg").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-value]");
+  if (!btn) return;
+  ui.flow = btn.dataset.value;
+  hoverIndex = null;
+  render();
+});
+
+document.getElementById("dimSeg").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-value]");
+  if (!btn) return;
+  ui.dim = btn.dataset.value;
+  hoverIndex = null;
+  render();
+});
+
+const dlg = document.getElementById("dlg");
+
+function openDialog(t) {
+  editingId = t?.id ?? null;
+  pendingType = t?.type ?? "expense";
+  document.getElementById("dlgTitle").textContent = t ? "Edit transaction" : "Add transaction";
+  document.getElementById("f-amount").value = t?.amount ?? "";
+  document.getElementById("f-date").value = t?.date ?? iso(new Date());
+  document.getElementById("f-cat").value = t?.category ?? "";
+  document.getElementById("f-mode").value = t?.mode ?? "";
+  document.getElementById("f-note").value = t?.note ?? "";
+  renderControls();
+  dlg.showModal();
+  document.getElementById("f-amount").focus();
+}
+
+document.getElementById("add").onclick = () => openDialog(null);
+document.getElementById("cancel").onclick = () => dlg.close();
+
+document.getElementById("formType").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-value]");
+  if (!btn) return;
+  pendingType = btn.dataset.value;
+  setSegment("formType", pendingType);
+});
+
+["f-cat", "f-mode"].forEach(id => document.getElementById(id).addEventListener("input", renderSuggestions));
+
+document.addEventListener("click", e => {
+  const chips = e.target.closest(".suggest .fchip");
+  if (chips) {
+    e.preventDefault();
+    const isCategory = chips.closest("#catSuggest") !== null;
+    const field = document.getElementById(isCategory ? "f-cat" : "f-mode");
+    field.value = field.value.trim() === chips.dataset.suggest ? "" : chips.dataset.suggest;
+    renderSuggestions();
+  }
+  const createLink = e.target.closest("[data-create]");
+  if (createLink) {
+    e.preventDefault();
+    openCreateDialog(createLink.dataset.create);
+  }
+});
+
+document.getElementById("form").addEventListener("submit", e => {
+  e.preventDefault();
+  const amount = Number(document.getElementById("f-amount").value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    alert("Enter an amount greater than zero.");
+    return;
+  }
+
+  const category = document.getElementById("f-cat").value.trim();
+  const mode = document.getElementById("f-mode").value.trim();
+  if (category && !state.categories.includes(category)) state.categories.push(category);
+  if (mode && !state.modes.includes(mode)) state.modes.push(mode);
+
+  const data = {
+    type: pendingType,
+    amount,
+    date: document.getElementById("f-date").value || iso(new Date()),
+    category,
+    mode,
+    note: document.getElementById("f-note").value.trim()
+  };
+
+  if (editingId) {
+    state.transactions = state.transactions.map(t => t.id === editingId ? { ...t, ...data } : t);
+  } else {
+    state.transactions.push({ id: crypto.randomUUID(), ...data });
+  }
+  save();
+  dlg.close();
+  render();
+});
+
+const createDlg = document.getElementById("createDlg");
+
+function renderCreateDialog() {
+  const usedCats = new Set(state.transactions.map(t => t.category).filter(Boolean));
+  const usedModes = new Set(state.transactions.map(t => t.mode).filter(Boolean));
+
+  document.getElementById("catList").innerHTML = state.categories.length
+    ? state.categories.map(c => `
+        <div class="chip">
+          <span>${esc(c)}</span>
+          <button type="button" data-rm-cat="${esc(c)}" title="${usedCats.has(c) ? "In use by transactions" : "Delete"}">🗑</button>
+        </div>`).join("")
+    : `<p class="hint">No categories yet.</p>`;
+
+  document.getElementById("modeList").innerHTML = state.modes.length
+    ? state.modes.map(m => `
+        <div class="chip">
+          <span>${esc(m)}</span>
+          <button type="button" data-rm-mode="${esc(m)}" title="${usedModes.has(m) ? "In use by transactions" : "Delete"}">🗑</button>
+        </div>`).join("")
+    : `<p class="hint">No payment modes yet.</p>`;
+
+  if (document.activeElement !== document.getElementById("f-currency")) {
+    document.getElementById("f-currency").value = state.currency;
+  }
+}
+
+function openCreateDialog(focus) {
+  renderCreateDialog();
+  if (!createDlg.open) createDlg.showModal();
+  const field = document.getElementById(focus === "modes" ? "newMode" : "newCat");
+  const source = document.getElementById(focus === "modes" ? "f-mode" : "f-cat");
+  if (source.value.trim() && !field.value.trim()) field.value = source.value.trim();
+  field.focus();
+}
+
+document.getElementById("createNew").onclick = () => openCreateDialog("categories");
+document.getElementById("createClose").onclick = () => createDlg.close();
+
+document.getElementById("f-currency").addEventListener("change", e => {
+  const code = e.target.value.trim().toUpperCase();
+  if (!code) { e.target.value = state.currency; return; }
+  try {
+    new Intl.NumberFormat(undefined, { style: "currency", currency: code }).format(1);
+  } catch {
+    alert(`“${code}” is not a recognised currency code.`);
+    e.target.value = state.currency;
+    return;
+  }
+  state.currency = code;
+  e.target.value = code;
+  save();
+  render();
+});
+
+function addToList(listName, inputId) {
+  const input = document.getElementById(inputId);
+  const value = input.value.trim();
+  if (!value) return;
+  if (!state[listName].includes(value)) state[listName].push(value);
+  state[listName].sort((a, b) => a.localeCompare(b));
+  input.value = "";
+  save();
+  renderCreateDialog();
+  render();
+}
+
+document.getElementById("addCat").onclick = () => addToList("categories", "newCat");
+document.getElementById("addMode").onclick = () => addToList("modes", "newMode");
+document.getElementById("newCat").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); addToList("categories", "newCat"); }
+});
+document.getElementById("newMode").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); addToList("modes", "newMode"); }
+});
+
+document.getElementById("catList").addEventListener("click", e => {
+  const name = e.target.dataset?.rmCat;
+  if (!name) return;
+  if (state.transactions.some(t => t.category === name)) {
+    alert(`“${name}” is used by existing transactions. Reassign or delete those first.`);
+    return;
+  }
+  state.categories = state.categories.filter(c => c !== name);
+  if (ui.category === name) ui.category = "";
+  save();
+  renderCreateDialog();
+  render();
+});
+
+document.getElementById("modeList").addEventListener("click", e => {
+  const name = e.target.dataset?.rmMode;
+  if (!name) return;
+  if (state.transactions.some(t => t.mode === name)) {
+    alert(`“${name}” is used by existing transactions. Reassign or delete those first.`);
+    return;
+  }
+  state.modes = state.modes.filter(m => m !== name);
+  if (ui.mode === name) ui.mode = "";
+  save();
+  renderCreateDialog();
+  render();
+});
+
+document.getElementById("clearAll").onclick = () => {
+  if (!state.transactions.length) return;
+  if (confirm("Delete all transactions? This cannot be undone.")) {
+    state.transactions = [];
+    save();
+    renderCreateDialog();
+    render();
+  }
+};
+
+document.getElementById("search").addEventListener("input", render);
+
+document.addEventListener("keydown", e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+  if (e.key === "/" && !typing) {
+    e.preventDefault();
+    document.getElementById("search").focus();
+  }
+  if (
+    e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing &&
+    !dlg.open && !createDlg.open
+  ) {
+    e.preventDefault();
+    openDialog(null);
+  }
+  if (e.key === "Escape") {
+    if (dlg.open) dlg.close();
+    if (createDlg.open) createDlg.close();
+  }
+});
+
+const themeBtn = document.getElementById("theme");
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  themeBtn.textContent = t === "dark" ? "☀️" : "🌙";
+  localStorage.setItem(THEME, t);
+}
+themeBtn.onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+applyTheme(localStorage.getItem(THEME) ||
+  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+document.getElementById("export").onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "my-expenses.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+document.getElementById("import").onclick = () => document.getElementById("importFile").click();
+document.getElementById("importFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const incoming = JSON.parse(await file.text());
+    const list = Array.isArray(incoming) ? incoming : incoming?.transactions;
+    if (!Array.isArray(list)) throw new Error("Expected a transactions array");
+
+    const existing = new Set(state.transactions.map(t => `${t.date}|${t.amount}|${t.note}|${t.type}`));
+    let added = 0;
+    for (const item of list) {
+      const amount = Number(item?.amount);
+      if (!item?.date || !Number.isFinite(amount) || amount <= 0) continue;
+      const key = `${item.date}|${amount}|${item.note ?? ""}|${item.type ?? "expense"}`;
+      if (existing.has(key)) continue;
+      existing.add(key);
+      state.transactions.push({
+        id: crypto.randomUUID(),
+        type: item.type === "income" ? "income" : "expense",
+        amount,
+        date: item.date,
+        category: item.category ?? "",
+        mode: item.mode ?? "",
+        note: item.note ?? ""
+      });
+      added++;
+    }
+    if (!Array.isArray(incoming)) {
+      if (incoming.currency) state.currency = incoming.currency;
+      for (const c of incoming.categories ?? []) if (!state.categories.includes(c)) state.categories.push(c);
+      for (const m of incoming.modes ?? []) if (!state.modes.includes(m)) state.modes.push(m);
+    }
+    save();
+    render();
+    alert(`Imported ${added} transaction${added === 1 ? "" : "s"}.`);
+  } catch (err) {
+    alert("Could not import that file: " + err.message);
+  } finally {
+    e.target.value = "";
+  }
+});
+
+render();
+</script>
+</body>
+</html>

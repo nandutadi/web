@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Links</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --text: #1c1e21;
+    --muted: #6b7280;
+    --border: #e3e5e8;
+    --accent: #2563eb;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 12px rgba(16, 24, 40, .06);
+    --radius: 14px;
+  }
+  html[data-theme="dark"] {
+    --bg: #14161a;
+    --panel: #1d2025;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #2c3037;
+    --accent: #6ea8fe;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 14px rgba(0, 0, 0, .35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+  }
+  .bar {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  h1 { font-size: 17px; margin: 0 12px 0 0; font-weight: 650; letter-spacing: -.01em; }
+  input, select, button, textarea {
+    font: inherit;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 8px 11px;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  #search { flex: 1 1 220px; min-width: 160px; }
+  button { cursor: pointer; transition: background .15s, border-color .15s; }
+  button:hover { border-color: var(--accent); }
+  .primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .primary:hover { filter: brightness(1.08); }
+  .icon-btn { padding: 8px 10px; line-height: 1; }
+  main { max-width: 1200px; margin: 0 auto; padding: 22px 20px 80px; }
+  .group { margin-bottom: 30px; }
+  .group-head {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 12px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .07em; color: var(--muted);
+  }
+  .group-head::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 14px;
+  }
+  .tile {
+    position: relative;
+    display: flex; flex-direction: column; gap: 6px;
+    background: hsl(var(--tile-hue) 85% 97%);
+    border: 1px solid hsl(var(--tile-hue) 55% 88%);
+    border-radius: var(--radius);
+    padding: 15px 16px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: transform .14s ease, border-color .14s ease;
+    min-height: 104px;
+  }
+  html[data-theme="dark"] .tile {
+    background: hsl(var(--tile-hue) 30% 21%);
+    border-color: hsl(var(--tile-hue) 28% 32%);
+  }
+  .tile:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .tile .top { display: flex; align-items: center; gap: 9px; }
+  .favicon {
+    width: 22px; height: 22px; border-radius: 6px; flex: none;
+    background: var(--bg); object-fit: contain;
+  }
+  .tile .title { font-weight: 620; font-size: 14.5px; line-height: 1.3; }
+  .tile .desc {
+    font-size: 12.5px; color: var(--muted); line-height: 1.45;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .tile .host { font-size: 11.5px; color: var(--muted); margin-top: auto; word-break: break-all; }
+  .tile .actions {
+    position: absolute; top: 8px; right: 8px;
+    display: flex; gap: 4px; opacity: 0; transition: opacity .14s;
+  }
+  .tile:hover .actions, .tile:focus-within .actions { opacity: 1; }
+  .tile .actions button {
+    padding: 3px 7px; font-size: 12px; border-radius: 7px;
+    background: var(--panel); box-shadow: var(--shadow);
+  }
+  .empty { color: var(--muted); text-align: center; padding: 60px 20px; font-size: 14px; }
+
+  dialog {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--panel); color: var(--text);
+    padding: 22px; width: min(440px, 92vw);
+    box-shadow: 0 20px 50px rgba(0,0,0,.3);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  dialog h2 { margin: 0 0 16px; font-size: 16px; }
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 13px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .field input, .field textarea, .field select { width: 100%; }
+  .field textarea { resize: vertical; min-height: 62px; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
+  .hint { font-size: 11.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>🔗 My Links</h1>
+    <input id="search" type="search" placeholder="Search links…  (press /)" autocomplete="off" />
+    <select id="filter" title="Filter by category"><option value="">All categories</option></select>
+    <button class="primary" id="add">+ Add link</button>
+    <button class="icon-btn" id="theme" title="Toggle theme">🌙</button>
+    <button class="icon-btn" id="export" title="Export JSON">⬇</button>
+    <button class="icon-btn" id="import" title="Import JSON">⬆</button>
+    <input type="file" id="importFile" accept="application/json" hidden />
+  </div>
+</header>
+
+<main id="main"></main>
+
+<dialog id="dlg">
+  <form id="form" method="dialog">
+    <h2 id="dlgTitle">Add link</h2>
+    <div class="field">
+      <label for="f-url">URL *</label>
+      <input id="f-url" type="text" inputmode="url" required placeholder="https://example.com" />
+    </div>
+    <div class="field">
+      <label for="f-title">Title</label>
+      <input id="f-title" placeholder="Leave blank to use the domain" />
+    </div>
+    <div class="field">
+      <label for="f-desc">Description</label>
+      <textarea id="f-desc" placeholder="What is this link for?"></textarea>
+    </div>
+    <div class="field">
+      <label for="f-cat">Category</label>
+      <input id="f-cat" list="cats" placeholder="e.g. Docs, Tools, Reading" />
+      <datalist id="cats"></datalist>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" id="cancel">Cancel</button>
+      <button type="submit" class="primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const STORE = "my-links-v1";
+const THEME = "my-links-theme";
+
+const seed = [
+  { url: "https://developer.mozilla.org", title: "MDN Web Docs", desc: "Reference for HTML, CSS and JavaScript.", category: "Docs" },
+  { url: "https://github.com", title: "GitHub", desc: "Repositories, issues and pull requests.", category: "Dev" },
+  { url: "https://stackoverflow.com", title: "Stack Overflow", desc: "Q&A for programming problems.", category: "Dev" },
+  { url: "https://news.ycombinator.com", title: "Hacker News", desc: "Tech and startup news.", category: "Reading" },
+  { url: "https://caniuse.com", title: "Can I use", desc: "Browser support tables for web features.", category: "Tools" },
+  { url: "https://regex101.com", title: "regex101", desc: "Build and test regular expressions.", category: "Tools" }
+];
+
+let links = load();
+let editingId = null;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { console.warn("Could not read saved links", e); }
+  return seed.map((l, i) => ({ id: crypto.randomUUID(), ...l }));
+}
+
+function save() {
+  localStorage.setItem(STORE, JSON.stringify(links));
+}
+
+function hostOf(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ""); }
+  catch { return url; }
+}
+
+function faviconOf(url) {
+  return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(hostOf(url))}`;
+}
+
+function hueFor(value) {
+  let hash = 0;
+  for (const char of value) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return hash % 360;
+}
+
+function render() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const cat = document.getElementById("filter").value;
+
+  const visible = links.filter(l => {
+    if (cat && (l.category || "") !== cat) return false;
+    if (!q) return true;
+    return [l.title, l.url, l.desc, l.category].join(" ").toLowerCase().includes(q);
+  });
+
+  const groups = new Map();
+  for (const l of visible) {
+    const key = l.category?.trim() || "Uncategorised";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(l);
+  }
+
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+
+  if (!visible.length) {
+    main.innerHTML = `<p class="empty">No links match. Try a different search, or add one with “+ Add link”.</p>`;
+  } else {
+    for (const [name, items] of [...groups].sort((a, b) => a[0].localeCompare(b[0]))) {
+      const section = document.createElement("section");
+      section.className = "group";
+      const head = document.createElement("h2");
+      head.className = "group-head";
+      head.textContent = `${name} · ${items.length}`;
+      section.appendChild(head);
+
+      const grid = document.createElement("div");
+      grid.className = "grid";
+      items.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+      for (const l of items) grid.appendChild(tile(l));
+      section.appendChild(grid);
+      main.appendChild(section);
+    }
+  }
+
+  const cats = [...new Set(links.map(l => l.category?.trim()).filter(Boolean))].sort();
+  const filter = document.getElementById("filter");
+  const current = filter.value;
+  filter.innerHTML = `<option value="">All categories</option>` +
+    cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  filter.value = cats.includes(current) ? current : "";
+
+  document.getElementById("cats").innerHTML = cats.map(c => `<option value="${esc(c)}">`).join("");
+}
+
+function tile(l) {
+  const a = document.createElement("a");
+  a.className = "tile";
+  a.style.setProperty("--tile-hue", hueFor(l.url));
+  a.href = l.url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+
+  const top = document.createElement("div");
+  top.className = "top";
+  const img = document.createElement("img");
+  img.className = "favicon";
+  img.src = faviconOf(l.url);
+  img.alt = "";
+  img.loading = "lazy";
+  img.onerror = () => { img.style.visibility = "hidden"; };
+  const title = document.createElement("span");
+  title.className = "title";
+  title.textContent = l.title?.trim() || hostOf(l.url);
+  top.append(img, title);
+  a.appendChild(top);
+
+  if (l.desc?.trim()) {
+    const d = document.createElement("div");
+    d.className = "desc";
+    d.textContent = l.desc;
+    a.appendChild(d);
+  }
+
+  const host = document.createElement("div");
+  host.className = "host";
+  host.textContent = hostOf(l.url);
+  a.appendChild(host);
+
+  const actions = document.createElement("div");
+  actions.className = "actions";
+  const edit = document.createElement("button");
+  edit.type = "button";
+  edit.textContent = "✎";
+  edit.title = "Edit";
+  edit.onclick = e => { e.preventDefault(); e.stopPropagation(); openDialog(l); };
+  const del = document.createElement("button");
+  del.type = "button";
+  del.textContent = "🗑";
+  del.title = "Delete";
+  del.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    if (confirm(`Delete “${l.title || hostOf(l.url)}”?`)) {
+      links = links.filter(x => x.id !== l.id);
+      save(); render();
+    }
+  };
+  actions.append(edit, del);
+  a.appendChild(actions);
+
+  return a;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+const dlg = document.getElementById("dlg");
+
+function openDialog(link) {
+  editingId = link?.id ?? null;
+  document.getElementById("dlgTitle").textContent = link ? "Edit link" : "Add link";
+  document.getElementById("f-url").value = link?.url ?? "";
+  document.getElementById("f-title").value = link?.title ?? "";
+  document.getElementById("f-desc").value = link?.desc ?? "";
+  document.getElementById("f-cat").value = link?.category ?? "";
+  dlg.showModal();
+  document.getElementById("f-url").focus();
+}
+
+document.getElementById("add").onclick = () => openDialog(null);
+document.getElementById("cancel").onclick = () => dlg.close();
+
+document.getElementById("form").addEventListener("submit", e => {
+  e.preventDefault();
+  let url = document.getElementById("f-url").value.trim();
+  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+
+  const data = {
+    url,
+    title: document.getElementById("f-title").value.trim(),
+    desc: document.getElementById("f-desc").value.trim(),
+    category: document.getElementById("f-cat").value.trim()
+  };
+
+  if (editingId) {
+    links = links.map(l => l.id === editingId ? { ...l, ...data } : l);
+  } else {
+    links.push({ id: crypto.randomUUID(), ...data });
+  }
+  save();
+  dlg.close();
+  render();
+});
+
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("filter").addEventListener("change", render);
+
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+    e.preventDefault();
+    document.getElementById("search").focus();
+  }
+  if (e.key === "Escape" && dlg.open) dlg.close();
+});
+
+const themeBtn = document.getElementById("theme");
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  themeBtn.textContent = t === "dark" ? "☀️" : "🌙";
+  localStorage.setItem(THEME, t);
+}
+themeBtn.onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+applyTheme(localStorage.getItem(THEME) ||
+  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+document.getElementById("export").onclick = () => {
+  const blob = new Blob([JSON.stringify(links, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "my-links.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+document.getElementById("import").onclick = () => document.getElementById("importFile").click();
+document.getElementById("importFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const incoming = JSON.parse(await file.text());
+    if (!Array.isArray(incoming)) throw new Error("Expected a JSON array");
+    const existing = new Set(links.map(l => l.url));
+    let added = 0;
+    for (const item of incoming) {
+      if (!item?.url || existing.has(item.url)) continue;
+      links.push({
+        id: crypto.randomUUID(),
+        url: item.url,
+        title: item.title ?? "",
+        desc: item.desc ?? "",
+        category: item.category ?? ""
+      });
+      existing.add(item.url);
+      added++;
+    }
+    save(); render();
+    alert(`Imported ${added} link(s).`);
+  } catch (err) {
+    alert("Import failed: " + err.message);
+  }
+  e.target.value = "";
+});
+
+render();
+</script>
+</body>
+</html>

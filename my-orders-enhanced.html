@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>My Orders — Studio Dashboard</title>
+<style>
+  :root {
+    --bg: #f6f7fb;
+    --panel: #ffffff;
+    --panel-soft: #fafbff;
+    --text: #182230;
+    --muted: #788396;
+    --border: #e7eaf1;
+    --accent: #6558d3;
+    --accent-strong: #5144bf;
+    --accent-soft: #f0eeff;
+    --good: #16845b;
+    --good-soft: #e8f7f0;
+    --warn: #b86b13;
+    --warn-soft: #fff4df;
+    --bad: #c34255;
+    --candle: #d46a42;
+    --candle-soft: #fff0e9;
+    --resin: #138b8a;
+    --resin-soft: #e6f8f7;
+    --shadow: 0 2px 5px rgba(29, 38, 59, .025), 0 12px 30px rgba(29, 38, 59, .045);
+    --radius: 18px;
+  }
+  html[data-theme="dark"] {
+    --bg: #11141b;
+    --panel: #191e28;
+    --panel-soft: #1d2330;
+    --text: #eef1f8;
+    --muted: #9aa5b7;
+    --border: #2a3241;
+    --accent: #a59bff;
+    --accent-strong: #b7afff;
+    --accent-soft: #2c2947;
+    --good: #5dd6a0;
+    --good-soft: #17392f;
+    --warn: #f4bd65;
+    --warn-soft: #3b2e1c;
+    --bad: #ff8d9c;
+    --candle: #ffad8c;
+    --candle-soft: #402a27;
+    --resin: #5ed8d1;
+    --resin-soft: #173b3d;
+    --shadow: 0 4px 22px rgba(0, 0, 0, .16);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: var(--text);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(180deg, color-mix(in srgb, var(--bg) 35%, transparent), color-mix(in srgb, var(--bg) 45%, transparent)),
+      url("thanvis-bg.jpg");
+    background-size: cover;
+    background-position: center top;
+    background-attachment: scroll;
+    background-repeat: no-repeat;
+  }
+  html[data-theme="dark"] body {
+    background-image:
+      linear-gradient(180deg, color-mix(in srgb, var(--bg) 50%, transparent), color-mix(in srgb, var(--bg) 60%, transparent)),
+      url("thanvis-bg.jpg");
+  }
+  button, input, select, textarea { font: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent); outline-offset: 2px;
+  }
+  .app-shell { min-height: 100vh; }
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(18px); border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 1240px; min-height: 78px; margin: auto; padding: 14px 28px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 11px; flex-shrink: 0; }
+  .brand-mark {
+    width: 42px; height: 42px; display: grid; place-items: center;
+    color: white; border-radius: 14px; font-size: 20px;
+    background: linear-gradient(145deg, #887bf2, #5546c4);
+    box-shadow: 0 7px 16px rgba(101, 88, 211, .25);
+  }
+  .brand h1 { margin: 0; font-size: 17px; letter-spacing: -.045em; font-weight: 780; }
+  .brand p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+  .topbar-tools { margin-left: auto; display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .search-wrap { position: relative; min-width: 180px; width: clamp(180px, 25vw, 300px); }
+  .search-wrap span { position: absolute; top: 50%; left: 13px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .search-wrap input {
+    width: 100%; padding: 11px 13px 11px 38px; border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); border-radius: 12px; outline: none;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid var(--border); border-radius: 12px; padding: 10px 13px;
+    background: var(--panel); color: var(--text); font-weight: 650; font-size: 13px;
+    transition: transform .15s, border-color .15s, background .15s;
+  }
+  .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .btn-primary { color: #fff; border-color: transparent; background: var(--accent); box-shadow: 0 6px 15px rgba(101,88,211,.2); }
+  .btn-primary:hover { background: var(--accent-strong); }
+  .btn-icon { width: 40px; height: 40px; padding: 0; font-size: 16px; }
+  .person-filter {
+    border: 1px solid var(--border); border-radius: 12px; padding: 10px 30px 10px 12px;
+    color: var(--text); background: var(--panel); max-width: 155px; font-size: 13px;
+  }
+  main { max-width: 1240px; margin: 0 auto; padding: 30px 28px 80px; }
+  .welcome {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 24px;
+  }
+  .eyebrow { text-transform: uppercase; letter-spacing: .13em; color: var(--accent); font-weight: 800; font-size: 10px; margin-bottom: 8px; }
+  .welcome h2 { font-size: clamp(24px, 3vw, 32px); letter-spacing: -.055em; margin: 0; line-height: 1.1; }
+  .welcome p { margin: 9px 0 0; color: var(--muted); font-size: 13px; }
+  .today-pill { border: 1px solid var(--border); border-radius: 999px; padding: 9px 13px; background: var(--panel); color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .stats {
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 13px; margin-bottom: 27px;
+  }
+  .stat {
+    position: relative; overflow: hidden; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 17px 18px; box-shadow: var(--shadow); min-height: 118px;
+  }
+  .stat-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .085em; color: var(--muted); font-weight: 800; }
+  .stat-icon { width: 33px; height: 33px; border-radius: 11px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 15px; }
+  .stat-value { margin-top: 11px; font-size: 29px; letter-spacing: -.055em; font-weight: 780; line-height: 1; }
+  .stat-sub { margin-top: 7px; color: var(--muted); font-size: 11px; }
+  .stat::after { content: ""; position: absolute; width: 74px; height: 74px; border-radius: 50%; right: -28px; bottom: -43px; background: var(--accent-soft); opacity: .7; }
+  .stat.open .stat-icon { background: var(--warn-soft); color: var(--warn); }
+  .stat.candles .stat-icon { background: var(--candle-soft); color: var(--candle); }
+  .stat.resin .stat-icon { background: var(--resin-soft); color: var(--resin); }
+  .stat.unpaid .stat-icon { background: var(--good-soft); color: var(--good); }
+  .workspace { background: var(--panel); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
+  .workspace-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 19px 22px; border-bottom: 1px solid var(--border); }
+  .workspace-title h3 { margin: 0; font-size: 15px; letter-spacing: -.025em; }
+  .workspace-title p { margin: 5px 0 0; font-size: 11.5px; color: var(--muted); }
+  .filters { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 22px; border-bottom: 1px solid var(--border); background: var(--panel-soft); flex-wrap: wrap; }
+  .seg { display: inline-flex; gap: 3px; padding: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; }
+  .seg button { border: 0; background: transparent; color: var(--muted); border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 700; }
+  .seg button.on { background: var(--panel); color: var(--accent); box-shadow: 0 1px 4px rgba(20, 25, 45, .10); }
+  .results-count { font-size: 12px; color: var(--muted); }
+  #list { padding: 21px 22px 24px; }
+  .group { margin-bottom: 25px; }
+  .group:last-child { margin-bottom: 0; }
+  .group-head { display: flex; align-items: center; gap: 10px; margin: 0 0 11px; color: var(--muted); font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .13em; }
+  .person-avatar { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: 0; }
+  .group-name { color: var(--text); font-size: 13px; letter-spacing: -.01em; text-transform: none; }
+  .group-count { text-transform: none; letter-spacing: 0; border-radius: 999px; padding: 3px 7px; background: var(--bg); font-size: 10px; }
+  .group-line { height: 1px; flex: 1; background: var(--border); }
+  .group-add {
+    width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
+    border: 1px solid var(--border); border-radius: 9px; background: var(--panel);
+    color: var(--accent); font-size: 16px; font-weight: 700; line-height: 1;
+    flex-shrink: 0; transition: background .15s, border-color .15s, color .15s;
+  }
+  .group-add:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong); }
+  .order-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .order {
+    min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 12px; transition: border-color .15s, transform .15s, box-shadow .15s; cursor: pointer;
+  }
+  .order:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .order:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent); outline-offset: 2px; }
+  .order.done { background: color-mix(in srgb, var(--good-soft) 22%, var(--panel)); }
+  .order.tinted {
+    background: color-mix(in srgb, var(--tile-color) 22%, var(--panel));
+    border-color: color-mix(in srgb, var(--tile-color) 42%, var(--border));
+  }
+  .order.tinted:hover {
+    border-color: color-mix(in srgb, var(--tile-color) 65%, var(--border));
+  }
+  .order.tinted.done {
+    background: color-mix(in srgb, var(--tile-color) 12%, color-mix(in srgb, var(--good-soft) 28%, var(--panel)));
+  }
+  .order.tinted .kind-icon.candle:not(.has-image) {
+    background: color-mix(in srgb, var(--tile-color) 32%, transparent);
+    color: color-mix(in srgb, var(--tile-color) 55%, var(--text));
+  }
+  .order.tinted .order-kind.candle {
+    color: color-mix(in srgb, var(--tile-color) 70%, var(--text));
+    background: color-mix(in srgb, var(--tile-color) 22%, transparent);
+  }
+  .order.tinted .order-divider {
+    background: color-mix(in srgb, var(--tile-color) 28%, var(--border));
+  }
+  .order-top { display: flex; align-items: flex-start; gap: 8px; }
+  .kind-icon {
+    width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center;
+    border-radius: 12px; font-size: 22px; line-height: 1; overflow: hidden;
+  }
+  .kind-icon.candle { background: var(--candle-soft); }
+  .kind-icon.resin { background: var(--resin-soft); }
+  .kind-icon.has-image { padding: 0; background: var(--bg); }
+  .kind-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .image-picker { display: flex; align-items: center; gap: 12px; }
+  .image-preview {
+    width: 56px; height: 56px; flex: 0 0 56px; border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border); background: var(--panel-soft);
+    display: grid; place-items: center; font-size: 24px;
+  }
+  .image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .image-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .image-actions .hint { width: 100%; }
+  .order-content { min-width: 0; flex: 1; }
+  .order-title { font-size: 12.5px; line-height: 1.35; font-weight: 760; overflow-wrap: anywhere; }
+  .order-meta { margin-top: 3px; font-size: 10.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
+  .order-kind { display: inline-flex; margin-top: 5px; border-radius: 6px; padding: 2px 6px; font-size: 8.5px; text-transform: uppercase; letter-spacing: .08em; font-weight: 850; }
+  .order-kind.candle { color: var(--candle); background: var(--candle-soft); }
+  .order-kind.resin { color: var(--resin); background: var(--resin-soft); }
+  .order-actions { display: flex; gap: 2px; }
+  .mini-btn { width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 8px; color: var(--muted); background: transparent; font-size: 13px; }
+  .mini-btn:hover { border-color: var(--border); color: var(--text); background: var(--panel-soft); }
+  .mini-btn.delete { color: var(--bad); }
+  .mini-btn.delete:hover { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+  .order-divider { height: 1px; background: var(--border); margin: 10px 0 9px; }
+  .checks { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+  .check { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; font-weight: 650; cursor: pointer; user-select: none; }
+  .check input { appearance: none; width: 15px; height: 15px; flex: 0 0 15px; margin: 0; border: 1.5px solid var(--border); border-radius: 5px; background: var(--bg); cursor: pointer; position: relative; }
+  .check input:checked { background: var(--good); border-color: var(--good); }
+  .check input:checked::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .check.paid input:checked { background: var(--accent); border-color: var(--accent); }
+  .check.on { color: var(--text); }
+  .empty { text-align: center; padding: 65px 20px 70px; color: var(--muted); }
+  .empty-icon { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 15px; border-radius: 18px; background: var(--accent-soft); color: var(--accent); font-size: 24px; }
+  .empty h3 { color: var(--text); font-size: 16px; margin: 0 0 7px; }
+  .empty p { font-size: 12px; margin: 0 0 17px; }
+  dialog { border: 1px solid var(--border); border-radius: 22px; background: var(--panel); color: var(--text); padding: 0; width: min(520px, 94vw); max-height: 90vh; overflow: auto; box-shadow: 0 24px 80px rgba(0,0,0,.28); }
+  dialog::backdrop { background: rgba(12, 16, 28, .48); backdrop-filter: blur(4px); }
+  .dialog-head { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+  .dialog-head h2 { margin: 0; font-size: 19px; letter-spacing: -.04em; }
+  .dialog-head p { margin: 6px 0 0; font-size: 11.5px; color: var(--muted); }
+  .dialog-body { padding: 20px 24px 24px; }
+  .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 15px; }
+  .field label, .field-label { font-size: 11px; font-weight: 750; color: var(--muted); }
+  .field input, .field textarea, .field select { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; color: var(--text); background: var(--panel-soft); outline: none; font-size: 13px; }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field .hint { font-size: 10.5px; color: var(--muted); }
+  .status-box { border: 1px solid var(--border); background: var(--panel-soft); border-radius: 12px; padding: 12px; }
+  .check-grid { display: flex; flex-wrap: wrap; gap: 11px 16px; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 9px; padding-top: 7px; }
+  .hidden { display: none !important; }
+  .toast { position: fixed; z-index: 50; bottom: 22px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--text); color: var(--panel); border-radius: 12px; padding: 11px 16px; font-size: 12px; box-shadow: var(--shadow); transition: .22s ease; }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  .footer-note { text-align: center; color: var(--muted); font-size: 10.5px; padding-top: 20px; }
+  @media (max-width: 950px) {
+    .topbar-inner { padding: 13px 20px; flex-wrap: wrap; }
+    .topbar-tools { width: 100%; margin-left: 0; }
+    .search-wrap { flex: 1; width: auto; }
+    .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .order-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    main { padding: 24px 20px 60px; }
+  }
+  @media (max-width: 650px) {
+    .topbar-inner { padding: 12px 14px; gap: 11px; }
+    .brand-mark { width: 38px; height: 38px; }
+    .topbar-tools { display: grid; grid-template-columns: 1fr auto auto; gap: 7px; }
+    .search-wrap { grid-column: 1 / -1; width: 100%; }
+    .person-filter { max-width: none; width: 100%; grid-column: 1 / 2; }
+    #add { grid-column: 2 / 4; }
+    .topbar-tools .utility { display: none; }
+    main { padding: 22px 13px 45px; }
+    .welcome { align-items: flex-start; flex-direction: column; gap: 12px; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-bottom: 18px; }
+    .stat { min-height: 105px; padding: 13px; border-radius: 15px; }
+    .stat-value { font-size: 25px; }
+    .stat-label { font-size: 9px; }
+    .stat-icon { width: 29px; height: 29px; }
+    .workspace { border-radius: 17px; }
+    .workspace-head { padding: 16px; }
+    .filters { padding: 12px 13px; }
+    .seg { max-width: 100%; }
+    .seg button { padding: 7px 9px; font-size: 11px; }
+    #list { padding: 16px 12px 18px; }
+    .order-list { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; gap: 0; }
+    .dialog-head { padding: 19px 18px 15px; }
+    .dialog-body { padding: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div><h1>Thanvi Art Gallery</h1><p>Handmade studio manager</p></div>
+      </div>
+      <div class="topbar-tools">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search orders…" autocomplete="off" aria-label="Search orders" /></div>
+        <select id="filterPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
+        <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> Add order</button>
+        <button class="btn btn-icon utility" id="theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
+        <button class="btn btn-icon utility" id="export" title="Export JSON" aria-label="Export orders">↓</button>
+        <button class="btn btn-icon utility" id="import" title="Import JSON" aria-label="Import orders">↑</button>
+        <input type="file" id="importFile" accept="application/json" hidden />
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <div>
+        <div class="eyebrow">Studio overview</div>
+        <h2>Your orders, at a glance.</h2>
+        <p>Keep every handmade piece, delivery and payment in sync.</p>
+      </div>
+      <div class="today-pill" id="todayLabel">✦ Your order workspace</div>
+    </section>
+
+    <section class="stats" id="stats" aria-label="Order statistics"></section>
+
+    <section class="workspace">
+      <div class="workspace-head">
+        <div class="workspace-title"><h3>Order workspace</h3><p>Manage progress from creation to payment.</p></div>
+        <div class="results-count" id="resultsCount">0 orders</div>
+      </div>
+      <div class="filters">
+        <div class="seg" id="typeFilter" role="group" aria-label="Order type">
+          <button type="button" data-type="" class="on">All items</button>
+          <button type="button" data-type="candle">Candles</button>
+          <button type="button" data-type="resin">Resin art</button>
+        </div>
+        <div class="seg" id="statusFilter" role="group" aria-label="Status">
+          <button type="button" data-status="" class="on">All status</button>
+          <button type="button" data-status="open">In progress</button>
+          <button type="button" data-status="done">Completed</button>
+          <button type="button" data-status="unpaid">Unpaid</button>
+        </div>
+      </div>
+      <div id="list"></div>
+    </section>
+    <div class="footer-note">Your orders are saved in this browser. Export a backup regularly.</div>
+  </main>
+</div>
+
+<dialog id="dlg">
+  <form id="form">
+    <div class="dialog-head">
+      <div><h2 id="dlgTitle">Add an order</h2><p>Capture the details now. Update progress any time.</p></div>
+      <button type="button" class="mini-btn" id="closeDialog" aria-label="Close dialog">✕</button>
+    </div>
+    <div class="dialog-body">
+      <div class="field">
+        <label for="f-person">Customer name <span aria-hidden="true">*</span></label>
+        <input id="f-person" list="people" required placeholder="e.g. Priya" autocomplete="off" />
+        <datalist id="people"></datalist>
+        <span class="hint">Orders are grouped by customer name.</span>
+      </div>
+      <div class="field">
+        <label for="f-kind">Order type <span aria-hidden="true">*</span></label>
+        <select id="f-kind" required><option value="candle">Candle</option><option value="resin">Resin art</option></select>
+      </div>
+      <div id="candleFields">
+        <div class="field"><label for="f-candleType">Candle shape <span aria-hidden="true">*</span></label><select id="f-candleType"><option value="">Choose a shape</option></select></div>
+        <div class="field-row">
+          <div class="field"><label for="f-color">Color</label><select id="f-color"><option value="">Choose a color</option></select></div>
+          <div class="field"><label for="f-scent">Scent</label><select id="f-scent"><option value="">Choose a scent</option></select></div>
+        </div>
+      </div>
+      <div id="resinFields" class="hidden">
+        <div class="field"><label for="f-resin">Resin art details <span aria-hidden="true">*</span></label><textarea id="f-resin" placeholder="Describe the piece, size, colours, finish…"></textarea></div>
+      </div>
+      <div class="field">
+        <span class="field-label">Order progress</span>
+        <div class="status-box"><div class="check-grid">
+          <label class="check"><input type="checkbox" id="f-completed" /> Made / completed</label>
+          <label class="check"><input type="checkbox" id="f-delivered" /> Delivered</label>
+          <label class="check paid"><input type="checkbox" id="f-paid" /> Payment received</label>
+        </div></div>
+      </div>
+      <div class="field">
+        <span class="field-label">Tile image</span>
+        <div class="image-picker">
+          <div class="image-preview" id="imagePreview" aria-hidden="true">📷</div>
+          <div class="image-actions">
+            <button type="button" class="btn" id="pickImage">Choose image</button>
+            <button type="button" class="btn hidden" id="clearImage">Remove</button>
+            <input type="file" id="f-image" accept="image/*" hidden />
+            <span class="hint">Optional. Shape icons are used when no image is set.</span>
+          </div>
+        </div>
+      </div>
+      <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Quantity, deadline, custom request…"></textarea></div>
+      <div class="dialog-actions">
+        <button type="button" class="btn" id="cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save order</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const STORE = "my-orders-v1";
+const THEME = "my-orders-theme";
+const CANDLE_SHAPES = ["Teddy Bear","Closed rose","Open rose","Sea shell","Jasmine set","Couple","Mothichoor laddo","Sunflower"];
+const CANDLE_COLORS = ["Pink","Orange","Blue","Red","Violet","Yellow","Green","Mustard","Burgundy"];
+const CANDLE_SCENTS = ["Sea Breeze","Strawberry","Intimate"];
+const CANDLE_COLOR_HEX = {
+  Pink: "#ec4899",
+  Orange: "#f97316",
+  Blue: "#3b82f6",
+  Red: "#ef4444",
+  Violet: "#8b5cf6",
+  Yellow: "#eab308",
+  Green: "#22c55e",
+  Mustard: "#ca8a04",
+  Burgundy: "#9f1239"
+};
+const SHAPE_ICONS = {
+  "Teddy Bear": "🧸",
+  "Closed rose": "🥀",
+  "Open rose": "🌹",
+  "Sea shell": "🐚",
+  "Jasmine set": "💮",
+  "Couple": "💑",
+  "Mothichoor laddo": "🟡",
+  "Sunflower": "🌻"
+};
+const RESIN_ICON = "✨";
+const CANDLE_FALLBACK_ICON = "🕯️";
+let pendingImage = null;
+let orders = load();
+let editingId = null;
+let typeFilter = "";
+let statusFilter = "";
+let toastTimer;
+
+function load() {
+  try { const raw = localStorage.getItem(STORE); if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; } }
+  catch (e) { console.warn("Could not read saved orders", e); }
+  return [];
+}
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(orders)); }
+  catch (e) { showToast("Could not save. Please export a backup."); }
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+}
+function showToast(message) {
+  const el = document.getElementById("toast"); el.textContent = message; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2400);
+}
+function fillSelect(id, values, placeholder) {
+  const el = document.getElementById(id), current = el.value;
+  el.innerHTML = `<option value="">${esc(placeholder)}</option>` + values.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  if ([...el.options].some(o => o.value === current)) el.value = current;
+}
+function initCandleOptions() {
+  fillSelect("f-candleType", CANDLE_SHAPES, "Choose a shape");
+  fillSelect("f-color", CANDLE_COLORS, "Choose a color");
+  fillSelect("f-scent", CANDLE_SCENTS, "Choose a scent");
+}
+function isFullyDone(o) { return !!(o.completed && o.delivered && o.paid); }
+function orderTitle(o) {
+  if (o.kind === "resin") return o.resinText?.trim() || "Resin art";
+  const parts = [o.candleType, o.color, o.scent].map(x => x?.trim()).filter(Boolean);
+  return parts.length ? parts.join(" · ") : "Candle";
+}
+function orderSearchText(o) {
+  return [o.person,o.kind,o.candleType,o.color,o.scent,o.resinText,o.notes].join(" ").toLowerCase();
+}
+function uniqueValues(key) {
+  return [...new Set(orders.map(o => (o[key] || "").trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+}
+function updateKindFields() {
+  const kind = document.getElementById("f-kind").value;
+  document.getElementById("candleFields").classList.toggle("hidden", kind !== "candle");
+  document.getElementById("resinFields").classList.toggle("hidden", kind !== "resin");
+  document.getElementById("f-candleType").required = kind === "candle";
+  document.getElementById("f-resin").required = kind === "resin";
+}
+function getVisibleOrders() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const person = document.getElementById("filterPerson").value;
+  return orders.filter(o => {
+    if (person && (o.person || "") !== person) return false;
+    if (typeFilter && o.kind !== typeFilter) return false;
+    if (statusFilter === "open" && isFullyDone(o)) return false;
+    if (statusFilter === "done" && !isFullyDone(o)) return false;
+    if (statusFilter === "unpaid" && o.paid) return false;
+    if (q && !orderSearchText(o).includes(q)) return false;
+    return true;
+  });
+}
+function renderStats(visible) {
+  const open = visible.filter(o => !isFullyDone(o)).length;
+  const candles = visible.filter(o => o.kind === "candle").length;
+  const resin = visible.filter(o => o.kind === "resin").length;
+  const unpaid = visible.filter(o => !o.paid).length;
+  document.getElementById("stats").innerHTML = `
+    <article class="stat"><div class="stat-head"><span class="stat-label">Total orders</span><span class="stat-icon">▦</span></div><div class="stat-value">${visible.length}</div><div class="stat-sub">Across all customers</div></article>
+    <article class="stat open"><div class="stat-head"><span class="stat-label">In progress</span><span class="stat-icon">◷</span></div><div class="stat-value">${open}</div><div class="stat-sub">Need at least one step</div></article>
+    <article class="stat candles"><div class="stat-head"><span class="stat-label">Candles</span><span class="stat-icon">♨</span></div><div class="stat-value">${candles}</div><div class="stat-sub">Candle creations</div></article>
+    <article class="stat resin"><div class="stat-head"><span class="stat-label">Resin art</span><span class="stat-icon">✧</span></div><div class="stat-value">${resin}</div><div class="stat-sub">Custom resin pieces</div></article>
+    <article class="stat unpaid"><div class="stat-head"><span class="stat-label">Unpaid</span><span class="stat-icon">₹</span></div><div class="stat-value">${unpaid}</div><div class="stat-sub">Payment to follow up</div></article>`;
+}
+function render() {
+  const visible = getVisibleOrders();
+  renderStats(visible);
+  document.getElementById("resultsCount").textContent = `${visible.length} ${visible.length === 1 ? "order" : "orders"}`;
+  const groups = new Map();
+  for (const o of visible) {
+    const key = o.person?.trim() || "Unnamed";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(o);
+  }
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  if (!visible.length) {
+    const noOrders = orders.length === 0;
+    list.innerHTML = `<div class="empty"><div class="empty-icon">${noOrders ? "✦" : "⌕"}</div><h3>${noOrders ? "Your first order starts here" : "No matching orders"}</h3><p>${noOrders ? "Add a customer order to start organizing your studio." : "Try changing your search or filters."}</p>${noOrders ? '<button class="btn btn-primary" type="button" id="emptyAdd">＋ Add your first order</button>' : ""}</div>`;
+    const emptyAdd = document.getElementById("emptyAdd"); if (emptyAdd) emptyAdd.onclick = () => openDialog(null);
+  } else {
+    for (const [name, items] of [...groups].sort((a,b) => a[0].localeCompare(b[0]))) {
+      const section = document.createElement("section"); section.className = "group";
+      const initials = name.split(/\s+/).filter(Boolean).slice(0,2).map(s => s[0]).join("").toUpperCase() || "?";
+      const head = document.createElement("h2"); head.className = "group-head";
+      const avatar = document.createElement("span"); avatar.className = "person-avatar"; avatar.textContent = initials;
+      const groupName = document.createElement("span"); groupName.className = "group-name"; groupName.textContent = name;
+      const count = document.createElement("span"); count.className = "group-count"; count.textContent = String(items.length);
+      const line = document.createElement("span"); line.className = "group-line";
+      const addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "group-add";
+      addBtn.textContent = "＋";
+      addBtn.title = `Add order for ${name}`;
+      addBtn.setAttribute("aria-label", `Add order for ${name}`);
+      addBtn.onclick = () => openDialog({ person: name });
+      head.append(avatar, groupName, count, line, addBtn);
+      section.appendChild(head);
+      const wrap = document.createElement("div"); wrap.className = "order-list";
+      items.sort((a,b) => Number(isFullyDone(a)) - Number(isFullyDone(b)) || (b.createdAt || 0) - (a.createdAt || 0)).forEach(o => wrap.appendChild(orderCard(o)));
+      section.appendChild(wrap); list.appendChild(section);
+    }
+  }
+  const people = uniqueValues("person"), filter = document.getElementById("filterPerson"), current = filter.value;
+  filter.innerHTML = `<option value="">All customers</option>` + people.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join("");
+  filter.value = people.includes(current) ? current : "";
+  document.getElementById("people").innerHTML = people.map(p => `<option value="${esc(p)}">`).join("");
+}
+function orderCard(o) {
+  const el = document.createElement("article"); el.className = "order" + (isFullyDone(o) ? " done" : "");
+  const candleHex = o.kind === "candle" ? CANDLE_COLOR_HEX[o.color] : null;
+  if (candleHex) {
+    el.classList.add("tinted");
+    el.style.setProperty("--tile-color", candleHex);
+  }
+  el.tabIndex = 0;
+  el.setAttribute("role", "button");
+  el.setAttribute("aria-label", `Edit order: ${orderTitle(o)}`);
+  el.addEventListener("click", e => {
+    if (e.target.closest("button, label, input, a")) return;
+    openDialog(o);
+  });
+  el.addEventListener("keydown", e => {
+    if (e.target !== el) return;
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openDialog(o); }
+  });
+  const top = document.createElement("div"); top.className = "order-top";
+  const icon = document.createElement("div");
+  icon.className = "kind-icon " + (o.kind === "resin" ? "resin" : "candle");
+  icon.setAttribute("aria-hidden", "true");
+  if (o.image) {
+    icon.classList.add("has-image");
+    const img = document.createElement("img");
+    img.src = o.image;
+    img.alt = "";
+    img.loading = "lazy";
+    icon.appendChild(img);
+  } else {
+    icon.textContent = o.kind === "resin"
+      ? RESIN_ICON
+      : (SHAPE_ICONS[o.candleType] || CANDLE_FALLBACK_ICON);
+  }
+  const content = document.createElement("div"); content.className = "order-content";
+  const title = document.createElement("div"); title.className = "order-title"; title.textContent = orderTitle(o); content.appendChild(title);
+  if (o.kind === "candle") {
+    const bits = []; if (o.candleType?.trim()) bits.push(o.candleType.trim()); if (o.color?.trim()) bits.push("Color: " + o.color.trim()); if (o.scent?.trim()) bits.push("Scent: " + o.scent.trim());
+    if (bits.length) { const meta = document.createElement("div"); meta.className = "order-meta"; meta.textContent = bits.join(" · "); content.appendChild(meta); }
+  }
+  if (o.notes?.trim()) { const notes = document.createElement("div"); notes.className = "order-meta"; notes.textContent = "Note: " + o.notes.trim(); content.appendChild(notes); }
+  const kind = document.createElement("span"); kind.className = "order-kind " + (o.kind === "resin" ? "resin" : "candle"); kind.textContent = o.kind === "resin" ? "Resin art" : "Candle"; content.appendChild(kind);
+  const actions = document.createElement("div"); actions.className = "order-actions";
+  const edit = document.createElement("button"); edit.type = "button"; edit.className = "mini-btn"; edit.textContent = "✎"; edit.title = "Edit order"; edit.setAttribute("aria-label","Edit order"); edit.onclick = e => { e.stopPropagation(); openDialog(o); };
+  const del = document.createElement("button"); del.type = "button"; del.className = "mini-btn delete"; del.textContent = "🗑"; del.title = "Delete order"; del.setAttribute("aria-label","Delete order"); del.onclick = e => {
+    e.stopPropagation();
+    if (confirm(`Delete this order for ${o.person || "Unnamed"}? This cannot be undone.`)) { orders = orders.filter(x => x.id !== o.id); save(); render(); showToast("Order deleted"); }
+  };
+  actions.append(edit,del); top.append(icon,content,actions);
+  const divider = document.createElement("div"); divider.className = "order-divider";
+  const checks = document.createElement("div"); checks.className = "checks";
+  checks.append(makeCheck(o,"completed","Completed"),makeCheck(o,"delivered","Delivered"),makeCheck(o,"paid","Payment received",true));
+  el.append(top,divider,checks); return el;
+}
+function makeCheck(o,key,label,paid=false) {
+  const lab = document.createElement("label"); lab.className = "check" + (paid ? " paid" : "") + (o[key] ? " on" : "");
+  const input = document.createElement("input"); input.type = "checkbox"; input.checked = !!o[key]; input.setAttribute("aria-label",label + " for " + (o.person || "order"));
+  input.addEventListener("change", () => { orders = orders.map(x => x.id === o.id ? {...x,[key]:input.checked} : x); save(); render(); showToast(label + (input.checked ? " marked" : " unmarked")); });
+  lab.append(input,document.createTextNode(label)); return lab;
+}
+const dlg = document.getElementById("dlg");
+
+function defaultIconForForm() {
+  const kind = document.getElementById("f-kind").value;
+  if (kind === "resin") return RESIN_ICON;
+  return SHAPE_ICONS[document.getElementById("f-candleType").value] || CANDLE_FALLBACK_ICON;
+}
+
+function updateImagePreview() {
+  const preview = document.getElementById("imagePreview");
+  const clearBtn = document.getElementById("clearImage");
+  preview.innerHTML = "";
+  if (pendingImage) {
+    const img = document.createElement("img");
+    img.src = pendingImage;
+    img.alt = "";
+    preview.appendChild(img);
+    clearBtn.classList.remove("hidden");
+  } else {
+    preview.textContent = defaultIconForForm();
+    clearBtn.classList.add("hidden");
+  }
+}
+
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) {
+      reject(new Error("Please choose an image file"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read image"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 160;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      img.onerror = () => reject(new Error("Invalid image"));
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function openDialog(order) {
+  const isEdit = !!(order && order.id);
+  editingId = isEdit ? order.id : null;
+  pendingImage = isEdit ? (order.image || null) : null;
+  document.getElementById("f-image").value = "";
+  document.getElementById("dlgTitle").textContent = isEdit ? "Edit order" : "Add an order";
+  document.getElementById("f-person").value = order?.person ?? "";
+  document.getElementById("f-kind").value = isEdit ? (order.kind ?? "candle") : "candle";
+  initCandleOptions();
+  ensureSelectValue("f-candleType",order?.candleType); ensureSelectValue("f-color",order?.color); ensureSelectValue("f-scent",order?.scent);
+  document.getElementById("f-candleType").value = isEdit ? (order.candleType ?? "") : "";
+  document.getElementById("f-color").value = isEdit ? (order.color ?? "") : "";
+  document.getElementById("f-scent").value = isEdit ? (order.scent ?? "") : "";
+  document.getElementById("f-resin").value = isEdit ? (order.resinText ?? "") : "";
+  document.getElementById("f-completed").checked = isEdit ? !!order.completed : false;
+  document.getElementById("f-delivered").checked = isEdit ? !!order.delivered : false;
+  document.getElementById("f-paid").checked = isEdit ? !!order.paid : false;
+  document.getElementById("f-notes").value = isEdit ? (order.notes ?? "") : "";
+  updateKindFields();
+  updateImagePreview();
+  dlg.showModal();
+  if (!isEdit && order?.person) document.getElementById("f-kind").focus();
+  else document.getElementById("f-person").focus();
+}
+function ensureSelectValue(id,value) {
+  if (!value) return; const el = document.getElementById(id);
+  if (![...el.options].some(o => o.value === value)) { const opt = document.createElement("option"); opt.value = value; opt.textContent = value; el.appendChild(opt); }
+}
+document.getElementById("f-kind").addEventListener("change", () => { updateKindFields(); updateImagePreview(); });
+document.getElementById("f-candleType").addEventListener("change", updateImagePreview);
+document.getElementById("pickImage").onclick = () => document.getElementById("f-image").click();
+document.getElementById("clearImage").onclick = () => {
+  pendingImage = null;
+  document.getElementById("f-image").value = "";
+  updateImagePreview();
+};
+document.getElementById("f-image").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    pendingImage = await readImageFile(file);
+    updateImagePreview();
+  } catch (err) {
+    alert(err.message);
+    e.target.value = "";
+  }
+});
+document.getElementById("add").onclick = () => openDialog(null);
+document.getElementById("cancel").onclick = () => dlg.close();
+document.getElementById("closeDialog").onclick = () => dlg.close();
+document.getElementById("form").addEventListener("submit",e => {
+  e.preventDefault();
+  const kind = document.getElementById("f-kind").value, person = document.getElementById("f-person").value.trim();
+  if (!person) { document.getElementById("f-person").focus(); return; }
+  if (kind === "candle" && !document.getElementById("f-candleType").value.trim()) { document.getElementById("f-candleType").focus(); return; }
+  if (kind === "resin" && !document.getElementById("f-resin").value.trim()) { document.getElementById("f-resin").focus(); return; }
+  const data = {
+    person, kind,
+    candleType: kind === "candle" ? document.getElementById("f-candleType").value.trim() : "",
+    color: kind === "candle" ? document.getElementById("f-color").value.trim() : "",
+    scent: kind === "candle" ? document.getElementById("f-scent").value.trim() : "",
+    resinText: kind === "resin" ? document.getElementById("f-resin").value.trim() : "",
+    completed: document.getElementById("f-completed").checked,
+    delivered: document.getElementById("f-delivered").checked,
+    paid: document.getElementById("f-paid").checked,
+    notes: document.getElementById("f-notes").value.trim(),
+    image: pendingImage || ""
+  };
+  if (editingId) orders = orders.map(o => o.id === editingId ? {...o,...data} : o);
+  else orders.push({id: crypto.randomUUID(),createdAt:Date.now(),...data});
+  save(); dlg.close(); render(); showToast(editingId ? "Order updated" : "Order added"); editingId = null; pendingImage = null;
+});
+document.getElementById("search").addEventListener("input",render);
+document.getElementById("filterPerson").addEventListener("change",render);
+document.getElementById("typeFilter").addEventListener("click",e => {
+  const btn = e.target.closest("button[data-type]"); if (!btn) return;
+  typeFilter = btn.dataset.type;
+  [...document.getElementById("typeFilter").children].forEach(b => b.classList.toggle("on",b === btn)); render();
+});
+document.getElementById("statusFilter").addEventListener("click",e => {
+  const btn = e.target.closest("button[data-status]"); if (!btn) return;
+  statusFilter = btn.dataset.status;
+  [...document.getElementById("statusFilter").children].forEach(b => b.classList.toggle("on",b === btn)); render();
+});
+document.addEventListener("keydown",e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+  if (e.key === "/" && !typing && !dlg.open) {
+    e.preventDefault();
+    document.getElementById("search").focus();
+  }
+  if (
+    e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !dlg.open
+  ) {
+    e.preventDefault();
+    openDialog(null);
+  }
+  if (e.key === "Escape" && dlg.open) dlg.close();
+});
+const themeBtn = document.getElementById("theme");
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t; themeBtn.textContent = t === "dark" ? "☀" : "☾";
+  themeBtn.title = t === "dark" ? "Switch to light theme" : "Switch to dark theme";
+  localStorage.setItem(THEME,t);
+}
+themeBtn.onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+applyTheme(localStorage.getItem(THEME) || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+document.getElementById("todayLabel").textContent = "✦ " + new Intl.DateTimeFormat(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"}).format(new Date());
+document.getElementById("export").onclick = () => {
+  const blob = new Blob([JSON.stringify(orders,null,2)],{type:"application/json"});
+  const url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = "my-orders.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(url),1000); showToast("Orders exported");
+};
+document.getElementById("import").onclick = () => document.getElementById("importFile").click();
+document.getElementById("importFile").addEventListener("change",async e => {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const incoming = JSON.parse(await file.text()); if (!Array.isArray(incoming)) throw new Error("Expected a JSON array");
+    const existing = new Set(orders.map(o => o.id)); let added = 0;
+    for (const item of incoming) {
+      if (!item?.person || !item?.kind) continue;
+      const id = item.id && !existing.has(item.id) ? item.id : crypto.randomUUID();
+      orders.push({id,createdAt:item.createdAt || Date.now(),person:String(item.person),kind:item.kind === "resin" ? "resin" : "candle",candleType:item.candleType || "",color:item.color || "",scent:item.scent || "",resinText:item.resinText || "",completed:!!item.completed,delivered:!!item.delivered,paid:!!item.paid,notes:item.notes || "",image:item.image || ""});
+      existing.add(id); added++;
+    }
+    save(); render(); showToast(`Imported ${added} order${added === 1 ? "" : "s"}`);
+  } catch(err) { alert("Import failed: " + err.message); }
+  e.target.value = "";
+});
+initCandleOptions(); render();
+</script>
+</body>
+</html>
