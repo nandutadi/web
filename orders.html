@@ -228,9 +228,10 @@
   .stat-sub { margin-top: 7px; color: var(--muted); font-size: 11px; }
   .stat::after { content: ""; position: absolute; width: 74px; height: 74px; border-radius: 50%; right: -28px; bottom: -43px; background: var(--accent-soft); opacity: .7; }
   .stat.open .stat-icon { background: var(--warn-soft); color: var(--warn); }
+  .stat.closed .stat-icon { background: var(--good-soft); color: var(--good); }
   .stat.candles .stat-icon { background: var(--candle-soft); color: var(--candle); }
   .stat.resin .stat-icon { background: var(--resin-soft); color: var(--resin); }
-  .stat.unpaid .stat-icon { background: var(--good-soft); color: var(--good); }
+  .stat.unpaid .stat-icon { background: var(--accent-soft); color: var(--accent); }
   .workspace { background: var(--panel); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
   .workspace-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 19px 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
   .workspace-title { min-width: 0; }
@@ -776,8 +777,8 @@
         </div>
         <div class="seg" id="statusFilter" role="group" aria-label="Status">
           <button type="button" data-status="" class="on">All status</button>
-          <button type="button" data-status="open">In progress</button>
-          <button type="button" data-status="done">Completed</button>
+          <button type="button" data-status="open">Open</button>
+          <button type="button" data-status="closed">Closed</button>
           <button type="button" data-status="unpaid">Unpaid</button>
         </div>
       </div>
@@ -1488,7 +1489,7 @@ function getVisibleOrders() {
     if (person && (o.person || "") !== person) return false;
     if (typeFilter && o.kind !== typeFilter) return false;
     if (statusFilter === "open" && isFullyDone(o)) return false;
-    if (statusFilter === "done" && !isFullyDone(o)) return false;
+    if ((statusFilter === "closed" || statusFilter === "done") && !isFullyDone(o)) return false;
     if (statusFilter === "unpaid" && o.paid) return false;
     if (q && !orderSearchText(o).includes(q)) return false;
     return true;
@@ -1499,8 +1500,8 @@ function statsScopeLabel() {
   const q = document.getElementById("search")?.value.trim() || "";
   const bits = [];
   if (typeFilter) bits.push(typeMeta(typeFilter).name);
-  if (statusFilter === "open") bits.push("In progress");
-  if (statusFilter === "done") bits.push("Completed");
+  if (statusFilter === "open") bits.push("Open");
+  if (statusFilter === "closed" || statusFilter === "done") bits.push("Closed");
   if (statusFilter === "unpaid") bits.push("Unpaid");
   if (person) bits.push(person);
   if (q) bits.push(`“${q}”`);
@@ -1509,24 +1510,35 @@ function statsScopeLabel() {
 function renderStats(visible) {
   const scope = statsScopeLabel();
   const filtered = !!typeFilter || !!statusFilter || personOrSearchActive();
+  const isClosedFilter = statusFilter === "closed" || statusFilter === "done";
   const cards = [];
 
   cards.push({
-    cls: statusFilter === "open" ? "open" : statusFilter === "unpaid" ? "unpaid" : "",
+    cls: statusFilter === "open" ? "open" : isClosedFilter ? "closed" : statusFilter === "unpaid" ? "unpaid" : "",
     label: "Total orders",
     icon: "▦",
     count: visible.length,
     sub: scope
   });
 
-  // Skip when status filter already is "in progress" or "completed" (would duplicate / always be 0)
-  if (statusFilter !== "open" && statusFilter !== "done") {
+  // Open / Closed are derived from Completed + Delivered + Payment Received
+  if (statusFilter !== "open" && !isClosedFilter) {
     cards.push({
       cls: "open",
-      label: "In progress",
+      label: "Open orders",
       icon: "◷",
       count: visible.filter(o => !isFullyDone(o)).length,
-      sub: filtered ? "In current filter" : "Need at least one step"
+      sub: filtered ? "In current filter" : "Missing a status step"
+    });
+  }
+
+  if (!isClosedFilter && statusFilter !== "open" && statusFilter !== "unpaid") {
+    cards.push({
+      cls: "closed",
+      label: "Closed orders",
+      icon: "✓",
+      count: visible.filter(o => isFullyDone(o)).length,
+      sub: "Completed · Delivered · Payment Received"
     });
   }
 
@@ -1677,7 +1689,7 @@ function orderCard(o) {
   top.append(icon, content);
   const divider = document.createElement("div"); divider.className = "order-divider";
   const checks = document.createElement("div"); checks.className = "checks";
-  checks.append(makeCheck(o,"completed","Completed"),makeCheck(o,"delivered","Delivered"),makeCheck(o,"paid","Payment received",true));
+  checks.append(makeCheck(o,"completed","Completed"),makeCheck(o,"delivered","Delivered"),makeCheck(o,"paid","Payment Received",true));
   el.append(top,divider,checks); return el;
 }
 function makeCheck(o,key,label,paid=false) {
@@ -1757,7 +1769,7 @@ function openViewDialog(order) {
   status.append(
     makeCheck(o, "completed", "Completed"),
     makeCheck(o, "delivered", "Delivered"),
-    makeCheck(o, "paid", "Payment received", true)
+    makeCheck(o, "paid", "Payment Received", true)
   );
 
   viewDlg.showModal();
