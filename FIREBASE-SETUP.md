@@ -1,0 +1,66 @@
+# Firebase setup for Thanvis Orders
+
+Orders sync through **Cloud Firestore** so phone and laptop share the same data.
+
+## 1. Create a Firebase project
+
+1. Open [Firebase Console](https://console.firebase.google.com/)
+2. **Add project** → name it e.g. `thanvis-orders`
+3. Disable Google Analytics if you do not need it → **Create project**
+
+## 2. Register a web app
+
+1. Project overview → **Add app** → **Web** (`</>`)
+2. App nickname: `thanvis-web`
+3. Do **not** need Firebase Hosting for GitHub Pages
+4. Register → copy the `firebaseConfig` object (apiKey, authDomain, projectId, …)
+
+## 3. Create Firestore
+
+1. Build → **Firestore Database** → **Create database**
+2. Start in **production mode**
+3. Pick a region close to you (e.g. `asia-south1`)
+
+## 4. Enable Anonymous Auth
+
+1. Build → **Authentication** → **Get started**
+2. **Sign-in method** → **Anonymous** → Enable → Save
+
+## 5. Security rules
+
+Firestore → **Rules** → publish:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+Anyone who opens your site can still sign in anonymously and read/write this collection. Fine for a private studio tool; tighten later (Google sign-in, App Check) if needed.
+
+## 6. Connect the website
+
+The Thanvi Arts Firebase config is already built into `orders.html`, so every device that opens the site syncs automatically — no paste step.
+
+1. Open `orders.html` (local or GitHub Pages)
+2. Status pill should say **Synced with Firebase**
+3. Existing local orders upload once automatically
+
+Optional: use the **☁** button only if you need to override config or switch to local-only mode.
+
+## 7. Test
+
+1. Add an order on your laptop
+2. Open the same site on your phone → order should appear
+3. Toggle Completed / Delivered / Paid → should update everywhere
+
+## Notes
+
+- Config is stored in that browser’s `localStorage` (not in the git repo)
+- Export JSON backups still work from the ↓ button
+- Large tile images count toward each Firestore document size limit (1 MB). Keep photos small (the app already compresses uploads)

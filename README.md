@@ -39,6 +39,7 @@ Then visit `http://localhost:8080`.
 
 ## Notes
 
-- App data is stored in the browser (`localStorage`), not on the server.
+- **Orders** can sync with Firebase Firestore across devices. See [FIREBASE-SETUP.md](FIREBASE-SETUP.md).
+- Without Firebase, data stays in the browser (`localStorage`).
 - Export JSON backups from each app regularly.
 - `.nojekyll` disables Jekyll processing on GitHub Pages.

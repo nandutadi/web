@@ -256,6 +256,17 @@
   .toast { position: fixed; z-index: 50; bottom: 22px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--text); color: var(--panel); border-radius: 12px; padding: 11px 16px; font-size: 12px; box-shadow: var(--shadow); transition: .22s ease; }
   .toast.show { transform: translate(-50%, 0); opacity: 1; }
   .footer-note { text-align: center; color: var(--muted); font-size: 10.5px; padding-top: 20px; }
+  .sync-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--border); border-radius: 999px; padding: 9px 13px;
+    background: var(--panel); color: var(--muted); font-size: 12px; white-space: nowrap;
+  }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .sync-pill.cloud .sync-dot { background: var(--good); }
+  .sync-pill.local .sync-dot { background: var(--warn); }
+  .sync-pill.error .sync-dot { background: var(--bad); }
+  .sync-pill.connecting .sync-dot { background: var(--accent); }
+  #fbConfig { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; min-height: 140px; font-size: 11.5px; }
   @media (max-width: 950px) {
     .topbar-inner { padding: 13px 20px; flex-wrap: wrap; }
     .topbar-tools { width: 100%; margin-left: 0; }
@@ -306,6 +317,7 @@
         <select id="filterPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
         <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> Add order</button>
         <button class="btn btn-icon utility" id="theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
+        <button class="btn btn-icon utility" id="firebaseSettings" title="Firebase sync settings" aria-label="Firebase sync settings">☁</button>
         <button class="btn btn-icon utility" id="export" title="Export JSON" aria-label="Export orders">↓</button>
         <button class="btn btn-icon utility" id="import" title="Import JSON" aria-label="Import orders">↑</button>
         <input type="file" id="importFile" accept="application/json" hidden />
@@ -320,7 +332,10 @@
         <h2>Your orders, at a glance.</h2>
         <p>Keep every handmade piece, delivery and payment in sync.</p>
       </div>
-      <div class="today-pill" id="todayLabel">✦ Your order workspace</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">
+        <div class="today-pill" id="todayLabel">✦ Your order workspace</div>
+        <div class="sync-pill local" id="syncPill" title="Data sync status"><span class="sync-dot" aria-hidden="true"></span><span id="syncLabel">Local only</span></div>
+      </div>
     </section>
 
     <section class="stats" id="stats" aria-label="Order statistics"></section>
@@ -404,11 +419,49 @@
     </div>
   </form>
 </dialog>
+<dialog id="fbDlg">
+  <form id="fbForm">
+    <div class="dialog-head">
+      <div>
+        <h2>Firebase sync</h2>
+        <p>Paste your Firebase web config so orders sync across devices.</p>
+      </div>
+      <button type="button" class="mini-btn" id="closeFbDialog" aria-label="Close dialog">✕</button>
+    </div>
+    <div class="dialog-body">
+      <div class="field">
+        <label for="fbConfig">Firebase config JSON</label>
+        <textarea id="fbConfig" placeholder='{ "apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..." }'></textarea>
+        <span class="hint">From Firebase Console → Project settings → Your apps → SDK setup. See FIREBASE-SETUP.md.</span>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn" id="clearFirebase">Use local only</button>
+        <button type="button" class="btn" id="cancelFb">Cancel</button>
+        <button type="submit" class="btn btn-primary">Connect &amp; sync</button>
+      </div>
+    </div>
+  </form>
+</dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 const STORE = "my-orders-v1";
 const THEME = "my-orders-theme";
+const FB_CONFIG_KEY = "thanvis-firebase-config";
+const FB_DISABLED_KEY = "thanvis-firebase-disabled";
+// Public web config (safe to ship). Protect data with Firestore rules + Anonymous Auth.
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD7tJQdNGy7zijKh8D4d6N_bplC7ahw9VE",
+  authDomain: "thanvi-arts.firebaseapp.com",
+  projectId: "thanvi-arts",
+  storageBucket: "thanvi-arts.firebasestorage.app",
+  messagingSenderId: "195111953238",
+  appId: "1:195111953238:web:3f5b32835f9c7c95b82cf7",
+  measurementId: "G-PF1FXP11Q2"
+};
 const CANDLE_SHAPES = ["Teddy Bear","Closed rose","Open rose","Sea shell","Jasmine set","Couple","Mothichoor laddo","Sunflower"];
 const CANDLE_COLORS = ["Pink","Orange","Blue","Red","Violet","Yellow","Green","Mustard","Burgundy"];
 const CANDLE_SCENTS = ["Sea Breeze","Strawberry","Intimate"];
@@ -436,20 +489,164 @@ const SHAPE_ICONS = {
 const RESIN_ICON = "✨";
 const CANDLE_FALLBACK_ICON = "🕯️";
 let pendingImage = null;
-let orders = load();
+let orders = [];
 let editingId = null;
 let typeFilter = "";
 let statusFilter = "";
 let toastTimer;
+let db = null;
+let unsubOrders = null;
+let cloudEnabled = false;
+let firebaseAppReady = false;
 
-function load() {
+function loadLocal() {
   try { const raw = localStorage.getItem(STORE); if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; } }
   catch (e) { console.warn("Could not read saved orders", e); }
   return [];
 }
-function save() {
+function cacheLocal() {
   try { localStorage.setItem(STORE, JSON.stringify(orders)); }
-  catch (e) { showToast("Could not save. Please export a backup."); }
+  catch (e) { showToast("Could not cache locally. Export a backup."); }
+}
+function getFirebaseConfig() {
+  if (localStorage.getItem(FB_DISABLED_KEY) === "1") return null;
+  try {
+    const raw = localStorage.getItem(FB_CONFIG_KEY);
+    if (raw) {
+      const cfg = JSON.parse(raw);
+      if (cfg?.apiKey && cfg?.projectId) return cfg;
+    }
+  } catch (e) { console.warn("Invalid Firebase config override", e); }
+  return DEFAULT_FIREBASE_CONFIG;
+}
+function setSyncStatus(mode, label) {
+  const pill = document.getElementById("syncPill");
+  const text = document.getElementById("syncLabel");
+  pill.className = "sync-pill " + mode;
+  text.textContent = label;
+}
+function normalizeOrder(raw, id) {
+  return {
+    id: id || raw.id || crypto.randomUUID(),
+    createdAt: Number(raw.createdAt) || Date.now(),
+    person: String(raw.person || ""),
+    kind: raw.kind === "resin" ? "resin" : "candle",
+    candleType: raw.candleType || "",
+    color: raw.color || "",
+    scent: raw.scent || "",
+    resinText: raw.resinText || "",
+    completed: !!raw.completed,
+    delivered: !!raw.delivered,
+    paid: !!raw.paid,
+    notes: raw.notes || "",
+    image: raw.image || ""
+  };
+}
+function orderPayload(o) {
+  return {
+    createdAt: o.createdAt || Date.now(),
+    person: o.person || "",
+    kind: o.kind === "resin" ? "resin" : "candle",
+    candleType: o.candleType || "",
+    color: o.color || "",
+    scent: o.scent || "",
+    resinText: o.resinText || "",
+    completed: !!o.completed,
+    delivered: !!o.delivered,
+    paid: !!o.paid,
+    notes: o.notes || "",
+    image: o.image || ""
+  };
+}
+async function upsertOrder(order) {
+  const o = normalizeOrder(order, order.id);
+  if (cloudEnabled && db) {
+    await db.collection("orders").doc(o.id).set(orderPayload(o), { merge: true });
+    return o;
+  }
+  const idx = orders.findIndex(x => x.id === o.id);
+  if (idx >= 0) orders[idx] = { ...orders[idx], ...o };
+  else orders.push(o);
+  cacheLocal();
+  render();
+  return o;
+}
+async function removeOrder(id) {
+  if (cloudEnabled && db) {
+    await db.collection("orders").doc(id).delete();
+    return;
+  }
+  orders = orders.filter(x => x.id !== id);
+  cacheLocal();
+  render();
+}
+async function initFirebase() {
+  if (unsubOrders) { unsubOrders(); unsubOrders = null; }
+  db = null;
+  cloudEnabled = false;
+
+  const config = getFirebaseConfig();
+  if (!config) {
+    orders = loadLocal();
+    setSyncStatus("local", "Local only");
+    render();
+    return;
+  }
+
+  setSyncStatus("connecting", "Connecting…");
+  try {
+    if (!firebaseAppReady) {
+      firebase.initializeApp(config);
+      firebaseAppReady = true;
+    } else if (firebase.apps.length) {
+      // Re-init only if project changed: simplest path is reload
+      const current = firebase.app().options;
+      if (current.projectId !== config.projectId || current.apiKey !== config.apiKey) {
+        location.reload();
+        return;
+      }
+    }
+    db = firebase.firestore();
+    try { await firebase.auth().signInAnonymously(); }
+    catch (authErr) { console.warn("Anonymous auth unavailable; using public rules if allowed.", authErr); }
+
+    // Upload any local orders missing from cloud (one-time migration)
+    const existingSnap = await db.collection("orders").get();
+    const cloudIds = new Set(existingSnap.docs.map(d => d.id));
+    const local = loadLocal();
+    let uploaded = 0;
+    cloudEnabled = true;
+    for (const item of local) {
+      const o = normalizeOrder(item);
+      if (!cloudIds.has(o.id)) {
+        await db.collection("orders").doc(o.id).set(orderPayload(o), { merge: true });
+        uploaded++;
+      }
+    }
+    if (uploaded) showToast(`Uploaded ${uploaded} local order${uploaded === 1 ? "" : "s"} to Firebase`);
+
+    unsubOrders = db.collection("orders").onSnapshot(snap => {
+      orders = snap.docs.map(doc => normalizeOrder(doc.data(), doc.id));
+      cacheLocal();
+      cloudEnabled = true;
+      setSyncStatus("cloud", "Synced with Firebase");
+      render();
+    }, err => {
+      console.error(err);
+      cloudEnabled = false;
+      orders = loadLocal();
+      setSyncStatus("error", "Cloud error — local copy");
+      render();
+      showToast("Firebase error: " + err.message);
+    });
+  } catch (err) {
+    console.error(err);
+    cloudEnabled = false;
+    orders = loadLocal();
+    setSyncStatus("error", "Not connected");
+    render();
+    showToast("Could not connect Firebase: " + err.message);
+  }
 }
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
@@ -600,9 +797,14 @@ function orderCard(o) {
   const kind = document.createElement("span"); kind.className = "order-kind " + (o.kind === "resin" ? "resin" : "candle"); kind.textContent = o.kind === "resin" ? "Resin art" : "Candle"; content.appendChild(kind);
   const actions = document.createElement("div"); actions.className = "order-actions";
   const edit = document.createElement("button"); edit.type = "button"; edit.className = "mini-btn"; edit.textContent = "✎"; edit.title = "Edit order"; edit.setAttribute("aria-label","Edit order"); edit.onclick = e => { e.stopPropagation(); openDialog(o); };
-  const del = document.createElement("button"); del.type = "button"; del.className = "mini-btn delete"; del.textContent = "🗑"; del.title = "Delete order"; del.setAttribute("aria-label","Delete order"); del.onclick = e => {
+  const del = document.createElement("button"); del.type = "button"; del.className = "mini-btn delete"; del.textContent = "🗑"; del.title = "Delete order"; del.setAttribute("aria-label","Delete order"); del.onclick = async e => {
     e.stopPropagation();
-    if (confirm(`Delete this order for ${o.person || "Unnamed"}? This cannot be undone.`)) { orders = orders.filter(x => x.id !== o.id); save(); render(); showToast("Order deleted"); }
+    if (!confirm(`Delete this order for ${o.person || "Unnamed"}? This cannot be undone.`)) return;
+    try {
+      await removeOrder(o.id);
+      if (!cloudEnabled) showToast("Order deleted");
+      else showToast("Order deleted");
+    } catch (err) { alert("Delete failed: " + err.message); }
   };
   actions.append(edit,del); top.append(icon,content,actions);
   const divider = document.createElement("div"); divider.className = "order-divider";
@@ -613,7 +815,17 @@ function orderCard(o) {
 function makeCheck(o,key,label,paid=false) {
   const lab = document.createElement("label"); lab.className = "check" + (paid ? " paid" : "") + (o[key] ? " on" : "");
   const input = document.createElement("input"); input.type = "checkbox"; input.checked = !!o[key]; input.setAttribute("aria-label",label + " for " + (o.person || "order"));
-  input.addEventListener("change", () => { orders = orders.map(x => x.id === o.id ? {...x,[key]:input.checked} : x); save(); render(); showToast(label + (input.checked ? " marked" : " unmarked")); });
+  input.addEventListener("change", async () => {
+    const next = { ...o, [key]: input.checked };
+    try {
+      await upsertOrder(next);
+      if (!cloudEnabled) showToast(label + (input.checked ? " marked" : " unmarked"));
+      else showToast(label + (input.checked ? " marked" : " unmarked"));
+    } catch (err) {
+      input.checked = !input.checked;
+      alert("Update failed: " + err.message);
+    }
+  });
   lab.append(input,document.createTextNode(label)); return lab;
 }
 const dlg = document.getElementById("dlg");
@@ -719,13 +931,16 @@ document.getElementById("f-image").addEventListener("change", async e => {
 document.getElementById("add").onclick = () => openDialog(null);
 document.getElementById("cancel").onclick = () => dlg.close();
 document.getElementById("closeDialog").onclick = () => dlg.close();
-document.getElementById("form").addEventListener("submit",e => {
+document.getElementById("form").addEventListener("submit", async e => {
   e.preventDefault();
   const kind = document.getElementById("f-kind").value, person = document.getElementById("f-person").value.trim();
   if (!person) { document.getElementById("f-person").focus(); return; }
   if (kind === "candle" && !document.getElementById("f-candleType").value.trim()) { document.getElementById("f-candleType").focus(); return; }
   if (kind === "resin" && !document.getElementById("f-resin").value.trim()) { document.getElementById("f-resin").focus(); return; }
-  const data = {
+  const existing = editingId ? orders.find(o => o.id === editingId) : null;
+  const order = normalizeOrder({
+    id: editingId || crypto.randomUUID(),
+    createdAt: existing?.createdAt || Date.now(),
     person, kind,
     candleType: kind === "candle" ? document.getElementById("f-candleType").value.trim() : "",
     color: kind === "candle" ? document.getElementById("f-color").value.trim() : "",
@@ -736,10 +951,16 @@ document.getElementById("form").addEventListener("submit",e => {
     paid: document.getElementById("f-paid").checked,
     notes: document.getElementById("f-notes").value.trim(),
     image: pendingImage || ""
-  };
-  if (editingId) orders = orders.map(o => o.id === editingId ? {...o,...data} : o);
-  else orders.push({id: crypto.randomUUID(),createdAt:Date.now(),...data});
-  save(); dlg.close(); render(); showToast(editingId ? "Order updated" : "Order added"); editingId = null; pendingImage = null;
+  });
+  try {
+    await upsertOrder(order);
+    dlg.close();
+    showToast(editingId ? "Order updated" : "Order added");
+    editingId = null;
+    pendingImage = null;
+  } catch (err) {
+    alert("Save failed: " + err.message);
+  }
 });
 document.getElementById("search").addEventListener("input",render);
 document.getElementById("filterPerson").addEventListener("change",render);
@@ -765,7 +986,10 @@ document.addEventListener("keydown",e => {
     e.preventDefault();
     openDialog(null);
   }
-  if (e.key === "Escape" && dlg.open) dlg.close();
+  if (e.key === "Escape") {
+    if (dlg.open) dlg.close();
+    if (fbDlg.open) fbDlg.close();
+  }
 });
 const themeBtn = document.getElementById("theme");
 function applyTheme(t) {
@@ -790,14 +1014,48 @@ document.getElementById("importFile").addEventListener("change",async e => {
     for (const item of incoming) {
       if (!item?.person || !item?.kind) continue;
       const id = item.id && !existing.has(item.id) ? item.id : crypto.randomUUID();
-      orders.push({id,createdAt:item.createdAt || Date.now(),person:String(item.person),kind:item.kind === "resin" ? "resin" : "candle",candleType:item.candleType || "",color:item.color || "",scent:item.scent || "",resinText:item.resinText || "",completed:!!item.completed,delivered:!!item.delivered,paid:!!item.paid,notes:item.notes || "",image:item.image || ""});
+      await upsertOrder(normalizeOrder({ ...item, id, createdAt: item.createdAt || Date.now() }, id));
       existing.add(id); added++;
     }
-    save(); render(); showToast(`Imported ${added} order${added === 1 ? "" : "s"}`);
+    if (!cloudEnabled) render();
+    showToast(`Imported ${added} order${added === 1 ? "" : "s"}`);
   } catch(err) { alert("Import failed: " + err.message); }
   e.target.value = "";
 });
-initCandleOptions(); render();
+
+const fbDlg = document.getElementById("fbDlg");
+document.getElementById("firebaseSettings").onclick = () => {
+  const cfg = getFirebaseConfig() || DEFAULT_FIREBASE_CONFIG;
+  document.getElementById("fbConfig").value = JSON.stringify(cfg, null, 2);
+  fbDlg.showModal();
+  document.getElementById("fbConfig").focus();
+};
+document.getElementById("closeFbDialog").onclick = () => fbDlg.close();
+document.getElementById("cancelFb").onclick = () => fbDlg.close();
+document.getElementById("clearFirebase").onclick = async () => {
+  localStorage.setItem(FB_DISABLED_KEY, "1");
+  fbDlg.close();
+  showToast("Switched to local-only mode");
+  await initFirebase();
+};
+document.getElementById("fbForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const raw = document.getElementById("fbConfig").value.trim();
+  try {
+    const cfg = JSON.parse(raw);
+    if (!cfg.apiKey || !cfg.projectId) throw new Error("Config must include apiKey and projectId");
+    localStorage.setItem(FB_CONFIG_KEY, JSON.stringify(cfg));
+    localStorage.removeItem(FB_DISABLED_KEY);
+    fbDlg.close();
+    showToast("Connecting to Firebase…");
+    await initFirebase();
+  } catch (err) {
+    alert("Invalid Firebase config: " + err.message);
+  }
+});
+
+initCandleOptions();
+initFirebase();
 </script>
 </body>
 </html>
