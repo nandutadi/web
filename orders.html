@@ -245,10 +245,25 @@
   .group { margin-bottom: 25px; }
   .group:last-child { margin-bottom: 0; }
   .group-head { display: flex; align-items: center; gap: 10px; margin: 0 0 11px; color: var(--muted); font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .13em; min-width: 0; }
+  .group-title {
+    display: inline-flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%;
+    border: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; text-align: left;
+  }
+  .group-title:hover .group-name { color: var(--accent-strong); }
+  .group-title:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent); outline-offset: 2px; border-radius: 8px;
+  }
+  .group-chevron {
+    width: 18px; height: 18px; display: grid; place-items: center; flex: none;
+    color: var(--muted); font-size: 11px; transition: transform .15s ease;
+  }
+  .group.collapsed .group-chevron { transform: rotate(-90deg); }
   .person-avatar { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: 0; flex: none; }
   .group-name { color: var(--text); font-size: 13px; letter-spacing: -.01em; text-transform: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .group-count { text-transform: none; letter-spacing: 0; border-radius: 999px; padding: 3px 7px; background: var(--bg); font-size: 10px; flex: none; }
   .group-line { height: 1px; flex: 1; background: var(--border); min-width: 12px; }
+  .group.collapsed .order-list { display: none; }
+  .group.collapsed .group-head { margin-bottom: 0; }
   .group-add {
     width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
     border: 1px solid var(--border); border-radius: 9px; background: var(--panel);
@@ -417,6 +432,47 @@
   .order-kind.pipe { color: #b45309; background: #fff4df; }
   html[data-theme="dark"] .order-kind.pipe { color: #f4bd65; background: #3b2e1c; }
   .kind-icon.pipe { background: var(--warn-soft); }
+  #viewDlg { width: min(480px, 96vw); }
+  .view-hero {
+    width: 100%; aspect-ratio: 1.15; border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border); background: var(--panel-soft);
+    display: grid; place-items: center; margin-bottom: 16px;
+  }
+  .view-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .view-hero .view-fallback {
+    font-size: clamp(48px, 12vw, 72px); line-height: 1; opacity: .9;
+  }
+  .view-badge {
+    display: inline-flex; margin-bottom: 10px; border-radius: 999px; padding: 4px 10px;
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
+  }
+  .view-badge.candle { color: var(--candle); background: var(--candle-soft); }
+  .view-badge.resin { color: var(--resin); background: var(--resin-soft); }
+  .view-badge.pipe { color: #b45309; background: #fff4df; }
+  html[data-theme="dark"] .view-badge.pipe { color: #f4bd65; background: #3b2e1c; }
+  .view-title { margin: 0 0 6px; font-size: clamp(18px, 4vw, 22px); letter-spacing: -.04em; line-height: 1.2; }
+  .view-sub { margin: 0 0 16px; color: var(--muted); font-size: 12px; }
+  .view-grid {
+    display: grid; gap: 10px; margin-bottom: 16px;
+    border: 1px solid var(--border); border-radius: 14px; padding: 12px;
+    background: var(--panel-soft);
+  }
+  .view-row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: start; }
+  .view-row .k { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding-top: 2px; }
+  .view-row .v { font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+  .view-status {
+    display: flex; flex-wrap: wrap; gap: 10px 14px; margin-bottom: 4px;
+    border: 1px solid var(--border); border-radius: 14px; padding: 12px;
+    background: var(--panel-soft);
+  }
+  .view-status .check { font-size: 12px; gap: 7px; }
+  .view-status .check input { width: 17px; height: 17px; flex-basis: 17px; }
+  .dialog-actions.view-actions { justify-content: stretch; }
+  .dialog-actions.view-actions .btn { flex: 1 1 auto; }
+  .dialog-actions.view-actions .btn-danger {
+    color: #fff; border-color: transparent; background: var(--bad);
+  }
+  .dialog-actions.view-actions .btn-danger:hover { filter: brightness(1.05); }
   .order-content { min-width: 0; flex: 1; }
   .order-title { font-size: 12.5px; line-height: 1.35; font-weight: 760; overflow-wrap: anywhere; }
   .order-meta { margin-top: 3px; font-size: 10.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
@@ -551,6 +607,10 @@
     #list { padding: 12px; }
     .order-list { grid-template-columns: 1fr; }
     .group-head { gap: 8px; }
+    #viewDlg { width: min(480px, 94vw); }
+    .view-hero { aspect-ratio: 1; margin-bottom: 12px; border-radius: 14px; }
+    .view-row { grid-template-columns: 72px 1fr; gap: 8px; }
+    .dialog-actions.view-actions { flex-direction: column-reverse; }
     .group-name { font-size: 12px; }
     .field-row { grid-template-columns: 1fr; gap: 0; }
     dialog,
@@ -627,7 +687,7 @@
     .stats { margin-bottom: 10px; }
     .stat { min-height: 78px; padding: 10px; }
     .brand-orb { display: none; }
-    dialog, #catDlg, #dlg { max-height: 96dvh; border-radius: 14px; margin: auto; width: min(720px, 94vw); }
+    dialog, #catDlg, #dlg, #viewDlg { max-height: 96dvh; border-radius: 14px; margin: auto; width: min(720px, 94vw); }
     .dialog-actions { position: static; margin: 0; padding-top: 8px; border-top: 0; background: transparent; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -727,6 +787,28 @@
   </main>
 </div>
 
+<dialog id="viewDlg">
+  <div class="dialog-head">
+    <div>
+      <h2>Order details</h2>
+      <p>Shape, customer, and progress.</p>
+    </div>
+    <button type="button" class="mini-btn" id="closeViewDialog" aria-label="Close dialog">✕</button>
+  </div>
+  <div class="dialog-body">
+    <div class="view-hero" id="viewHero" aria-hidden="true"></div>
+    <div id="viewBadge" class="view-badge candle">Candle</div>
+    <h3 class="view-title" id="viewTitle">Order</h3>
+    <p class="view-sub" id="viewSub"></p>
+    <div class="view-grid" id="viewGrid"></div>
+    <div class="view-status" id="viewStatus"></div>
+    <div class="dialog-actions view-actions" style="margin-top:16px">
+      <button type="button" class="btn btn-danger" id="viewDelete">Delete</button>
+      <button type="button" class="btn btn-primary" id="viewEdit">Edit</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="dlg">
   <form id="form">
     <div class="dialog-head">
@@ -753,7 +835,7 @@
       <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Quantity, deadline, custom request…"></textarea></div>
       <div class="dialog-actions">
         <button type="button" class="btn" id="cancel">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save order</button>
+        <button type="submit" class="btn btn-primary" title="Save order (press S)">Save order</button>
       </div>
     </div>
   </form>
@@ -774,7 +856,7 @@
       <div id="catTypeEditor"></div>
       <div class="dialog-actions" style="margin-top:16px">
         <button type="button" class="btn" id="catCancel">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save categories</button>
+        <button type="submit" class="btn btn-primary" title="Save categories (press S)">Save categories</button>
       </div>
     </div>
   </form>
@@ -827,6 +909,7 @@ let catImageTarget = null;
 let editingId = null;
 let typeFilter = "";
 let statusFilter = "";
+let collapsedGroups = new Set();
 let toastTimer;
 let db = null;
 let unsubOrders = null;
@@ -1444,11 +1527,30 @@ function render() {
     const emptyAdd = document.getElementById("emptyAdd"); if (emptyAdd) emptyAdd.onclick = () => openDialog(null);
   } else {
     for (const [name, items] of [...groups].sort((a,b) => a[0].localeCompare(b[0]))) {
-      const section = document.createElement("section"); section.className = "group";
+      const isCollapsed = collapsedGroups.has(name);
+      const section = document.createElement("section");
+      section.className = "group" + (isCollapsed ? " collapsed" : "");
       const initials = name.split(/\s+/).filter(Boolean).slice(0,2).map(s => s[0]).join("").toUpperCase() || "?";
       const head = document.createElement("h2"); head.className = "group-head";
+      const titleBtn = document.createElement("button");
+      titleBtn.type = "button";
+      titleBtn.className = "group-title";
+      titleBtn.title = isCollapsed ? `Expand orders for ${name}` : `Collapse orders for ${name}`;
+      titleBtn.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+      titleBtn.setAttribute("aria-label", `${isCollapsed ? "Expand" : "Collapse"} orders for ${name}`);
+      const chevron = document.createElement("span"); chevron.className = "group-chevron"; chevron.setAttribute("aria-hidden", "true"); chevron.textContent = "▾";
       const avatar = document.createElement("span"); avatar.className = "person-avatar"; avatar.textContent = initials;
       const groupName = document.createElement("span"); groupName.className = "group-name"; groupName.textContent = name;
+      titleBtn.append(chevron, avatar, groupName);
+      titleBtn.onclick = () => {
+        if (collapsedGroups.has(name)) collapsedGroups.delete(name);
+        else collapsedGroups.add(name);
+        section.classList.toggle("collapsed", collapsedGroups.has(name));
+        const collapsed = collapsedGroups.has(name);
+        titleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        titleBtn.title = collapsed ? `Expand orders for ${name}` : `Collapse orders for ${name}`;
+        titleBtn.setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} orders for ${name}`);
+      };
       const count = document.createElement("span"); count.className = "group-count"; count.textContent = String(items.length);
       const line = document.createElement("span"); line.className = "group-line";
       const addBtn = document.createElement("button");
@@ -1458,7 +1560,7 @@ function render() {
       addBtn.title = `Add order for ${name}`;
       addBtn.setAttribute("aria-label", `Add order for ${name}`);
       addBtn.onclick = () => openDialog({ person: name });
-      head.append(avatar, groupName, count, line, addBtn);
+      head.append(titleBtn, count, line, addBtn);
       section.appendChild(head);
       const wrap = document.createElement("div"); wrap.className = "order-list";
       items.sort((a,b) => Number(isFullyDone(a)) - Number(isFullyDone(b)) || (b.createdAt || 0) - (a.createdAt || 0)).forEach(o => wrap.appendChild(orderCard(o)));
@@ -1480,14 +1582,14 @@ function orderCard(o) {
   }
   el.tabIndex = 0;
   el.setAttribute("role", "button");
-  el.setAttribute("aria-label", `Edit order: ${orderTitle(o)}`);
+  el.setAttribute("aria-label", `View order: ${orderTitle(o)}`);
   el.addEventListener("click", e => {
     if (e.target.closest("button, label, input, a")) return;
-    openDialog(o);
+    openViewDialog(o);
   });
   el.addEventListener("keydown", e => {
     if (e.target !== el) return;
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openDialog(o); }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openViewDialog(o); }
   });
   const top = document.createElement("div"); top.className = "order-top";
   const icon = document.createElement("div");
@@ -1516,18 +1618,7 @@ function orderCard(o) {
   if (bits.length) { const meta = document.createElement("div"); meta.className = "order-meta"; meta.textContent = bits.join(" · "); content.appendChild(meta); }
   if (o.notes?.trim()) { const notes = document.createElement("div"); notes.className = "order-meta"; notes.textContent = "Note: " + o.notes.trim(); content.appendChild(notes); }
   const kind = document.createElement("span"); kind.className = "order-kind " + kindClass; kind.textContent = o.kindName || typeMeta(o.kind).name; content.appendChild(kind);
-  const actions = document.createElement("div"); actions.className = "order-actions";
-  const edit = document.createElement("button"); edit.type = "button"; edit.className = "mini-btn"; edit.textContent = "✎"; edit.title = "Edit order"; edit.setAttribute("aria-label","Edit order"); edit.onclick = e => { e.stopPropagation(); openDialog(o); };
-  const del = document.createElement("button"); del.type = "button"; del.className = "mini-btn delete"; del.textContent = "🗑"; del.title = "Delete order"; del.setAttribute("aria-label","Delete order"); del.onclick = async e => {
-    e.stopPropagation();
-    if (!confirm(`Delete this order for ${o.person || "Unnamed"}? This cannot be undone.`)) return;
-    try {
-      await removeOrder(o.id);
-      if (!cloudEnabled) showToast("Order deleted");
-      else showToast("Order deleted");
-    } catch (err) { alert("Delete failed: " + err.message); }
-  };
-  actions.append(edit,del); top.append(icon,content,actions);
+  top.append(icon, content);
   const divider = document.createElement("div"); divider.className = "order-divider";
   const checks = document.createElement("div"); checks.className = "checks";
   checks.append(makeCheck(o,"completed","Completed"),makeCheck(o,"delivered","Delivered"),makeCheck(o,"paid","Payment received",true));
@@ -1540,8 +1631,10 @@ function makeCheck(o,key,label,paid=false) {
     const next = { ...o, [key]: input.checked };
     try {
       await upsertOrder(next);
-      if (!cloudEnabled) showToast(label + (input.checked ? " marked" : " unmarked"));
-      else showToast(label + (input.checked ? " marked" : " unmarked"));
+      o[key] = input.checked;
+      lab.classList.toggle("on", input.checked);
+      if (viewingOrder?.id === o.id) viewingOrder[key] = input.checked;
+      showToast(label + (input.checked ? " marked" : " unmarked"));
     } catch (err) {
       input.checked = !input.checked;
       alert("Update failed: " + err.message);
@@ -1550,6 +1643,81 @@ function makeCheck(o,key,label,paid=false) {
   lab.append(input,document.createTextNode(label)); return lab;
 }
 const dlg = document.getElementById("dlg");
+const viewDlg = document.getElementById("viewDlg");
+let viewingOrder = null;
+
+function formatOrderedAt(ms) {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      weekday: "short", month: "short", day: "numeric", year: "numeric",
+      hour: "numeric", minute: "2-digit"
+    }).format(new Date(ms || Date.now()));
+  } catch (e) {
+    return new Date(ms || Date.now()).toLocaleString();
+  }
+}
+function openViewDialog(order) {
+  viewingOrder = order ? normalizeOrder(order, order.id) : null;
+  if (!viewingOrder) return;
+  const o = viewingOrder;
+  const kindClass = o.kind === "resin" ? "resin" : o.kind === "pipeCleaner" ? "pipe" : "candle";
+  const image = o.image || orderOptionImage(o.kind, o);
+  const hero = document.getElementById("viewHero");
+  hero.innerHTML = "";
+  if (image) {
+    const img = document.createElement("img");
+    img.src = image;
+    img.alt = o.shape || o.candleType || "Shape";
+    hero.appendChild(img);
+  } else {
+    const fallback = document.createElement("div");
+    fallback.className = "view-fallback";
+    fallback.textContent = SHAPE_ICONS[o.shape || o.candleType] || KIND_ICONS[o.kind] || "✦";
+    hero.appendChild(fallback);
+  }
+  const badge = document.getElementById("viewBadge");
+  badge.className = "view-badge " + kindClass;
+  badge.textContent = o.kindName || typeMeta(o.kind).name;
+  document.getElementById("viewTitle").textContent = orderTitle(o);
+  document.getElementById("viewSub").textContent = `${o.person || "Unnamed"} · Ordered ${formatOrderedAt(o.createdAt)}`;
+
+  const rows = [
+    ["Customer", o.person || "Unnamed"],
+    ["Type", o.kindName || typeMeta(o.kind).name],
+    ["Shape", o.shape || o.candleType || "—"],
+    ["Size", o.size || "—"],
+    ["Color", o.color || "—"],
+    ["Scent", o.kind === "candle" ? (o.scent || "—") : null],
+    ["Notes", o.notes || "—"]
+  ].filter(r => r[1] !== null);
+
+  const grid = document.getElementById("viewGrid");
+  grid.innerHTML = rows.map(([k, v]) =>
+    `<div class="view-row"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`
+  ).join("");
+
+  const status = document.getElementById("viewStatus");
+  status.innerHTML = "";
+  status.append(
+    makeCheck(o, "completed", "Completed"),
+    makeCheck(o, "delivered", "Delivered"),
+    makeCheck(o, "paid", "Payment received", true)
+  );
+
+  viewDlg.showModal();
+}
+async function deleteViewingOrder() {
+  if (!viewingOrder) return;
+  if (!confirm(`Delete this order for ${viewingOrder.person || "Unnamed"}? This cannot be undone.`)) return;
+  try {
+    await removeOrder(viewingOrder.id);
+    viewDlg.close();
+    viewingOrder = null;
+    showToast("Order deleted");
+  } catch (err) {
+    alert("Delete failed: " + err.message);
+  }
+}
 
 function toDatetimeLocalValue(ms) {
   const d = new Date(ms);
@@ -1587,6 +1755,16 @@ document.getElementById("f-kind").addEventListener("change", () => updateKindFie
 document.getElementById("add").onclick = () => openDialog(null);
 document.getElementById("cancel").onclick = () => dlg.close();
 document.getElementById("closeDialog").onclick = () => dlg.close();
+document.getElementById("closeViewDialog").onclick = () => { viewDlg.close(); viewingOrder = null; };
+document.getElementById("viewEdit").onclick = () => {
+  if (!viewingOrder) return;
+  const order = viewingOrder;
+  viewDlg.close();
+  viewingOrder = null;
+  openDialog(order);
+};
+document.getElementById("viewDelete").onclick = () => deleteViewingOrder();
+viewDlg.addEventListener("close", () => { viewingOrder = null; });
 document.getElementById("form").addEventListener("submit", async e => {
   e.preventDefault();
   const kind = normalizeKind(document.getElementById("f-kind").value);
@@ -1649,25 +1827,44 @@ document.getElementById("statusFilter").addEventListener("click",e => {
   [...document.getElementById("statusFilter").children].forEach(b => b.classList.toggle("on",b === btn)); render();
 });
 document.addEventListener("keydown",e => {
-  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
-  if (e.key === "/" && !typing && !dlg.open && !catDlg.open) {
+  const active = document.activeElement;
+  const tag = active?.tagName || "";
+  const inputType = (active?.type || "text").toLowerCase();
+  const typing = tag === "TEXTAREA" || (tag === "INPUT" && !["button","submit","checkbox","radio","file","reset"].includes(inputType)) || tag === "SELECT";
+  const typingText = tag === "TEXTAREA" || (tag === "INPUT" && !["button","submit","checkbox","radio","file","reset"].includes(inputType));
+  const orderOpen = !!document.getElementById("dlg")?.open;
+  const catOpen = !!document.getElementById("catDlg")?.open;
+  const viewOpen = !!document.getElementById("viewDlg")?.open;
+  const anyDialogOpen = orderOpen || catOpen || viewOpen;
+
+  if (e.key === "/" && !typing && !anyDialogOpen) {
     e.preventDefault();
     document.getElementById("search").focus();
   }
   if (
-    e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !dlg.open && !catDlg.open
+    e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !anyDialogOpen
   ) {
     e.preventDefault();
     openDialog(null);
   }
   if (
-    e.key.toLowerCase() === "c" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !dlg.open && !catDlg.open
+    e.key.toLowerCase() === "c" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && !anyDialogOpen
   ) {
     e.preventDefault();
     openCategoryDialog();
   }
-  if (e.key === "Escape" && catDlg.open) { catDlg.close(); return; }
-  if (e.key === "Escape" && dlg.open) dlg.close();
+  if (
+    e.key.toLowerCase() === "s" && !e.altKey && (orderOpen || catOpen) &&
+    ((e.metaKey || e.ctrlKey) || !typingText)
+  ) {
+    e.preventDefault();
+    const form = catOpen ? document.getElementById("catForm") : document.getElementById("form");
+    form?.requestSubmit();
+    return;
+  }
+  if (e.key === "Escape" && viewOpen) { viewDlg.close(); return; }
+  if (e.key === "Escape" && catOpen) { document.getElementById("catDlg").close(); return; }
+  if (e.key === "Escape" && orderOpen) document.getElementById("dlg").close();
 });
 const themeBtn = document.getElementById("theme");
 function applyTheme(t) {
