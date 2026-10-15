@@ -54,8 +54,6 @@ The Thanvi Arts Firebase config is already built into `orders.html`, so every de
 3. Status pill should say **Synced · your@email.com**
 4. Existing local orders upload once automatically
 
-Optional: use the **☁** button only if you need to override config or switch to local-only mode.
-
 ## 7. Test
 
 1. Add an order on your laptop

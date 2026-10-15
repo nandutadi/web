@@ -266,7 +266,6 @@
   .sync-pill.local .sync-dot { background: var(--warn); }
   .sync-pill.error .sync-dot { background: var(--bad); }
   .sync-pill.connecting .sync-dot { background: var(--accent); }
-  #fbConfig { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; min-height: 140px; font-size: 11.5px; }
   @media (max-width: 950px) {
     .topbar-inner { padding: 13px 20px; flex-wrap: wrap; }
     .topbar-tools { width: 100%; margin-left: 0; }
@@ -317,7 +316,6 @@
         <select id="filterPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
         <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> Add order</button>
         <button class="btn btn-icon utility" id="theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
-        <button class="btn btn-icon utility" id="firebaseSettings" title="Firebase sync settings" aria-label="Firebase sync settings">☁</button>
         <button class="btn btn-icon utility" id="export" title="Export JSON" aria-label="Export orders">↓</button>
         <button class="btn btn-icon utility" id="import" title="Import JSON" aria-label="Import orders">↑</button>
         <input type="file" id="importFile" accept="application/json" hidden />
@@ -421,29 +419,6 @@
     </div>
   </form>
 </dialog>
-<dialog id="fbDlg">
-  <form id="fbForm">
-    <div class="dialog-head">
-      <div>
-        <h2>Firebase sync</h2>
-        <p>Paste your Firebase web config so orders sync across devices.</p>
-      </div>
-      <button type="button" class="mini-btn" id="closeFbDialog" aria-label="Close dialog">✕</button>
-    </div>
-    <div class="dialog-body">
-      <div class="field">
-        <label for="fbConfig">Firebase config JSON</label>
-        <textarea id="fbConfig" placeholder='{ "apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..." }'></textarea>
-        <span class="hint">From Firebase Console → Project settings → Your apps → SDK setup. See FIREBASE-SETUP.md.</span>
-      </div>
-      <div class="dialog-actions">
-        <button type="button" class="btn" id="clearFirebase">Use local only</button>
-        <button type="button" class="btn" id="cancelFb">Cancel</button>
-        <button type="submit" class="btn btn-primary">Connect &amp; sync</button>
-      </div>
-    </div>
-  </form>
-</dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -452,10 +427,8 @@
 <script>
 const STORE = "my-orders-v1";
 const THEME = "my-orders-theme";
-const FB_CONFIG_KEY = "thanvis-firebase-config";
-const FB_DISABLED_KEY = "thanvis-firebase-disabled";
-// Public web config (safe to ship). Protect data with Firestore rules + Anonymous Auth.
-const DEFAULT_FIREBASE_CONFIG = {
+// Public web config (safe to ship). Protect data with Firestore rules + Google sign-in.
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD7tJQdNGy7zijKh8D4d6N_bplC7ahw9VE",
   authDomain: "thanvi-arts.firebaseapp.com",
   projectId: "thanvi-arts",
@@ -509,17 +482,6 @@ function loadLocal() {
 function cacheLocal() {
   try { localStorage.setItem(STORE, JSON.stringify(orders)); }
   catch (e) { showToast("Could not cache locally. Export a backup."); }
-}
-function getFirebaseConfig() {
-  if (localStorage.getItem(FB_DISABLED_KEY) === "1") return null;
-  try {
-    const raw = localStorage.getItem(FB_CONFIG_KEY);
-    if (raw) {
-      const cfg = JSON.parse(raw);
-      if (cfg?.apiKey && cfg?.projectId) return cfg;
-    }
-  } catch (e) { console.warn("Invalid Firebase config override", e); }
-  return DEFAULT_FIREBASE_CONFIG;
 }
 function setSyncStatus(mode, label) {
   const pill = document.getElementById("syncPill");
@@ -662,27 +624,11 @@ async function initFirebase() {
   db = null;
   cloudEnabled = false;
 
-  const config = getFirebaseConfig();
-  if (!config) {
-    orders = loadLocal();
-    setSyncStatus("local", "Local only");
-    setAuthButtons(false);
-    document.getElementById("googleSignIn").classList.add("hidden");
-    render();
-    return;
-  }
-
   setSyncStatus("connecting", "Connecting…");
   try {
     if (!firebaseAppReady) {
-      firebase.initializeApp(config);
+      firebase.initializeApp(FIREBASE_CONFIG);
       firebaseAppReady = true;
-    } else if (firebase.apps.length) {
-      const current = firebase.app().options;
-      if (current.projectId !== config.projectId || current.apiKey !== config.apiKey) {
-        location.reload();
-        return;
-      }
     }
     db = firebase.firestore();
 
@@ -1047,10 +993,7 @@ document.addEventListener("keydown",e => {
     e.preventDefault();
     openDialog(null);
   }
-  if (e.key === "Escape") {
-    if (dlg.open) dlg.close();
-    if (fbDlg.open) fbDlg.close();
-  }
+  if (e.key === "Escape" && dlg.open) dlg.close();
 });
 const themeBtn = document.getElementById("theme");
 function applyTheme(t) {
@@ -1082,37 +1025,6 @@ document.getElementById("importFile").addEventListener("change",async e => {
     showToast(`Imported ${added} order${added === 1 ? "" : "s"}`);
   } catch(err) { alert("Import failed: " + err.message); }
   e.target.value = "";
-});
-
-const fbDlg = document.getElementById("fbDlg");
-document.getElementById("firebaseSettings").onclick = () => {
-  const cfg = getFirebaseConfig() || DEFAULT_FIREBASE_CONFIG;
-  document.getElementById("fbConfig").value = JSON.stringify(cfg, null, 2);
-  fbDlg.showModal();
-  document.getElementById("fbConfig").focus();
-};
-document.getElementById("closeFbDialog").onclick = () => fbDlg.close();
-document.getElementById("cancelFb").onclick = () => fbDlg.close();
-document.getElementById("clearFirebase").onclick = async () => {
-  localStorage.setItem(FB_DISABLED_KEY, "1");
-  fbDlg.close();
-  showToast("Switched to local-only mode");
-  await initFirebase();
-};
-document.getElementById("fbForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const raw = document.getElementById("fbConfig").value.trim();
-  try {
-    const cfg = JSON.parse(raw);
-    if (!cfg.apiKey || !cfg.projectId) throw new Error("Config must include apiKey and projectId");
-    localStorage.setItem(FB_CONFIG_KEY, JSON.stringify(cfg));
-    localStorage.removeItem(FB_DISABLED_KEY);
-    fbDlg.close();
-    showToast("Connecting to Firebase…");
-    await initFirebase();
-  } catch (err) {
-    alert("Invalid Firebase config: " + err.message);
-  }
 });
 
 document.getElementById("googleSignIn").onclick = () => signInWithGoogle();
