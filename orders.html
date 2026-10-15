@@ -1494,20 +1494,76 @@ function getVisibleOrders() {
     return true;
   });
 }
+function statsScopeLabel() {
+  const person = document.getElementById("filterPerson")?.value || "";
+  const q = document.getElementById("search")?.value.trim() || "";
+  const bits = [];
+  if (typeFilter) bits.push(typeMeta(typeFilter).name);
+  if (statusFilter === "open") bits.push("In progress");
+  if (statusFilter === "done") bits.push("Completed");
+  if (statusFilter === "unpaid") bits.push("Unpaid");
+  if (person) bits.push(person);
+  if (q) bits.push(`“${q}”`);
+  return bits.length ? bits.join(" · ") : "Across all customers";
+}
 function renderStats(visible) {
-  const open = visible.filter(o => !isFullyDone(o)).length;
-  const unpaid = visible.filter(o => !o.paid).length;
-  const typeStats = FIXED_TYPES.map((t, i) => {
-    const count = visible.filter(o => o.kind === t.id).length;
-    const cls = t.id === "candle" ? "candles" : t.id === "resin" ? "resin" : "open";
-    const icon = t.id === "candle" ? "♨" : t.id === "resin" ? "✧" : "◍";
-    return `<article class="stat ${cls}"><div class="stat-head"><span class="stat-label">${esc(t.name)}</span><span class="stat-icon">${icon}</span></div><div class="stat-value">${count}</div><div class="stat-sub">By order type</div></article>`;
-  }).join("");
-  document.getElementById("stats").innerHTML = `
-    <article class="stat"><div class="stat-head"><span class="stat-label">Total orders</span><span class="stat-icon">▦</span></div><div class="stat-value">${visible.length}</div><div class="stat-sub">Across all customers</div></article>
-    <article class="stat open"><div class="stat-head"><span class="stat-label">In progress</span><span class="stat-icon">◷</span></div><div class="stat-value">${open}</div><div class="stat-sub">Need at least one step</div></article>
-    ${typeStats}
-    <article class="stat unpaid"><div class="stat-head"><span class="stat-label">Unpaid</span><span class="stat-icon">₹</span></div><div class="stat-value">${unpaid}</div><div class="stat-sub">Payment to follow up</div></article>`;
+  const scope = statsScopeLabel();
+  const filtered = !!typeFilter || !!statusFilter || personOrSearchActive();
+  const cards = [];
+
+  cards.push({
+    cls: statusFilter === "open" ? "open" : statusFilter === "unpaid" ? "unpaid" : "",
+    label: "Total orders",
+    icon: "▦",
+    count: visible.length,
+    sub: scope
+  });
+
+  // Skip when status filter already is "in progress" or "completed" (would duplicate / always be 0)
+  if (statusFilter !== "open" && statusFilter !== "done") {
+    cards.push({
+      cls: "open",
+      label: "In progress",
+      icon: "◷",
+      count: visible.filter(o => !isFullyDone(o)).length,
+      sub: filtered ? "In current filter" : "Need at least one step"
+    });
+  }
+
+  // Type breakdown only when viewing all types (selected type is already the Total)
+  if (!typeFilter) {
+    for (const t of FIXED_TYPES) {
+      const cls = t.id === "candle" ? "candles" : t.id === "resin" ? "resin" : "open";
+      const icon = t.id === "candle" ? "♨" : t.id === "resin" ? "✧" : "◍";
+      cards.push({
+        cls,
+        label: t.name,
+        icon,
+        count: visible.filter(o => o.kind === t.id).length,
+        sub: filtered ? "In current filter" : "By order type"
+      });
+    }
+  }
+
+  if (statusFilter !== "unpaid") {
+    cards.push({
+      cls: "unpaid",
+      label: "Unpaid",
+      icon: "₹",
+      count: visible.filter(o => !o.paid).length,
+      sub: filtered ? "In current filter" : "Payment to follow up"
+    });
+  }
+
+  document.getElementById("stats").innerHTML = cards.map(c => `
+    <article class="stat ${esc(c.cls)}">
+      <div class="stat-head"><span class="stat-label">${esc(c.label)}</span><span class="stat-icon">${c.icon}</span></div>
+      <div class="stat-value">${c.count}</div>
+      <div class="stat-sub">${esc(c.sub)}</div>
+    </article>`).join("");
+}
+function personOrSearchActive() {
+  return !!(document.getElementById("filterPerson")?.value || document.getElementById("search")?.value.trim());
 }
 function render() {
   const visible = getVisibleOrders();
