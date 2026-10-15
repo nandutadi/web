@@ -332,9 +332,8 @@
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center">
         <div class="today-pill" id="todayLabel">✦ Your order workspace</div>
-        <div class="sync-pill local" id="syncPill" title="Data sync status"><span class="sync-dot" aria-hidden="true"></span><span id="syncLabel">Local only</span></div>
-        <button type="button" class="btn hidden" id="googleSignIn">Sign in with Google</button>
-        <button type="button" class="btn hidden" id="googleSignOut">Sign out</button>
+        <div class="sync-pill local" id="syncPill" title="Data sync status"><span class="sync-dot" aria-hidden="true"></span><span id="syncLabel">Connecting…</span></div>
+        <button type="button" class="btn" id="googleSignOut">Sign out</button>
       </div>
     </section>
 
@@ -424,19 +423,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="auth-config.js"></script>
+<script src="auth-gate.js"></script>
 <script>
 const STORE = "my-orders-v1";
 const THEME = "my-orders-theme";
-// Public web config (safe to ship). Protect data with Firestore rules + Google sign-in.
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyD7tJQdNGy7zijKh8D4d6N_bplC7ahw9VE",
-  authDomain: "thanvi-arts.firebaseapp.com",
-  projectId: "thanvi-arts",
-  storageBucket: "thanvi-arts.firebasestorage.app",
-  messagingSenderId: "195111953238",
-  appId: "1:195111953238:web:3f5b32835f9c7c95b82cf7",
-  measurementId: "G-PF1FXP11Q2"
-};
 const CANDLE_SHAPES = ["Teddy Bear","Closed rose","Open rose","Sea shell","Jasmine set","Couple","Mothichoor laddo","Sunflower"];
 const CANDLE_COLORS = ["Pink","Orange","Blue","Red","Violet","Yellow","Green","Mustard","Burgundy"];
 const CANDLE_SCENTS = ["Sea Breeze","Strawberry","Intimate"];
@@ -472,7 +463,6 @@ let toastTimer;
 let db = null;
 let unsubOrders = null;
 let cloudEnabled = false;
-let firebaseAppReady = false;
 
 function loadLocal() {
   try { const raw = localStorage.getItem(STORE); if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; } }
@@ -544,18 +534,14 @@ async function removeOrder(id) {
   cacheLocal();
   render();
 }
-function setAuthButtons(signedIn) {
-  document.getElementById("googleSignIn").classList.toggle("hidden", signedIn);
-  document.getElementById("googleSignOut").classList.toggle("hidden", !signedIn);
-}
-
 function stopOrdersListener() {
   if (unsubOrders) { unsubOrders(); unsubOrders = null; }
 }
 
 async function startOrdersSync() {
   stopOrdersListener();
-  if (!db || !firebase.auth().currentUser) return;
+  if (!firebase.auth().currentUser) return;
+  db = firebase.firestore();
 
   setSyncStatus("connecting", "Syncing…");
   try {
@@ -595,64 +581,6 @@ async function startOrdersSync() {
     setSyncStatus("error", "Not synced");
     render();
     showToast("Could not sync: " + err.message);
-  }
-}
-
-async function signInWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    await firebase.auth().signInWithPopup(provider);
-  } catch (err) {
-    console.error(err);
-    showToast("Google sign-in failed: " + err.message);
-  }
-}
-
-async function signOutGoogle() {
-  stopOrdersListener();
-  cloudEnabled = false;
-  await firebase.auth().signOut();
-  orders = loadLocal();
-  setSyncStatus("local", "Signed out — local copy");
-  setAuthButtons(false);
-  render();
-  showToast("Signed out");
-}
-
-async function initFirebase() {
-  stopOrdersListener();
-  db = null;
-  cloudEnabled = false;
-
-  setSyncStatus("connecting", "Connecting…");
-  try {
-    if (!firebaseAppReady) {
-      firebase.initializeApp(FIREBASE_CONFIG);
-      firebaseAppReady = true;
-    }
-    db = firebase.firestore();
-
-    firebase.auth().onAuthStateChanged(async user => {
-      if (!user) {
-        stopOrdersListener();
-        cloudEnabled = false;
-        orders = loadLocal();
-        setSyncStatus("local", "Sign in to sync");
-        setAuthButtons(false);
-        render();
-        return;
-      }
-      setAuthButtons(true);
-      await startOrdersSync();
-    });
-  } catch (err) {
-    console.error(err);
-    cloudEnabled = false;
-    orders = loadLocal();
-    setSyncStatus("error", "Not connected");
-    setAuthButtons(false);
-    render();
-    showToast("Could not connect Firebase: " + err.message);
   }
 }
 function esc(s) {
@@ -1027,11 +955,16 @@ document.getElementById("importFile").addEventListener("change",async e => {
   e.target.value = "";
 });
 
-document.getElementById("googleSignIn").onclick = () => signInWithGoogle();
-document.getElementById("googleSignOut").onclick = () => signOutGoogle();
+document.getElementById("googleSignOut").onclick = async () => {
+  stopOrdersListener();
+  cloudEnabled = false;
+  await ThanvisAuth.signOut();
+};
 
 initCandleOptions();
-initFirebase();
+ThanvisAuth.onReady(() => {
+  startOrdersSync();
+});
 </script>
 </body>
 </html>

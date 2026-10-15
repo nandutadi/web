@@ -28,22 +28,36 @@ Orders sync through **Cloud Firestore** so phone and laptop share the same data.
 3. **Authentication → Settings → Authorized domains**  
    Add: `localhost`, `nandutadi.github.io` (and any custom domain)
 
-## 5. Security rules
+## 5. Security rules + page allowlist
 
-Firestore → **Rules** → publish:
+Firestore → **Rules** → publish (example):
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /orders/{orderId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if request.auth != null
+        && request.auth.token.email in [
+          "you@gmail.com",
+          "partner@gmail.com"
+        ];
     }
   }
 }
 ```
 
-Only signed-in Google users can read/write orders.
+Also put the **same emails** in `auth-config.js`:
+
+```js
+window.THANVIS_ALLOWED_EMAILS = [
+  "you@gmail.com",
+  "partner@gmail.com"
+];
+```
+
+- Firestore rules protect order data
+- `auth-config.js` locks every page (home, orders, expenses, links) behind Google sign-in for those emails only
 
 ## 6. Connect the website
 
