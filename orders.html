@@ -332,9 +332,11 @@
         <h2>Your orders, at a glance.</h2>
         <p>Keep every handmade piece, delivery and payment in sync.</p>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center">
         <div class="today-pill" id="todayLabel">✦ Your order workspace</div>
         <div class="sync-pill local" id="syncPill" title="Data sync status"><span class="sync-dot" aria-hidden="true"></span><span id="syncLabel">Local only</span></div>
+        <button type="button" class="btn hidden" id="googleSignIn">Sign in with Google</button>
+        <button type="button" class="btn hidden" id="googleSignOut">Sign out</button>
       </div>
     </section>
 
@@ -580,37 +582,21 @@ async function removeOrder(id) {
   cacheLocal();
   render();
 }
-async function initFirebase() {
+function setAuthButtons(signedIn) {
+  document.getElementById("googleSignIn").classList.toggle("hidden", signedIn);
+  document.getElementById("googleSignOut").classList.toggle("hidden", !signedIn);
+}
+
+function stopOrdersListener() {
   if (unsubOrders) { unsubOrders(); unsubOrders = null; }
-  db = null;
-  cloudEnabled = false;
+}
 
-  const config = getFirebaseConfig();
-  if (!config) {
-    orders = loadLocal();
-    setSyncStatus("local", "Local only");
-    render();
-    return;
-  }
+async function startOrdersSync() {
+  stopOrdersListener();
+  if (!db || !firebase.auth().currentUser) return;
 
-  setSyncStatus("connecting", "Connecting…");
+  setSyncStatus("connecting", "Syncing…");
   try {
-    if (!firebaseAppReady) {
-      firebase.initializeApp(config);
-      firebaseAppReady = true;
-    } else if (firebase.apps.length) {
-      // Re-init only if project changed: simplest path is reload
-      const current = firebase.app().options;
-      if (current.projectId !== config.projectId || current.apiKey !== config.apiKey) {
-        location.reload();
-        return;
-      }
-    }
-    db = firebase.firestore();
-    try { await firebase.auth().signInAnonymously(); }
-    catch (authErr) { console.warn("Anonymous auth unavailable; using public rules if allowed.", authErr); }
-
-    // Upload any local orders missing from cloud (one-time migration)
     const existingSnap = await db.collection("orders").get();
     const cloudIds = new Set(existingSnap.docs.map(d => d.id));
     const local = loadLocal();
@@ -629,13 +615,14 @@ async function initFirebase() {
       orders = snap.docs.map(doc => normalizeOrder(doc.data(), doc.id));
       cacheLocal();
       cloudEnabled = true;
-      setSyncStatus("cloud", "Synced with Firebase");
+      const email = firebase.auth().currentUser?.email;
+      setSyncStatus("cloud", email ? `Synced · ${email}` : "Synced with Firebase");
       render();
     }, err => {
       console.error(err);
       cloudEnabled = false;
       orders = loadLocal();
-      setSyncStatus("error", "Cloud error — local copy");
+      setSyncStatus("error", "Permission error");
       render();
       showToast("Firebase error: " + err.message);
     });
@@ -643,7 +630,81 @@ async function initFirebase() {
     console.error(err);
     cloudEnabled = false;
     orders = loadLocal();
+    setSyncStatus("error", "Not synced");
+    render();
+    showToast("Could not sync: " + err.message);
+  }
+}
+
+async function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    await firebase.auth().signInWithPopup(provider);
+  } catch (err) {
+    console.error(err);
+    showToast("Google sign-in failed: " + err.message);
+  }
+}
+
+async function signOutGoogle() {
+  stopOrdersListener();
+  cloudEnabled = false;
+  await firebase.auth().signOut();
+  orders = loadLocal();
+  setSyncStatus("local", "Signed out — local copy");
+  setAuthButtons(false);
+  render();
+  showToast("Signed out");
+}
+
+async function initFirebase() {
+  stopOrdersListener();
+  db = null;
+  cloudEnabled = false;
+
+  const config = getFirebaseConfig();
+  if (!config) {
+    orders = loadLocal();
+    setSyncStatus("local", "Local only");
+    setAuthButtons(false);
+    document.getElementById("googleSignIn").classList.add("hidden");
+    render();
+    return;
+  }
+
+  setSyncStatus("connecting", "Connecting…");
+  try {
+    if (!firebaseAppReady) {
+      firebase.initializeApp(config);
+      firebaseAppReady = true;
+    } else if (firebase.apps.length) {
+      const current = firebase.app().options;
+      if (current.projectId !== config.projectId || current.apiKey !== config.apiKey) {
+        location.reload();
+        return;
+      }
+    }
+    db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(async user => {
+      if (!user) {
+        stopOrdersListener();
+        cloudEnabled = false;
+        orders = loadLocal();
+        setSyncStatus("local", "Sign in to sync");
+        setAuthButtons(false);
+        render();
+        return;
+      }
+      setAuthButtons(true);
+      await startOrdersSync();
+    });
+  } catch (err) {
+    console.error(err);
+    cloudEnabled = false;
+    orders = loadLocal();
     setSyncStatus("error", "Not connected");
+    setAuthButtons(false);
     render();
     showToast("Could not connect Firebase: " + err.message);
   }
@@ -1053,6 +1114,9 @@ document.getElementById("fbForm").addEventListener("submit", async e => {
     alert("Invalid Firebase config: " + err.message);
   }
 });
+
+document.getElementById("googleSignIn").onclick = () => signInWithGoogle();
+document.getElementById("googleSignOut").onclick = () => signOutGoogle();
 
 initCandleOptions();
 initFirebase();

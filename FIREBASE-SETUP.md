@@ -21,10 +21,12 @@ Orders sync through **Cloud Firestore** so phone and laptop share the same data.
 2. Start in **production mode**
 3. Pick a region close to you (e.g. `asia-south1`)
 
-## 4. Enable Anonymous Auth
+## 4. Enable Google sign-in
 
 1. Build → **Authentication** → **Get started**
-2. **Sign-in method** → **Anonymous** → Enable → Save
+2. **Sign-in method** → **Google** → Enable → Save
+3. **Authentication → Settings → Authorized domains**  
+   Add: `localhost`, `nandutadi.github.io` (and any custom domain)
 
 ## 5. Security rules
 
@@ -41,15 +43,16 @@ service cloud.firestore {
 }
 ```
 
-Anyone who opens your site can still sign in anonymously and read/write this collection. Fine for a private studio tool; tighten later (Google sign-in, App Check) if needed.
+Only signed-in Google users can read/write orders.
 
 ## 6. Connect the website
 
 The Thanvi Arts Firebase config is already built into `orders.html`, so every device that opens the site syncs automatically — no paste step.
 
 1. Open `orders.html` (local or GitHub Pages)
-2. Status pill should say **Synced with Firebase**
-3. Existing local orders upload once automatically
+2. Click **Sign in with Google**
+3. Status pill should say **Synced · your@email.com**
+4. Existing local orders upload once automatically
 
 Optional: use the **☁** button only if you need to override config or switch to local-only mode.
 
