@@ -33,7 +33,8 @@
       #auth-gate {
         position: fixed; inset: 0; z-index: 99999;
         display: grid; place-items: center;
-        padding: 24px;
+        padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        overflow: auto;
         background:
           linear-gradient(180deg, rgba(247,241,234,.92), rgba(247,241,234,.96)),
           #f7f1ea;
@@ -49,7 +50,7 @@
         background: rgba(255,250,246,.96);
         border: 1px solid #eadcd3;
         border-radius: 20px;
-        padding: 28px 24px;
+        padding: clamp(20px, 4vw, 28px) clamp(16px, 4vw, 24px);
         box-shadow: 0 16px 40px rgba(90,55,50,.12);
         text-align: center;
       }
@@ -57,8 +58,8 @@
         background: #241e1d;
         border-color: #3a2f2d;
       }
-      #auth-gate h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.03em; }
-      #auth-gate p { margin: 0 0 18px; color: #8a6f6a; font-size: 14px; line-height: 1.45; }
+      #auth-gate h1 { margin: 0 0 8px; font-size: clamp(20px, 5vw, 24px); letter-spacing: -.03em; word-break: break-word; }
+      #auth-gate p { margin: 0 0 18px; color: #8a6f6a; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
       html[data-theme="dark"] #auth-gate p { color: #b79b95; }
       #auth-gate .actions { display: flex; flex-direction: column; gap: 10px; }
       #auth-gate button {

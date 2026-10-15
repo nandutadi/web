@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>My Expenses</title>
 <style>
   :root {
@@ -35,6 +35,7 @@
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
   header {
     position: sticky;
@@ -43,7 +44,7 @@
     background: color-mix(in srgb, var(--bg) 88%, transparent);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
-    padding: 14px 20px;
+    padding: 14px max(14px, env(safe-area-inset-right)) 14px max(14px, env(safe-area-inset-left));
   }
   .bar {
     max-width: 1200px;
@@ -53,6 +54,8 @@
     align-items: center;
     flex-wrap: wrap;
   }
+  .bar h1 { min-width: 0; }
+  #search { flex: 1 1 180px; min-width: 0; }
   h1 { font-size: 17px; margin: 0 12px 0 0; font-weight: 650; letter-spacing: -.01em; }
   input, button, textarea {
     font: inherit;
@@ -70,8 +73,10 @@
   .primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
   .primary:hover { filter: brightness(1.08); }
   .icon-btn { padding: 8px 10px; line-height: 1; }
-  main { max-width: 1200px; margin: 0 auto; padding: 22px 20px 80px; }
-
+  main {
+    max-width: 1200px; margin: 0 auto;
+    padding: 22px max(14px, env(safe-area-inset-right)) calc(80px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  }
   .filters {
     display: flex; gap: 14px 20px; align-items: center; flex-wrap: wrap;
     margin-bottom: 18px;
@@ -101,7 +106,7 @@
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 14px;
     margin-bottom: 22px;
   }
@@ -219,6 +224,12 @@
   .danger { color: var(--bad); border-color: var(--border); }
   @media (max-width: 620px) {
     .manage-grid, .row2 { grid-template-columns: 1fr; }
+    .bar { gap: 8px; }
+    .primary, #createNew { flex: 1 1 auto; }
+    dialog { width: min(440px, 100vw); max-height: 92dvh; }
+  }
+  @media (max-width: 400px) {
+    .cards { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
