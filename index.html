@@ -137,17 +137,25 @@
     font-size: 12px;
   }
   @media (max-width: 760px) {
-    .wrap { padding-top: 28px; }
-    header { margin-bottom: 24px; }
+    .wrap {
+      padding-top: 28px;
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
+      padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    }
+    header { margin-bottom: 24px; gap: 12px; }
     a.card, .card.soon { min-height: 150px; }
   }
   @media (max-width: 420px) {
     .grid { grid-template-columns: 1fr; }
     .brand h1 { font-size: clamp(24px, 8vw, 32px); }
+    .brand p { font-size: 13px; }
+    a.card, .card.soon { min-height: 140px; padding: 18px; }
   }
   @media (max-height: 500px) and (orientation: landscape) {
     .wrap { padding-top: 20px; padding-bottom: 28px; }
     a.card, .card.soon { min-height: 120px; }
+    header { margin-bottom: 16px; }
   }
 </style>
 </head>
