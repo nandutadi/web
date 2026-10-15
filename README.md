@@ -1,0 +1,44 @@
+# Thanvis studio tools
+
+Static web apps for orders, expenses, and links. Ready for [GitHub Pages](https://pages.github.com/).
+
+## Pages
+
+| Path | App |
+|------|-----|
+| `/` | Hub |
+| `/orders.html` | Candle & resin order tracker |
+| `/expenses.html` | Expense tracker |
+| `/links.html` | Link bookmarks |
+
+All paths are relative, so the site works at both:
+
+- `https://nandutadi.github.io/web/`
+- a custom domain (optional)
+
+## Enable GitHub Pages
+
+1. Push this repo to GitHub (branch `main`).
+2. Open **Settings → Pages**.
+3. Under **Build and deployment**:
+   - **Source:** Deploy from a branch
+   - **Branch:** `main` / `/ (root)`
+4. Save, wait a minute, then open the site URL shown on that page.
+
+Or use the included GitHub Actions workflow (Settings → Pages → Source: **GitHub Actions**). After the first push to `main`, approve/run the workflow if prompted.
+
+## Local preview
+
+Open `index.html` in a browser, or from this folder:
+
+```bash
+python3 -m http.server 8080
+```
+
+Then visit `http://localhost:8080`.
+
+## Notes
+
+- App data is stored in the browser (`localStorage`), not on the server.
+- Export JSON backups from each app regularly.
+- `.nojekyll` disables Jekyll processing on GitHub Pages.
