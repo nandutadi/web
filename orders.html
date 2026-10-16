@@ -1750,10 +1750,11 @@ function openViewDialog(order) {
 async function deleteViewingOrder() {
   if (!viewingOrder) return;
   if (!confirm(`Delete this order for ${viewingOrder.person || "Unnamed"}? This cannot be undone.`)) return;
+  const id = viewingOrder.id;
+  viewingOrder = null;
+  if (viewDlg.open) viewDlg.close();
   try {
-    await removeOrder(viewingOrder.id);
-    viewDlg.close();
-    viewingOrder = null;
+    await removeOrder(id);
     showToast("Order deleted");
   } catch (err) {
     alert("Delete failed: " + err.message);
