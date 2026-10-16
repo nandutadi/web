@@ -1,0 +1,99 @@
+import { SHAPE_ICONS, KIND_ICONS } from "../core/constants.js";
+import { esc } from "../core/escape.js";
+import { formatOrderedAt } from "../core/dates.js";
+import { typeMeta } from "../domain/catalog.js";
+import { normalizeOrder, orderTitle, orderOptionImage } from "../domain/order.js";
+import { state } from "../app/state.js";
+import { removeOrder } from "../data/orders-repository.js";
+import { showToast } from "./toast.js";
+import { makeCheck } from "./checks.js";
+import { openDialog } from "./order-form.js";
+
+export function openViewDialog(order) {
+  const viewDlg = document.getElementById("viewDlg");
+  state.viewingOrder = order ? normalizeOrder(order, order.id) : null;
+  if (!state.viewingOrder) return;
+  const o = state.viewingOrder;
+  const kindClass = o.kind === "resin" ? "resin" : o.kind === "pipeCleaner" ? "pipe" : "candle";
+  const image = o.image || orderOptionImage(state.catalog, o.kind, o);
+  const hero = document.getElementById("viewHero");
+  hero.innerHTML = "";
+  if (image) {
+    const img = document.createElement("img");
+    img.src = image;
+    img.alt = o.shape || o.candleType || "Shape";
+    hero.appendChild(img);
+  } else {
+    const fallback = document.createElement("div");
+    fallback.className = "view-fallback";
+    fallback.textContent = SHAPE_ICONS[o.shape || o.candleType] || KIND_ICONS[o.kind] || "✦";
+    hero.appendChild(fallback);
+  }
+  const badge = document.getElementById("viewBadge");
+  badge.className = "view-badge " + kindClass;
+  badge.textContent = o.kindName || typeMeta(o.kind).name;
+  document.getElementById("viewTitle").textContent = orderTitle(o);
+  document.getElementById("viewSub").textContent =
+    `${o.person || "Unnamed"} · Ordered ${formatOrderedAt(o.createdAt)}`;
+
+  const rows = [
+    ["Customer", o.person || "Unnamed"],
+    ["Type", o.kindName || typeMeta(o.kind).name],
+    ["Shape", o.shape || o.candleType || "—"],
+    ["Size", o.size || "—"],
+    ["Color", o.color || "—"],
+    ["Scent", o.kind === "candle" ? (o.scent || "—") : null],
+    ["Notes", o.notes || "—"]
+  ].filter(r => r[1] !== null);
+
+  const grid = document.getElementById("viewGrid");
+  grid.innerHTML = rows.map(([k, v]) =>
+    `<div class="view-row"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`
+  ).join("");
+
+  const status = document.getElementById("viewStatus");
+  status.innerHTML = "";
+  status.append(
+    makeCheck(o, "completed", "Completed"),
+    makeCheck(o, "delivered", "Delivered"),
+    makeCheck(o, "paid", "Payment Received", true)
+  );
+
+  viewDlg.showModal();
+}
+
+async function deleteViewingOrder() {
+  if (!state.viewingOrder) return;
+  if (!confirm(`Delete this order for ${state.viewingOrder.person || "Unnamed"}? This cannot be undone.`)) {
+    return;
+  }
+  const viewDlg = document.getElementById("viewDlg");
+  const id = state.viewingOrder.id;
+  state.viewingOrder = null;
+  if (viewDlg.open) viewDlg.close();
+  try {
+    await removeOrder(id);
+    showToast("Order deleted");
+  } catch (err) {
+    alert("Delete failed: " + err.message);
+  }
+}
+
+export function bindViewDialog() {
+  const viewDlg = document.getElementById("viewDlg");
+  document.getElementById("closeViewDialog").onclick = () => {
+    viewDlg.close();
+    state.viewingOrder = null;
+  };
+  document.getElementById("viewEdit").onclick = () => {
+    if (!state.viewingOrder) return;
+    const order = state.viewingOrder;
+    viewDlg.close();
+    state.viewingOrder = null;
+    openDialog(order);
+  };
+  document.getElementById("viewDelete").onclick = () => deleteViewingOrder();
+  viewDlg.addEventListener("close", () => {
+    state.viewingOrder = null;
+  });
+}
