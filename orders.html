@@ -8,17 +8,15 @@
 <link rel="stylesheet" href="live-bg.css" />
 <style>
   :root {
-    --bg: #f4f7fc;
-    --panel: rgba(255, 255, 255, .86);
-    --panel-soft: #f3f7ff;
-    --text: #142033;
-    --muted: #667892;
-    --border: rgba(20, 40, 70, .12);
-    --accent: #00a890;
-    --accent-strong: #008f7a;
-    --accent-soft: #e4faf5;
-    --neon: #00c9ad;
-    --neon-hot: #e91e8c;
+    --bg: #f4f5fb;
+    --panel: rgba(255, 255, 255, .9);
+    --panel-soft: #f2f3fa;
+    --text: #1a1f33;
+    --muted: #6b7390;
+    --border: rgba(30, 36, 70, .12);
+    --accent: #5b5fd9;
+    --accent-strong: #4549c4;
+    --accent-soft: #eceefc;
     --good: #16845b;
     --good-soft: #e8f7f0;
     --warn: #b86b13;
@@ -30,20 +28,18 @@
     --resin-soft: #e6f8f7;
     --shadow: 0 2px 5px rgba(29, 38, 59, .04), 0 12px 30px rgba(29, 38, 59, .06);
     --radius: 18px;
-    --glass: rgba(255, 255, 255, .72);
+    --glass: rgba(255, 255, 255, .78);
   }
   html[data-theme="dark"] {
-    --bg: #070b14;
-    --panel: rgba(16, 22, 36, .78);
-    --panel-soft: rgba(22, 30, 48, .9);
-    --text: #eef4ff;
-    --muted: #8ea0bd;
-    --border: rgba(0, 255, 208, .14);
-    --accent: #00ffd0;
-    --accent-strong: #5dffdf;
-    --accent-soft: rgba(0, 255, 208, .12);
-    --neon: #00ffd0;
-    --neon-hot: #ff2d95;
+    --bg: #07060f;
+    --panel: rgba(18, 16, 32, .82);
+    --panel-soft: rgba(28, 24, 48, .92);
+    --text: #eef0ff;
+    --muted: #9a9ec0;
+    --border: rgba(180, 170, 255, .14);
+    --accent: #a78bfa;
+    --accent-strong: #c4b5fd;
+    --accent-soft: rgba(167, 139, 250, .14);
     --good: #5dd6a0;
     --good-soft: #17392f;
     --warn: #f4bd65;
@@ -51,10 +47,10 @@
     --bad: #ff8d9c;
     --candle: #ffad8c;
     --candle-soft: #402a27;
-    --resin: #5ed8d1;
+    --resin: #7dd3c8;
     --resin-soft: #173b3d;
-    --shadow: 0 0 0 1px rgba(0, 255, 208, .06), 0 8px 32px rgba(0, 0, 0, .35);
-    --glass: rgba(10, 16, 28, .72);
+    --shadow: 0 0 0 1px rgba(180, 170, 255, .06), 0 8px 32px rgba(0, 0, 0, .4);
+    --glass: rgba(12, 10, 24, .75);
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -113,44 +109,24 @@
     position: relative; width: 44px; height: 44px; display: grid; place-items: center;
     margin-bottom: 2px;
   }
-  .brand-orb::before, .brand-orb::after {
+  .brand-orb::before {
     content: ""; position: absolute; inset: 0; border-radius: 50%;
-    border: 1.5px solid var(--neon);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--neon) 55%, transparent),
-                inset 0 0 10px color-mix(in srgb, var(--neon) 25%, transparent);
-    animation: orb-spin 10s linear infinite;
-  }
-  .brand-orb::after {
-    inset: 5px; border-color: var(--neon-hot);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--neon-hot) 50%, transparent);
-    animation-direction: reverse; animation-duration: 7s;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+    background: color-mix(in srgb, var(--accent-soft) 70%, transparent);
   }
   .brand-mark {
     position: relative; z-index: 1;
     width: 28px; height: 28px; display: grid; place-items: center;
-    color: var(--text); border-radius: 50%; font-size: 14px;
-    background: color-mix(in srgb, var(--panel) 90%, transparent);
-    text-shadow: 0 0 10px color-mix(in srgb, var(--neon) 60%, transparent);
+    color: var(--accent); border-radius: 50%; font-size: 14px;
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
   }
   .brand-center h1 {
-    margin: 0; font-size: clamp(14px, 2.2vw, 17px); letter-spacing: .04em;
-    font-weight: 780; text-transform: uppercase;
-    background: linear-gradient(90deg, var(--neon), var(--neon-hot), var(--neon));
-    background-size: 200% 100%;
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: neon-title 6s ease-in-out infinite;
-    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--neon) 35%, transparent));
+    margin: 0; font-size: clamp(14px, 2.2vw, 17px); letter-spacing: .03em;
+    font-weight: 780; text-transform: uppercase; color: var(--text);
   }
   .brand-center p {
     margin: 0; color: var(--muted); font-size: 10px; letter-spacing: .18em;
     text-transform: uppercase; font-weight: 700;
-  }
-  @keyframes orb-spin {
-    to { transform: rotate(360deg); }
-  }
-  @keyframes neon-title {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
   }
   .search-wrap { position: relative; flex: 1 1 160px; min-width: 0; max-width: none; }
   .search-wrap span { position: absolute; top: 50%; left: 13px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
@@ -160,8 +136,7 @@
   }
   .search-wrap input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent),
-                0 0 18px color-mix(in srgb, var(--accent) 22%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
   }
   .topbar .btn, .topbar .btn-signout {
     background: color-mix(in srgb, var(--panel) 78%, transparent);
@@ -175,19 +150,17 @@
   }
   .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
   .btn-primary {
-    color: #04120f; border-color: transparent; background: var(--accent);
-    box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+    color: #fff; border-color: transparent; background: var(--accent);
+    box-shadow: none;
   }
-  html[data-theme="light"] .btn-primary { color: #fff; }
+  html[data-theme="dark"] .btn-primary { color: #1a1430; }
   .btn-primary:hover { background: var(--accent-strong); }
   .btn-icon { width: 40px; height: 40px; padding: 0; font-size: 16px; flex: none; }
   .btn-signout {
     padding: 9px 12px; font-size: 12px; white-space: nowrap;
-    border-color: color-mix(in srgb, var(--neon-hot) 35%, var(--border));
   }
   .btn-signout:hover {
-    border-color: var(--neon-hot);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--neon-hot) 30%, transparent);
+    border-color: var(--accent);
   }
   .person-filter {
     border: 1px solid var(--border); border-radius: 12px; padding: 10px 30px 10px 12px;
@@ -200,7 +173,7 @@
     backdrop-filter: blur(18px) saturate(1.15);
     border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: var(--shadow), 0 0 28px color-mix(in srgb, var(--neon) 8%, transparent);
+    box-shadow: var(--shadow);
   }
   main {
     max-width: 1240px; margin: 0 auto;
@@ -334,7 +307,6 @@
   .cat-type-chip.on {
     border-color: var(--accent); color: var(--accent-strong);
     background: var(--accent-soft);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 18%, transparent);
   }
   .cat-section {
     margin-bottom: 12px;
@@ -574,9 +546,11 @@
     .brand-mark { width: 24px; height: 24px; font-size: 12px; }
     .brand-center h1 { font-size: clamp(13px, 3.8vw, 15px); }
     .topbar-side--right {
-      width: 100%; justify-content: center; gap: 6px;
+      width: 100%; justify-content: center; gap: 6px; flex-wrap: nowrap;
     }
-    .btn-signout { padding: 8px 10px; font-size: 11px; }
+    .btn-signout {
+      height: 38px; padding: 0 10px; font-size: 11px; border-radius: 12px;
+    }
     .btn-icon { width: 38px; height: 38px; }
     main {
       padding: 14px max(12px, env(safe-area-inset-right)) calc(36px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
@@ -591,8 +565,8 @@
       border-radius: 14px;
     }
     .person-filter, #add, #manageCategories { flex: 1 1 calc(50% - 4px); min-width: 0; }
-    #manageCategories { font-size: 12px; padding: 10px 8px; }
-    .btn-primary span { display: none; }
+    #add, #manageCategories { font-size: 12px; padding: 10px 8px; }
+    #add .btn-label-full { display: none; }
     .stat { min-height: 92px; padding: 12px; border-radius: 14px; }
     .stat-value { font-size: clamp(20px, 6vw, 24px); }
     .stat-label { font-size: 9px; }
@@ -666,8 +640,7 @@
     .stats { grid-template-columns: 1fr 1fr; }
     .person-filter { flex: 1 1 100%; }
     #add, #manageCategories { flex: 1 1 calc(50% - 4px); }
-    .btn-signout { order: -1; width: 100%; }
-    .topbar-side--right { flex-wrap: wrap; }
+    .btn-signout { padding: 0 8px; font-size: 10px; }
     .cat-row,
     .cat-row.shape-row,
     .cat-row.shape-row.simple {
@@ -760,7 +733,7 @@
     <nav class="toolbar" aria-label="Order controls">
       <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search orders…" autocomplete="off" aria-label="Search orders" /></div>
       <select id="filterPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
-      <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> <span>Add order</span></button>
+      <button class="btn btn-primary" id="add" title="Add order (press N)"><span aria-hidden="true">＋</span> <span class="btn-label-short">Add</span><span class="btn-label-full"> order</span></button>
       <button class="btn" id="manageCategories" type="button" title="Create or edit categories (press C)">＋ Category</button>
     </nav>
 
