@@ -2,11 +2,11 @@ import { SHAPE_ICONS, KIND_ICONS } from "../core/constants.js";
 import { esc } from "../core/escape.js";
 import { formatOrderedAt } from "../core/dates.js";
 import { typeMeta } from "../domain/catalog.js";
-import { normalizeOrder, orderTitle, orderOptionImage } from "../domain/order.js";
+import { normalizeOrder, orderTitle, orderOptionImage, unitCount } from "../domain/order.js";
 import { state } from "../app/state.js";
 import { removeOrder } from "../data/orders-repository.js";
 import { showToast } from "./toast.js";
-import { makeCheck } from "./checks.js";
+import { renderUnitChecks } from "./checks.js";
 import { openDialog } from "./order-form.js";
 
 export function openViewDialog(order) {
@@ -32,13 +32,16 @@ export function openViewDialog(order) {
   const badge = document.getElementById("viewBadge");
   badge.className = "view-badge " + kindClass;
   badge.textContent = o.kindName || typeMeta(o.kind).name;
-  document.getElementById("viewTitle").textContent = orderTitle(o);
+  const qty = unitCount(o);
+  document.getElementById("viewTitle").textContent =
+    qty > 1 ? `${orderTitle(o)} · ×${qty}` : orderTitle(o);
   document.getElementById("viewSub").textContent =
     `${o.person || "Unnamed"} · Ordered ${formatOrderedAt(o.createdAt)}`;
 
   const rows = [
     ["Customer", o.person || "Unnamed"],
     ["Type", o.kindName || typeMeta(o.kind).name],
+    ["Quantity", String(qty)],
     ["Shape", o.shape || o.candleType || "—"],
     ["Size", o.size || "—"],
     ["Color", o.color || "—"],
@@ -52,21 +55,19 @@ export function openViewDialog(order) {
   ).join("");
 
   const status = document.getElementById("viewStatus");
-  status.innerHTML = "";
-  status.append(
-    makeCheck(o, "completed", "Completed"),
-    makeCheck(o, "delivered", "Delivered"),
-    makeCheck(o, "paid", "Payment Received", true)
-  );
+  status.className = "view-status unit-list";
+  renderUnitChecks(o, status);
 
   viewDlg.showModal();
 }
 
 async function deleteViewingOrder() {
   if (!state.viewingOrder) return;
-  if (!confirm(`Delete this order for ${state.viewingOrder.person || "Unnamed"}? This cannot be undone.`)) {
-    return;
-  }
+  const qty = unitCount(state.viewingOrder);
+  const label = qty > 1
+    ? `Delete this line (${qty} items) for ${state.viewingOrder.person || "Unnamed"}?`
+    : `Delete this order for ${state.viewingOrder.person || "Unnamed"}? This cannot be undone.`;
+  if (!confirm(label)) return;
   const viewDlg = document.getElementById("viewDlg");
   const id = state.viewingOrder.id;
   state.viewingOrder = null;

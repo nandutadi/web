@@ -10,7 +10,10 @@ import {
   normalizeKind,
   attrsFromOrder,
   normalizeOrder,
-  orderOptionImage
+  orderOptionImage,
+  clampQty,
+  resizeUnits,
+  unitCount
 } from "../domain/order.js";
 import { upsertOrder } from "../data/orders-repository.js";
 import { showToast } from "./toast.js";
@@ -178,6 +181,7 @@ export function openDialog(order) {
     isEdit ? (order.createdAt || Date.now()) : Date.now()
   );
   populateKindSelect(isEdit ? order.kind : "candle");
+  document.getElementById("f-qty").value = String(isEdit ? unitCount(order) : 1);
   document.getElementById("f-notes").value = isEdit ? (order.notes ?? "") : "";
   updateKindFields(isEdit ? attrsFromOrder(order) : null);
   dlg.showModal();
@@ -214,6 +218,19 @@ export function bindOrderForm() {
     const existing = state.editingId
       ? state.orders.find(o => o.id === state.editingId)
       : null;
+    const qty = clampQty(document.getElementById("f-qty").value);
+    const units = resizeUnits(
+      existing?.units?.length
+        ? existing.units
+        : existing
+          ? [{
+              completed: !!existing.completed,
+              delivered: !!existing.delivered,
+              paid: !!existing.paid
+            }]
+          : [],
+      qty
+    );
     const order = normalizeOrder({
       id: state.editingId || crypto.randomUUID(),
       createdAt: fromDatetimeLocalValue(document.getElementById("f-ordered").value),
@@ -229,9 +246,8 @@ export function bindOrderForm() {
       size: (kind === "resin" || kind === "pipeCleaner") ? attrs.size.name : "",
       sizeId: (kind === "resin" || kind === "pipeCleaner") ? attrs.size.id : "",
       candleType: kind === "candle" ? attrs.shape.name : "",
-      completed: existing ? !!existing.completed : false,
-      delivered: existing ? !!existing.delivered : false,
-      paid: existing ? !!existing.paid : false,
+      units,
+      qty,
       notes: document.getElementById("f-notes").value.trim(),
       image: existing?.image || orderOptionImage(state.catalog, kind, {
         shapeId: attrs.shape.id,
@@ -247,7 +263,12 @@ export function bindOrderForm() {
     try {
       await upsertOrder(order);
       dlg.close();
-      showToast(state.editingId ? "Order updated" : "Order added");
+      const msg = state.editingId
+        ? "Order updated"
+        : qty > 1
+          ? `Added ${qty} items`
+          : "Order added";
+      showToast(msg);
       state.editingId = null;
     } catch (err) {
       alert("Save failed: " + err.message);

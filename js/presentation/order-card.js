@@ -1,8 +1,8 @@
 import { CANDLE_COLOR_HEX, SHAPE_ICONS, KIND_ICONS } from "../core/constants.js";
 import { typeMeta } from "../domain/catalog.js";
-import { isFullyDone, orderTitle, orderOptionImage } from "../domain/order.js";
+import { isFullyDone, orderTitle, orderOptionImage, unitCount } from "../domain/order.js";
 import { state } from "../app/state.js";
-import { makeCheck } from "./checks.js";
+import { renderUnitChecks } from "./checks.js";
 import { openViewDialog } from "./view-dialog.js";
 
 export function orderCard(o) {
@@ -16,7 +16,11 @@ export function orderCard(o) {
   }
   el.tabIndex = 0;
   el.setAttribute("role", "button");
-  el.setAttribute("aria-label", `View order: ${orderTitle(o)}`);
+  const qty = unitCount(o);
+  el.setAttribute(
+    "aria-label",
+    qty > 1 ? `View order: ${orderTitle(o)}, quantity ${qty}` : `View order: ${orderTitle(o)}`
+  );
   el.addEventListener("click", e => {
     if (e.target.closest("button, label, input, a")) return;
     openViewDialog(o);
@@ -50,10 +54,20 @@ export function orderCard(o) {
 
   const content = document.createElement("div");
   content.className = "order-content";
+  const titleRow = document.createElement("div");
+  titleRow.className = "order-title-row";
   const title = document.createElement("div");
   title.className = "order-title";
   title.textContent = orderTitle(o);
-  content.appendChild(title);
+  titleRow.appendChild(title);
+  if (qty > 1) {
+    const badge = document.createElement("span");
+    badge.className = "qty-badge";
+    badge.textContent = `×${qty}`;
+    badge.title = `${qty} items`;
+    titleRow.appendChild(badge);
+  }
+  content.appendChild(titleRow);
 
   const bits = [];
   if (o.shape?.trim() || o.candleType?.trim()) bits.push((o.shape || o.candleType).trim());
@@ -80,13 +94,9 @@ export function orderCard(o) {
 
   const divider = document.createElement("div");
   divider.className = "order-divider";
-  const checks = document.createElement("div");
-  checks.className = "checks";
-  checks.append(
-    makeCheck(o, "completed", "Completed"),
-    makeCheck(o, "delivered", "Delivered"),
-    makeCheck(o, "paid", "Payment Received", true)
-  );
-  el.append(top, divider, checks);
+  const unitWrap = document.createElement("div");
+  unitWrap.className = "unit-list";
+  renderUnitChecks(o, unitWrap);
+  el.append(top, divider, unitWrap);
   return el;
 }

@@ -438,7 +438,13 @@
   }
   .dialog-actions.view-actions .btn-danger:hover { filter: brightness(1.05); }
   .order-content { min-width: 0; flex: 1; }
-  .order-title { font-size: 12.5px; line-height: 1.35; font-weight: 760; overflow-wrap: anywhere; }
+  .order-title-row { display: flex; align-items: flex-start; gap: 8px; }
+  .order-title { font-size: 12.5px; line-height: 1.35; font-weight: 760; overflow-wrap: anywhere; flex: 1; min-width: 0; }
+  .qty-badge {
+    flex: none; border-radius: 999px; padding: 2px 7px; font-size: 10px; font-weight: 800;
+    letter-spacing: .02em; color: var(--accent-strong); background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  }
   .order-meta { margin-top: 3px; font-size: 10.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
   .order-kind { display: inline-flex; margin-top: 5px; border-radius: 6px; padding: 2px 6px; font-size: 8.5px; text-transform: uppercase; letter-spacing: .08em; font-weight: 850; }
   .order-kind.candle { color: var(--candle); background: var(--candle-soft); }
@@ -449,6 +455,23 @@
   .mini-btn.delete { color: var(--bad); }
   .mini-btn.delete:hover { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
   .order-divider { height: 1px; background: var(--border); margin: 10px 0 9px; }
+  .unit-list { display: flex; flex-direction: column; gap: 7px; }
+  .unit-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 6px 8px; border-radius: 10px;
+    background: color-mix(in srgb, var(--panel-soft) 70%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  }
+  .unit-row.done {
+    background: color-mix(in srgb, var(--good-soft) 28%, transparent);
+  }
+  .unit-label {
+    flex: none; min-width: 22px; margin-top: 1px;
+    font-size: 10px; font-weight: 800; color: var(--muted); letter-spacing: .04em;
+  }
+  .unit-row .checks { flex: 1; min-width: 0; }
+  .view-status.unit-list { gap: 8px; }
+  .view-status .unit-row { padding: 8px 10px; }
   .checks { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
   .check { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; font-weight: 650; cursor: pointer; user-select: none; }
   .check input { appearance: none; width: 15px; height: 15px; flex: 0 0 15px; margin: 0; border: 1.5px solid var(--border); border-radius: 5px; background: var(--bg); cursor: pointer; position: relative; }

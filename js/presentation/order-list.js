@@ -1,5 +1,5 @@
 import { esc } from "../core/escape.js";
-import { filterOrders, isFullyDone, uniqueValues } from "../domain/order.js";
+import { filterOrders, isFullyDone, uniqueValues, countUnits } from "../domain/order.js";
 import { state } from "../app/state.js";
 import { renderStats } from "./stats.js";
 import { orderCard } from "./order-card.js";
@@ -17,8 +17,11 @@ function getVisibleOrders() {
 export function render() {
   const visible = getVisibleOrders();
   renderStats(visible);
+  const pieces = countUnits(visible);
   document.getElementById("resultsCount").textContent =
-    `${visible.length} ${visible.length === 1 ? "order" : "orders"}`;
+    pieces === visible.length
+      ? `${visible.length} ${visible.length === 1 ? "order" : "orders"}`
+      : `${visible.length} line${visible.length === 1 ? "" : "s"} · ${pieces} items`;
 
   const groups = new Map();
   for (const o of visible) {
