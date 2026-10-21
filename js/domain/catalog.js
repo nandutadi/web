@@ -23,7 +23,8 @@ export function defaultCatalog() {
       scents: optionList(["Sea Breeze", "Strawberry", "Intimate"])
     },
     resin: {
-      useCandleShapes: false,
+      // Resin always shares candle moulds; new candle shapes appear in resin orders automatically.
+      useCandleShapes: true,
       shapes: [],
       colors: []
     },
@@ -77,7 +78,7 @@ export function normalizeCatalog(raw) {
       scents: normalizeOptList(raw.candle?.scents)
     },
     resin: {
-      useCandleShapes: !!raw.resin?.useCandleShapes,
+      useCandleShapes: true,
       shapes: normalizeOptList(raw.resin?.shapes, true),
       colors: normalizeOptList(raw.resin?.colors)
     },
@@ -113,7 +114,7 @@ export function cleanCatalog(raw) {
       scents: pruneOptList(c.candle.scents)
     },
     resin: {
-      useCandleShapes: !!c.resin.useCandleShapes,
+      useCandleShapes: true,
       shapes: pruneOptList(c.resin.shapes, true),
       colors: pruneOptList(c.resin.colors)
     },
@@ -138,9 +139,25 @@ export function findOpt(list, idOrName) {
   return (list || []).find(o => o.id === idOrName || o.name === idOrName) || null;
 }
 
+/**
+ * Shapes available for resin orders: candle moulds plus resin-only shapes.
+ * Candle entries come first; resin-only shapes with a new name/id are appended.
+ */
 export function resinShapes(catalog) {
-  if (catalog?.resin?.useCandleShapes) return catalog.candle.shapes || [];
-  return catalog?.resin?.shapes || [];
+  const candle = catalog?.candle?.shapes || [];
+  const resinOnly = catalog?.resin?.shapes || [];
+  const seenIds = new Set();
+  const seenNames = new Set();
+  const out = [];
+  for (const s of [...candle, ...resinOnly]) {
+    const nameKey = (s.name || "").trim().toLowerCase();
+    if (s.id && seenIds.has(s.id)) continue;
+    if (nameKey && seenNames.has(nameKey)) continue;
+    if (s.id) seenIds.add(s.id);
+    if (nameKey) seenNames.add(nameKey);
+    out.push(s);
+  }
+  return out;
 }
 
 export function categoriesPayload(data) {

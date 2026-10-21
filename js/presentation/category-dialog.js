@@ -220,7 +220,12 @@ function renderCatTypeEditor() {
 
   if (state.activeTypeId === "candle") {
     editor.append(
-      makeCatSection("Shapes", "Candle mould shapes — upload an image for each shape", state.draftCatalog.candle.shapes, { shapeImages: true }),
+      makeCatSection(
+        "Shapes",
+        "Candle moulds — also offered on Resin orders (images included)",
+        state.draftCatalog.candle.shapes,
+        { shapeImages: true }
+      ),
       makeCatSection("Colors", "Candle colors", state.draftCatalog.candle.colors),
       makeCatSection("Scents", "Candle scents", state.draftCatalog.candle.scents)
     );
@@ -228,27 +233,18 @@ function renderCatTypeEditor() {
   }
 
   if (state.activeTypeId === "resin") {
-    const check = document.createElement("label");
-    check.className = "cat-check";
-    check.innerHTML = `<input type="checkbox" id="catUseCandleShapes" ${state.draftCatalog.resin.useCandleShapes ? "checked" : ""} /><span>Use Candle shapes for Resin orders</span>`;
-    check.querySelector("input").addEventListener("change", e => {
-      state.draftCatalog.resin.useCandleShapes = e.target.checked;
-      renderCatTypeEditor();
-    });
-    editor.appendChild(check);
-    if (state.draftCatalog.resin.useCandleShapes) {
-      const note = document.createElement("p");
-      note.className = "cat-hint";
-      note.textContent = "Resin orders will use Candle shapes (including their images). Manage shapes under the Candle tab. You can still set Resin colors below.";
-      editor.appendChild(note);
-    } else {
-      editor.appendChild(makeCatSection(
-        "Shapes",
-        "Resin moulds / types — upload an image for each shape. Expand a shape to add optional sizes.",
-        state.draftCatalog.resin.shapes,
-        { withSizes: true, sizeLabel: "Sizes / dimensions", shapeImages: true }
-      ));
-    }
+    state.draftCatalog.resin.useCandleShapes = true;
+    const note = document.createElement("p");
+    note.className = "cat-hint";
+    note.textContent =
+      "Resin orders include every Candle mould automatically, plus any resin-only shapes you add below. Expand a resin shape to add optional sizes.";
+    editor.appendChild(note);
+    editor.appendChild(makeCatSection(
+      "Shapes",
+      "Resin-only moulds / types — upload an image for each. Expand a shape to add optional sizes.",
+      state.draftCatalog.resin.shapes,
+      { withSizes: true, sizeLabel: "Sizes / dimensions", shapeImages: true }
+    ));
     editor.appendChild(makeCatSection("Colors", "Resin colors", state.draftCatalog.resin.colors));
     return;
   }

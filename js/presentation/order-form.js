@@ -115,9 +115,7 @@ export function updateKindFields(preset = null) {
       findOpt(shapes, document.getElementById("f-shape")?.value) ||
       findOpt(shapes, values.shapeId) ||
       findOpt(shapes, values.shapeName || values.shape);
-    const sizes = (!catalog.resin.useCandleShapes && selectedShape?.sizes)
-      ? selectedShape.sizes
-      : [];
+    const sizes = selectedShape?.sizes || [];
     if (sizes.length) {
       wrap.appendChild(
         makeAttrSelect(
