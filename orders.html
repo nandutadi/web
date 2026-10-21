@@ -146,8 +146,12 @@
       </div>
       <div id="orderAttrFields"></div>
       <div class="field">
-        <label for="f-qty">Quantity <span aria-hidden="true">*</span></label>
-        <input id="f-qty" type="number" min="1" max="99" step="1" value="1" required />
+        <span class="field-label" id="f-qty-label">Quantity <span aria-hidden="true">*</span></span>
+        <div class="qty-stepper" role="group" aria-labelledby="f-qty-label">
+          <button type="button" class="qty-btn" id="qtyMinus" aria-label="Decrease quantity">−</button>
+          <output class="qty-value" id="f-qty" aria-live="polite">1</output>
+          <button type="button" class="qty-btn" id="qtyPlus" aria-label="Increase quantity">＋</button>
+        </div>
         <span class="hint">Same product, multiple pieces — each gets its own status checkboxes.</span>
       </div>
       <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Deadline, custom request…"></textarea></div>

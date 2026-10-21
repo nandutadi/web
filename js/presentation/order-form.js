@@ -171,6 +171,21 @@ export function renderTypeFilter() {
     ).join("");
 }
 
+function readQty() {
+  return clampQty(document.getElementById("f-qty")?.textContent);
+}
+
+function setQty(value) {
+  const qty = clampQty(value);
+  const el = document.getElementById("f-qty");
+  const minus = document.getElementById("qtyMinus");
+  const plus = document.getElementById("qtyPlus");
+  if (el) el.textContent = String(qty);
+  if (minus) minus.disabled = qty <= 1;
+  if (plus) plus.disabled = qty >= 99;
+  return qty;
+}
+
 export function openDialog(order) {
   const dlg = document.getElementById("dlg");
   const isEdit = !!(order && order.id);
@@ -181,7 +196,7 @@ export function openDialog(order) {
     isEdit ? (order.createdAt || Date.now()) : Date.now()
   );
   populateKindSelect(isEdit ? order.kind : "candle");
-  document.getElementById("f-qty").value = String(isEdit ? unitCount(order) : 1);
+  setQty(isEdit ? unitCount(order) : 1);
   document.getElementById("f-notes").value = isEdit ? (order.notes ?? "") : "";
   updateKindFields(isEdit ? attrsFromOrder(order) : null);
   dlg.showModal();
@@ -195,6 +210,9 @@ export function bindOrderForm() {
   document.getElementById("add").onclick = () => openDialog(null);
   document.getElementById("cancel").onclick = () => dlg.close();
   document.getElementById("closeDialog").onclick = () => dlg.close();
+
+  document.getElementById("qtyMinus").onclick = () => setQty(readQty() - 1);
+  document.getElementById("qtyPlus").onclick = () => setQty(readQty() + 1);
 
   document.getElementById("form").addEventListener("submit", async e => {
     e.preventDefault();
@@ -218,7 +236,7 @@ export function bindOrderForm() {
     const existing = state.editingId
       ? state.orders.find(o => o.id === state.editingId)
       : null;
-    const qty = clampQty(document.getElementById("f-qty").value);
+    const qty = readQty();
     const units = resizeUnits(
       existing?.units?.length
         ? existing.units
