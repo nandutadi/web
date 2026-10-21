@@ -1,7 +1,7 @@
 import { FIXED_TYPES } from "../core/constants.js";
 import { esc } from "../core/escape.js";
 import { typeMeta } from "../domain/catalog.js";
-import { isFullyDone } from "../domain/order.js";
+import { countUnits } from "../domain/order.js";
 import { state } from "../app/state.js";
 
 function personOrSearchActive() {
@@ -24,11 +24,33 @@ function statsScopeLabel() {
   return bits.length ? bits.join(" · ") : "Across all customers";
 }
 
+function countOpenUnits(orders) {
+  return orders.reduce((sum, o) => {
+    const units = o.units?.length ? o.units : [{ completed: o.completed, delivered: o.delivered, paid: o.paid }];
+    return sum + units.filter(u => !(u.completed && u.delivered && u.paid)).length;
+  }, 0);
+}
+
+function countClosedUnits(orders) {
+  return orders.reduce((sum, o) => {
+    const units = o.units?.length ? o.units : [{ completed: o.completed, delivered: o.delivered, paid: o.paid }];
+    return sum + units.filter(u => u.completed && u.delivered && u.paid).length;
+  }, 0);
+}
+
+function countUnpaidUnits(orders) {
+  return orders.reduce((sum, o) => {
+    const units = o.units?.length ? o.units : [{ paid: o.paid }];
+    return sum + units.filter(u => !u.paid).length;
+  }, 0);
+}
+
 export function renderStats(visible) {
   const scope = statsScopeLabel();
   const filtered = !!state.typeFilter || !!state.statusFilter || personOrSearchActive();
   const isClosedFilter = state.statusFilter === "closed" || state.statusFilter === "done";
   const cards = [];
+  const totalPieces = countUnits(visible);
 
   cards.push({
     cls: state.statusFilter === "open"
@@ -38,18 +60,20 @@ export function renderStats(visible) {
         : state.statusFilter === "unpaid"
           ? "unpaid"
           : "",
-    label: "Total orders",
+    label: "Total items",
     icon: "▦",
-    count: visible.length,
-    sub: scope
+    count: totalPieces,
+    sub: visible.length === totalPieces
+      ? scope
+      : `${visible.length} line${visible.length === 1 ? "" : "s"} · ${scope}`
   });
 
   if (state.statusFilter !== "open" && !isClosedFilter) {
     cards.push({
       cls: "open",
-      label: "Open orders",
+      label: "Open items",
       icon: "◷",
-      count: visible.filter(o => !isFullyDone(o)).length,
+      count: countOpenUnits(visible),
       sub: filtered ? "In current filter" : "Missing a status step"
     });
   }
@@ -57,9 +81,9 @@ export function renderStats(visible) {
   if (!isClosedFilter && state.statusFilter !== "open" && state.statusFilter !== "unpaid") {
     cards.push({
       cls: "closed",
-      label: "Closed orders",
+      label: "Closed items",
       icon: "✓",
-      count: visible.filter(o => isFullyDone(o)).length,
+      count: countClosedUnits(visible),
       sub: "Completed · Delivered · Payment Received"
     });
   }
@@ -68,11 +92,12 @@ export function renderStats(visible) {
     for (const t of FIXED_TYPES) {
       const cls = t.id === "candle" ? "candles" : t.id === "resin" ? "resin" : "open";
       const icon = t.id === "candle" ? "♨" : t.id === "resin" ? "✧" : "◍";
+      const typeOrders = visible.filter(o => o.kind === t.id);
       cards.push({
         cls,
         label: t.name,
         icon,
-        count: visible.filter(o => o.kind === t.id).length,
+        count: countUnits(typeOrders),
         sub: filtered ? "In current filter" : "By order type"
       });
     }
@@ -83,7 +108,7 @@ export function renderStats(visible) {
       cls: "unpaid",
       label: "Unpaid",
       icon: "₹",
-      count: visible.filter(o => !o.paid).length,
+      count: countUnpaidUnits(visible),
       sub: filtered ? "In current filter" : "Payment to follow up"
     });
   }

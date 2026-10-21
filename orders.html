@@ -145,7 +145,12 @@
         <select id="f-kind" required></select>
       </div>
       <div id="orderAttrFields"></div>
-      <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Quantity, deadline, custom request…"></textarea></div>
+      <div class="field">
+        <label for="f-qty">Quantity <span aria-hidden="true">*</span></label>
+        <input id="f-qty" type="number" min="1" max="99" step="1" value="1" required />
+        <span class="hint">Same product, multiple pieces — each gets its own status checkboxes.</span>
+      </div>
+      <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Deadline, custom request…"></textarea></div>
       <div class="dialog-actions">
         <button type="button" class="btn" id="cancel">Cancel</button>
         <button type="submit" class="btn btn-primary" title="Save order (press S)">Save order</button>

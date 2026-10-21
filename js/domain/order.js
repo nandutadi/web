@@ -1,6 +1,8 @@
 import { FIXED_TYPES } from "../core/constants.js";
 import { findOpt, resinShapes, typeMeta } from "./catalog.js";
 
+const MAX_QTY = 99;
+
 export function normalizeKind(rawKind) {
   const k = String(rawKind || "candle");
   if (FIXED_TYPES.some(t => t.id === k)) return k;
@@ -9,9 +11,64 @@ export function normalizeKind(rawKind) {
   return "candle";
 }
 
+export function normalizeUnit(raw = {}) {
+  return {
+    id: raw.id || crypto.randomUUID(),
+    completed: !!raw.completed,
+    delivered: !!raw.delivered,
+    paid: !!raw.paid
+  };
+}
+
+/** Clamp quantity to a sensible cart size. */
+export function clampQty(value) {
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n) || n < 1) return 1;
+  return Math.min(MAX_QTY, n);
+}
+
+/**
+ * Build / resize the per-item status list.
+ * Legacy orders (no units) become a single unit from top-level flags.
+ */
+export function normalizeUnits(raw) {
+  if (Array.isArray(raw?.units) && raw.units.length) {
+    const qty = raw.qty != null ? clampQty(raw.qty) : clampQty(raw.units.length);
+    return resizeUnits(raw.units.map(normalizeUnit), qty);
+  }
+  const qty = clampQty(raw?.qty ?? 1);
+  const seed = normalizeUnit({
+    completed: raw?.completed,
+    delivered: raw?.delivered,
+    paid: raw?.paid
+  });
+  return resizeUnits([seed], qty);
+}
+
+export function resizeUnits(units, qty) {
+  const n = clampQty(qty);
+  const next = (Array.isArray(units) ? units : []).map(normalizeUnit);
+  while (next.length < n) next.push(normalizeUnit());
+  while (next.length > n) next.pop();
+  return next;
+}
+
+function aggregateFlags(units) {
+  if (!units.length) {
+    return { completed: false, delivered: false, paid: false };
+  }
+  return {
+    completed: units.every(u => u.completed),
+    delivered: units.every(u => u.delivered),
+    paid: units.every(u => u.paid)
+  };
+}
+
 export function normalizeOrder(raw, id) {
   const kind = normalizeKind(raw.kind);
   const meta = typeMeta(kind);
+  const units = normalizeUnits(raw);
+  const flags = aggregateFlags(units);
   return {
     id: id || raw.id || crypto.randomUUID(),
     createdAt: Number(raw.createdAt) || Date.now(),
@@ -29,15 +86,19 @@ export function normalizeOrder(raw, id) {
     candleType: raw.candleType || raw.shape || "",
     resinText: raw.resinText || "",
     categoryPath: Array.isArray(raw.categoryPath) ? raw.categoryPath : [],
-    completed: !!raw.completed,
-    delivered: !!raw.delivered,
-    paid: !!raw.paid,
+    units,
+    qty: units.length,
+    completed: flags.completed,
+    delivered: flags.delivered,
+    paid: flags.paid,
     notes: raw.notes || "",
     image: raw.image || ""
   };
 }
 
 export function orderPayload(o) {
+  const units = normalizeUnits(o);
+  const flags = aggregateFlags(units);
   return {
     createdAt: o.createdAt || Date.now(),
     person: o.person || "",
@@ -54,16 +115,35 @@ export function orderPayload(o) {
     candleType: o.candleType || o.shape || "",
     resinText: o.resinText || "",
     categoryPath: Array.isArray(o.categoryPath) ? o.categoryPath : [],
-    completed: !!o.completed,
-    delivered: !!o.delivered,
-    paid: !!o.paid,
+    units,
+    qty: units.length,
+    completed: flags.completed,
+    delivered: flags.delivered,
+    paid: flags.paid,
     notes: o.notes || "",
     image: o.image || ""
   };
 }
 
+export function isUnitDone(u) {
+  return !!(u?.completed && u?.delivered && u?.paid);
+}
+
 export function isFullyDone(o) {
+  const units = o?.units?.length ? o.units : null;
+  if (units) return units.every(isUnitDone);
   return !!(o.completed && o.delivered && o.paid);
+}
+
+export function hasUnpaidUnit(o) {
+  const units = o?.units?.length ? o.units : null;
+  if (units) return units.some(u => !u.paid);
+  return !o.paid;
+}
+
+export function unitCount(o) {
+  if (o?.units?.length) return o.units.length;
+  return clampQty(o?.qty ?? 1);
 }
 
 export function orderTitle(o) {
@@ -115,7 +195,7 @@ export function filterOrders(orders, { query, person, typeFilter, statusFilter }
     if (typeFilter && o.kind !== typeFilter) return false;
     if (statusFilter === "open" && isFullyDone(o)) return false;
     if ((statusFilter === "closed" || statusFilter === "done") && !isFullyDone(o)) return false;
-    if (statusFilter === "unpaid" && o.paid) return false;
+    if (statusFilter === "unpaid" && !hasUnpaidUnit(o)) return false;
     if (q && !orderSearchText(o).includes(q)) return false;
     return true;
   });
@@ -138,4 +218,9 @@ export function attrsFromOrder(order) {
     sizeId: order.sizeId,
     sizeName: order.size
   };
+}
+
+/** Count pieces (units) across orders — used by stats. */
+export function countUnits(orders) {
+  return (orders || []).reduce((sum, o) => sum + unitCount(o), 0);
 }
