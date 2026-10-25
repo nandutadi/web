@@ -141,6 +141,12 @@ export function hasUnpaidUnit(o) {
   return !o.paid;
 }
 
+export function hasIncompleteUnit(o) {
+  const units = o?.units?.length ? o.units : null;
+  if (units) return units.some(u => !u.completed);
+  return !o?.completed;
+}
+
 export function unitCount(o) {
   if (o?.units?.length) return o.units.length;
   return clampQty(o?.qty ?? 1);
@@ -196,6 +202,7 @@ export function filterOrders(orders, { query, person, typeFilter, statusFilter }
     if (statusFilter === "open" && isFullyDone(o)) return false;
     if ((statusFilter === "closed" || statusFilter === "done") && !isFullyDone(o)) return false;
     if (statusFilter === "unpaid" && !hasUnpaidUnit(o)) return false;
+    if (statusFilter === "incomplete" && !hasIncompleteUnit(o)) return false;
     if (q && !orderSearchText(o).includes(q)) return false;
     return true;
   });

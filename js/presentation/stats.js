@@ -16,6 +16,7 @@ function statsScopeLabel() {
   const q = document.getElementById("search")?.value.trim() || "";
   const bits = [];
   if (state.typeFilter) bits.push(typeMeta(state.typeFilter).name);
+  if (state.statusFilter === "incomplete") bits.push("Not completed");
   if (state.statusFilter === "open") bits.push("Open");
   if (state.statusFilter === "closed" || state.statusFilter === "done") bits.push("Closed");
   if (state.statusFilter === "unpaid") bits.push("Unpaid");
@@ -49,11 +50,12 @@ export function renderStats(visible) {
   const scope = statsScopeLabel();
   const filtered = !!state.typeFilter || !!state.statusFilter || personOrSearchActive();
   const isClosedFilter = state.statusFilter === "closed" || state.statusFilter === "done";
+  const isIncompleteFilter = state.statusFilter === "incomplete";
   const cards = [];
   const totalPieces = countUnits(visible);
 
   cards.push({
-    cls: state.statusFilter === "open"
+    cls: state.statusFilter === "open" || isIncompleteFilter
       ? "open"
       : isClosedFilter
         ? "closed"
@@ -68,7 +70,7 @@ export function renderStats(visible) {
       : `${visible.length} line${visible.length === 1 ? "" : "s"} · ${scope}`
   });
 
-  if (state.statusFilter !== "open" && !isClosedFilter) {
+  if (state.statusFilter !== "open" && !isClosedFilter && !isIncompleteFilter) {
     cards.push({
       cls: "open",
       label: "Open items",
@@ -78,7 +80,7 @@ export function renderStats(visible) {
     });
   }
 
-  if (!isClosedFilter && state.statusFilter !== "open" && state.statusFilter !== "unpaid") {
+  if (!isClosedFilter && !isIncompleteFilter && state.statusFilter !== "open" && state.statusFilter !== "unpaid") {
     cards.push({
       cls: "closed",
       label: "Closed items",
