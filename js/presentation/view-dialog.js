@@ -100,18 +100,25 @@ async function deleteViewingOrder() {
 
 export function bindViewDialog() {
   const viewDlg = document.getElementById("viewDlg");
+  if (!viewDlg) return;
   document.getElementById("closeViewDialog").onclick = () => {
     viewDlg.close();
     state.viewingOrder = null;
   };
-  document.getElementById("viewEdit").onclick = () => {
-    if (!state.viewingOrder) return;
-    const order = state.viewingOrder;
-    viewDlg.close();
-    state.viewingOrder = null;
-    openDialog(order);
-  };
-  document.getElementById("viewDelete").onclick = () => deleteViewingOrder();
+  const editBtn = document.getElementById("viewEdit");
+  const canEdit = !!document.getElementById("dlg");
+  if (editBtn) {
+    editBtn.hidden = !canEdit;
+    editBtn.onclick = () => {
+      if (!state.viewingOrder || !canEdit) return;
+      const order = state.viewingOrder;
+      viewDlg.close();
+      state.viewingOrder = null;
+      openDialog(order);
+    };
+  }
+  const deleteBtn = document.getElementById("viewDelete");
+  if (deleteBtn) deleteBtn.onclick = () => deleteViewingOrder();
   viewDlg.addEventListener("close", () => {
     state.viewingOrder = null;
   });

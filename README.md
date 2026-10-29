@@ -6,8 +6,9 @@ Static site for Thanvis Art Gallery order tracking, with room for upcoming studi
 
 | Path | App |
 |------|-----|
-| `/` | Hub — Orders + upcoming modules |
+| `/` | Hub — Orders + Accounts |
 | `/orders.html` | Candle & resin order tracker |
+| `/accounts.html` | Amounts billed, received, and outstanding |
 
 All paths are relative, so the site works at both:
 

@@ -7,6 +7,7 @@
 <title>My Orders — Studio Dashboard</title>
 <link rel="stylesheet" href="live-bg.css" />
 <link rel="stylesheet" href="css/orders.css" />
+<link rel="stylesheet" href="css/accounts.css" />
 </head>
 <body>
 <div class="live-bg" aria-hidden="true">
@@ -45,6 +46,10 @@
         <p>Order tracking</p>
       </a>
       <div class="topbar-side topbar-side--right">
+        <nav class="page-nav" aria-label="Studio pages">
+          <a href="orders.html" class="on" aria-current="page">Orders</a>
+          <a href="accounts.html">Accounts</a>
+        </nav>
         <button type="button" class="btn btn-signout" id="googleSignOut">Sign out</button>
         <button class="btn btn-icon utility" id="theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
         <button class="btn btn-icon utility" id="export" title="Export JSON" aria-label="Export orders">↓</button>

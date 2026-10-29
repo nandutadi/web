@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<title>Accounts — Studio Dashboard</title>
+<link rel="stylesheet" href="live-bg.css" />
+<link rel="stylesheet" href="css/orders.css" />
+<link rel="stylesheet" href="css/accounts.css" />
+</head>
+<body>
+<div class="live-bg" aria-hidden="true">
+  <div class="live-bg__blob live-bg__blob--a"></div>
+  <div class="live-bg__blob live-bg__blob--b"></div>
+  <div class="live-bg__blob live-bg__blob--c"></div>
+  <div class="live-bg__grid"></div>
+  <div class="live-bg__ring"></div>
+  <div class="live-bg__beam live-bg__beam--a"></div>
+  <div class="live-bg__beam live-bg__beam--b"></div>
+  <div class="live-bg__beam live-bg__beam--c"></div>
+  <div class="live-bg__horizon"></div>
+  <div class="live-bg__sparks">
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+    <div class="live-bg__spark"></div>
+  </div>
+  <div class="live-bg__scan"></div>
+  <div class="live-bg__wash"></div>
+</div>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar-fade" aria-hidden="true"></div>
+    <div class="topbar-inner">
+      <div class="topbar-side topbar-side--left" aria-hidden="true"></div>
+      <a class="brand-center" href="index.html" title="Back to home">
+        <div class="brand-orb" aria-hidden="true">
+          <div class="brand-mark">✦</div>
+        </div>
+        <h1>Thanvi Art Gallery</h1>
+        <p>Accounts</p>
+      </a>
+      <div class="topbar-side topbar-side--right">
+        <nav class="page-nav" aria-label="Studio pages">
+          <a href="orders.html">Orders</a>
+          <a href="accounts.html" class="on" aria-current="page">Accounts</a>
+        </nav>
+        <button type="button" class="btn btn-signout" id="googleSignOut">Sign out</button>
+        <button class="btn btn-icon utility" id="theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <div>
+        <div class="eyebrow">Studio accounts</div>
+        <h2>Money across every order.</h2>
+        <p>Totals from candle shape prices and resin order amounts.</p>
+      </div>
+      <div class="welcome-meta">
+        <div class="today-pill" id="todayLabel">✦ Your accounts workspace</div>
+        <div class="sync-pill local" id="syncPill" title="Data sync status"><span class="sync-dot" aria-hidden="true"></span><span id="syncLabel">Connecting…</span></div>
+      </div>
+    </section>
+
+    <section class="stats" id="accountsStats" aria-label="Account totals"></section>
+
+    <section class="workspace">
+      <div class="workspace-head">
+        <div class="workspace-title"><h3>All amounts</h3><p>Same-day orders for one customer are clubbed with a consolidated total.</p></div>
+        <div class="results-count" id="accountsCount">0 lines</div>
+      </div>
+
+      <div class="accounts-toolbar">
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="accountsSearch" type="search" placeholder="Search amounts…" autocomplete="off" aria-label="Search amounts" /></div>
+        <select id="accountsPerson" class="person-filter" title="Filter by person"><option value="">All people</option></select>
+      </div>
+
+      <div class="filters">
+        <div class="seg" id="accountsTypeFilter" role="group" aria-label="Order type"></div>
+        <div class="seg" id="accountsDeliveryFilter" role="group" aria-label="Delivery status"></div>
+        <div class="seg" id="accountsPayFilter" role="group" aria-label="Payment status"></div>
+      </div>
+
+      <div id="accountsList"></div>
+    </section>
+    <div class="footer-note">Amounts follow order prices. Mark units paid on Orders to update received totals.</div>
+  </main>
+</div>
+
+<dialog id="viewDlg">
+  <div class="dialog-head">
+    <div>
+      <h2>Order details</h2>
+      <p>Shape, customer, and progress.</p>
+    </div>
+    <button type="button" class="mini-btn" id="closeViewDialog" aria-label="Close dialog">✕</button>
+  </div>
+  <div class="dialog-body">
+    <div class="view-hero" id="viewHero" aria-hidden="true"></div>
+    <div id="viewBadge" class="view-badge candle">Candle</div>
+    <h3 class="view-title" id="viewTitle">Order</h3>
+    <p class="view-sub" id="viewSub"></p>
+    <div class="view-grid" id="viewGrid"></div>
+    <div class="view-status" id="viewStatus"></div>
+    <div class="dialog-actions view-actions" style="margin-top:16px">
+      <button type="button" class="btn btn-danger" id="viewDelete">Delete</button>
+      <button type="button" class="btn btn-primary" id="viewEdit">Edit</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="auth-config.js"></script>
+<script src="auth-gate.js"></script>
+<script type="module" src="js/app/accounts-bootstrap.js"></script>
+</body>
+</html>

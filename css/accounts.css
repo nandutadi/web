@@ -1,0 +1,254 @@
+.stat-value.money {
+  font-size: clamp(18px, 2.4vw, 24px);
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+}
+
+.page-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel-soft);
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.page-nav a:hover { color: var(--text); border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.page-nav a.on {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.accounts-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 14px;
+}
+
+.accounts-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accounts-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.1fr) minmax(160px, 1.6fr) minmax(120px, 1fr) minmax(140px, 1.1fr) minmax(90px, 0.8fr);
+  gap: 12px 14px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.accounts-row-clickable {
+  cursor: pointer;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+
+.accounts-row-clickable:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.accounts-row-clickable:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.accounts-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.accounts-club {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accounts-club-head {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 55%, transparent), transparent),
+    var(--panel);
+}
+
+.accounts-club.open .accounts-club-head {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.accounts-club-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 2px 10px;
+  padding-left: 10px;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.accounts-child {
+  background: color-mix(in srgb, var(--panel-soft) 80%, var(--panel));
+}
+
+.club-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+}
+
+.accounts-head {
+  padding: 8px 14px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.accounts-person,
+.accounts-title {
+  font-size: 13px;
+  font-weight: 720;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.accounts-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.accounts-amount {
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.accounts-row .num { text-align: right; justify-self: end; }
+
+.pay-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  border: 1px solid var(--border);
+  background: var(--panel-soft);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pay-pill.paid {
+  color: var(--good);
+  background: var(--good-soft);
+  border-color: color-mix(in srgb, var(--good) 30%, var(--border));
+}
+
+.pay-pill.unpaid {
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-color: color-mix(in srgb, var(--warn) 30%, var(--border));
+}
+
+.pay-pill.partial {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+.pay-pill.none {
+  color: var(--muted);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  border: 1px solid var(--border);
+  background: var(--panel-soft);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.status-pill.delivered {
+  color: var(--good);
+  background: var(--good-soft);
+  border-color: color-mix(in srgb, var(--good) 30%, var(--border));
+}
+
+.status-pill.undelivered {
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-color: color-mix(in srgb, var(--warn) 30%, var(--border));
+}
+
+.status-pill.partial-delivery {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+.stat.warn {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--warn-soft) 70%, transparent), transparent),
+    var(--panel);
+}
+
+@media (max-width: 860px) {
+  .accounts-head { display: none; }
+  .accounts-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "person amount"
+      "order order"
+      "date status";
+  }
+  .accounts-row > :nth-child(1) { grid-area: person; }
+  .accounts-row > :nth-child(2) { grid-area: order; }
+  .accounts-row > :nth-child(3) { grid-area: date; }
+  .accounts-row > :nth-child(4) { grid-area: status; justify-self: end; }
+  .accounts-row > :nth-child(5) { grid-area: amount; }
+}
+
+@media (max-width: 520px) {
+  .page-nav { width: 100%; order: 3; }
+  .page-nav a { flex: 1; justify-content: center; }
+}

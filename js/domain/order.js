@@ -331,3 +331,58 @@ export function attrsFromOrder(order) {
 export function countUnits(orders) {
   return (orders || []).reduce((sum, o) => sum + unitCount(o), 0);
 }
+
+/** Paid / outstanding split for one order amount. */
+export function orderMoneyBreakdown(order, catalog) {
+  const o = resolveOrderPricing(order, catalog) || (order ? normalizeOrder(order, order.id) : null);
+  if (!o) return { amount: null, received: null, outstanding: null, paidCount: 0, qty: 0 };
+  const amount = parseMoney(o.amount);
+  const qty = unitCount(o);
+  const units = o.units?.length
+    ? o.units
+    : [{ paid: o.paid }];
+  const paidCount = units.filter(u => u.paid).length;
+  if (amount === null) {
+    return { amount: null, received: null, outstanding: null, paidCount, qty, order: o };
+  }
+  const received = qty > 0 ? amount * (paidCount / qty) : 0;
+  const outstanding = amount - received;
+  return { amount, received, outstanding, paidCount, qty, order: o };
+}
+
+/** Totals across orders for the Accounts page. */
+export function accountsSummary(orders, catalog) {
+  const rows = [];
+  let total = 0;
+  let received = 0;
+  let outstanding = 0;
+  let pricedCount = 0;
+  let unpricedCount = 0;
+  const byKind = {};
+
+  for (const raw of orders || []) {
+    const breakdown = orderMoneyBreakdown(raw, catalog);
+    const o = breakdown.order || raw;
+    const kind = normalizeKind(o.kind);
+    if (!byKind[kind]) byKind[kind] = { total: 0, received: 0, outstanding: 0, count: 0 };
+
+    if (breakdown.amount === null) {
+      unpricedCount += 1;
+      rows.push({ order: o, ...breakdown });
+      continue;
+    }
+
+    pricedCount += 1;
+    total += breakdown.amount;
+    received += breakdown.received;
+    outstanding += breakdown.outstanding;
+    byKind[kind].total += breakdown.amount;
+    byKind[kind].received += breakdown.received;
+    byKind[kind].outstanding += breakdown.outstanding;
+    byKind[kind].count += 1;
+    rows.push({ order: o, ...breakdown });
+  }
+
+  rows.sort((a, b) => (b.order.createdAt || 0) - (a.order.createdAt || 0));
+  return { total, received, outstanding, pricedCount, unpricedCount, byKind, rows };
+}

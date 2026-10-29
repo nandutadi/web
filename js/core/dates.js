@@ -13,6 +13,26 @@ export function formatOrderedAt(ms) {
   }
 }
 
+/** Local calendar day key — YYYY-MM-DD — for grouping same-day orders. */
+export function orderDayKey(ms) {
+  const d = new Date(ms || Date.now());
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+export function formatOrderDay(ms) {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }).format(new Date(ms || Date.now()));
+  } catch (e) {
+    return orderDayKey(ms);
+  }
+}
+
 export function toDatetimeLocalValue(ms) {
   const d = new Date(ms);
   const pad = n => String(n).padStart(2, "0");
