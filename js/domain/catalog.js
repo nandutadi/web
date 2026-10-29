@@ -36,11 +36,18 @@ export function defaultCatalog() {
   };
 }
 
+export function normalizePrice(raw) {
+  if (raw === null || raw === undefined || raw === "") return "";
+  const value = String(raw).trim();
+  return value;
+}
+
 export function normalizeOpt(raw, withSizes = false) {
   const opt = {
     id: raw?.id || crypto.randomUUID(),
     name: String(raw?.name || "").trim(),
     image: raw?.image || "",
+    price: normalizePrice(raw?.price),
     expanded: !!raw?.expanded
   };
   if (withSizes) {
@@ -98,6 +105,8 @@ export function pruneOptList(list, withSizes = false) {
         name: (o.name || "").trim(),
         image: o.image || ""
       };
+      const price = normalizePrice(o.price);
+      if (price) next.price = price;
       if (withSizes) next.sizes = pruneOptList(o.sizes || [], false);
       return next;
     })

@@ -64,11 +64,105 @@ function aggregateFlags(units) {
   };
 }
 
+/** Parse a free-text catalog/order price into a number, or null. */
+export function parseMoney(raw) {
+  if (raw === null || raw === undefined || raw === "") return null;
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+  const cleaned = String(raw).replace(/,/g, "").replace(/[^0-9.-]/g, "");
+  if (!cleaned || cleaned === "-" || cleaned === ".") return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function formatMoney(value) {
+  const n = parseMoney(value);
+  if (n === null) return "";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2
+  }).format(n);
+}
+
+/** Unit price for a candle shape from the catalog. */
+export function candleUnitPrice(catalog, shapeId, shapeName) {
+  const shape =
+    findOpt(catalog?.candle?.shapes, shapeId) ||
+    findOpt(catalog?.candle?.shapes, shapeName);
+  return parseMoney(shape?.price);
+}
+
+/** unitPrice × qty for candle orders; null when unknown. */
+export function calcOrderAmount(unitPrice, qty) {
+  const price = parseMoney(unitPrice);
+  if (price === null) return null;
+  return price * clampQty(qty);
+}
+
+/**
+ * Fill missing candle pricing from the catalog (for orders created before prices existed).
+ * Stored unitPrice/amount always win when present.
+ */
+export function resolveOrderPricing(order, catalog) {
+  const o = order ? normalizeOrder(order, order.id) : null;
+  if (!o) return null;
+  if (normalizeKind(o.kind) !== "candle") return o;
+
+  let unitPrice = parseMoney(o.unitPrice);
+  let amount = parseMoney(o.amount);
+  if (unitPrice !== null && amount !== null) return o;
+
+  const fromCatalog = candleUnitPrice(catalog, o.shapeId, o.shape || o.candleType);
+  if (unitPrice === null) unitPrice = fromCatalog;
+  if (amount === null && unitPrice !== null) {
+    amount = calcOrderAmount(unitPrice, o.qty);
+  }
+  if (unitPrice === null && amount === null) return o;
+  return {
+    ...o,
+    unitPrice: unitPrice === null ? "" : unitPrice,
+    amount: amount === null ? "" : amount
+  };
+}
+
+/** Apply catalog prices to any candle orders that are missing amount/unitPrice. */
+export function applyCatalogPricingToOrders(orders, catalog) {
+  const changed = [];
+  const next = (orders || []).map(order => {
+    if (normalizeKind(order?.kind) !== "candle") return order;
+    const hadAmount = parseMoney(order?.amount) !== null;
+    const hadUnit = parseMoney(order?.unitPrice) !== null;
+    if (hadAmount && hadUnit) return order;
+    const resolved = resolveOrderPricing(order, catalog);
+    if (
+      parseMoney(resolved.amount) === parseMoney(order?.amount) &&
+      parseMoney(resolved.unitPrice) === parseMoney(order?.unitPrice)
+    ) {
+      return order;
+    }
+    if (parseMoney(resolved.amount) === null && parseMoney(resolved.unitPrice) === null) {
+      return order;
+    }
+    changed.push(resolved);
+    return resolved;
+  });
+  return { orders: next, changed };
+}
+
 export function normalizeOrder(raw, id) {
   const kind = normalizeKind(raw.kind);
   const meta = typeMeta(kind);
   const units = normalizeUnits(raw);
   const flags = aggregateFlags(units);
+  const qty = units.length;
+  let unitPrice = parseMoney(raw.unitPrice);
+  let amount = parseMoney(raw.amount);
+  if (unitPrice === null && amount !== null && qty > 0) {
+    unitPrice = amount / qty;
+  }
+  if (amount === null && unitPrice !== null) {
+    amount = calcOrderAmount(unitPrice, qty);
+  }
   return {
     id: id || raw.id || crypto.randomUUID(),
     createdAt: Number(raw.createdAt) || Date.now(),
@@ -87,7 +181,9 @@ export function normalizeOrder(raw, id) {
     resinText: raw.resinText || "",
     categoryPath: Array.isArray(raw.categoryPath) ? raw.categoryPath : [],
     units,
-    qty: units.length,
+    qty,
+    unitPrice: unitPrice === null ? "" : unitPrice,
+    amount: amount === null ? "" : amount,
     completed: flags.completed,
     delivered: flags.delivered,
     paid: flags.paid,
@@ -99,6 +195,8 @@ export function normalizeOrder(raw, id) {
 export function orderPayload(o) {
   const units = normalizeUnits(o);
   const flags = aggregateFlags(units);
+  const unitPrice = parseMoney(o.unitPrice);
+  const amount = parseMoney(o.amount) ?? calcOrderAmount(unitPrice, units.length);
   return {
     createdAt: o.createdAt || Date.now(),
     person: o.person || "",
@@ -117,6 +215,8 @@ export function orderPayload(o) {
     categoryPath: Array.isArray(o.categoryPath) ? o.categoryPath : [],
     units,
     qty: units.length,
+    unitPrice: unitPrice === null ? "" : unitPrice,
+    amount: amount === null ? "" : amount,
     completed: flags.completed,
     delivered: flags.delivered,
     paid: flags.paid,

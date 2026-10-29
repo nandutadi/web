@@ -155,6 +155,16 @@
         </div>
         <span class="hint">Same product, multiple pieces — each gets its own status checkboxes.</span>
       </div>
+      <div class="field" id="amountField" hidden>
+        <span class="field-label" id="f-amount-label">Amount</span>
+        <output class="amount-value" id="f-amount" aria-labelledby="f-amount-label" aria-live="polite">—</output>
+        <span class="hint">Shape price × quantity — saved with the order.</span>
+      </div>
+      <div class="field" id="resinPriceField" hidden>
+        <label for="f-resin-price">Price</label>
+        <input id="f-resin-price" type="text" inputmode="decimal" placeholder="e.g. 500" autocomplete="off" />
+        <span class="hint" id="resinPriceHint">Enter price per piece. Saved as price × quantity.</span>
+      </div>
       <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Deadline, custom request…"></textarea></div>
       <div class="dialog-actions">
         <button type="button" class="btn" id="cancel">Cancel</button>

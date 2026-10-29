@@ -11,6 +11,7 @@ import {
   loadLocalCatalog,
   saveLocalCatalog
 } from "./local-storage.js";
+import { enrichOrdersWithCatalogPricing } from "./orders-repository.js";
 import { writeSyncMeta, readSyncMeta } from "./sync-meta.js";
 import { showToast } from "../core/toast.js";
 
@@ -119,6 +120,11 @@ async function startCategoriesSync() {
     state.catalog = normalizeCatalog(cloudCatalog);
     saveLocalCatalog(state.catalog);
     writeSyncMeta({ catalogCachedAt: Date.now() });
+    try {
+      await enrichOrdersWithCatalogPricing({ persistCloud: !fromCache });
+    } catch (err) {
+      console.error(err);
+    }
     notifyCatalogChanged();
     requestRender();
   }, err => {
@@ -135,6 +141,7 @@ export async function startOrdersSync() {
 
   state.orders = loadLocalOrders();
   state.catalog = loadLocalCatalog();
+  enrichOrdersWithCatalogPricing();
   notifyCatalogChanged();
   requestRender();
   notifySyncStatus("connecting", state.orders.length ? "Cached · syncing…" : "Syncing…");
@@ -152,6 +159,11 @@ export async function startOrdersSync() {
       const fromCache = !!snap.metadata?.fromCache;
       state.orders = snap.docs.map(doc => normalizeOrder(doc.data(), doc.id));
       cacheLocalOrders(state.orders);
+      try {
+        await enrichOrdersWithCatalogPricing({ persistCloud: !fromCache });
+      } catch (err) {
+        console.error(err);
+      }
       state.cloudEnabled = true;
       writeSyncMeta({ lastSyncedAt: Date.now(), fromCache: !!fromCache });
 
@@ -172,6 +184,7 @@ export async function startOrdersSync() {
       console.error(err);
       state.cloudEnabled = false;
       state.orders = loadLocalOrders();
+      enrichOrdersWithCatalogPricing();
       notifySyncStatus("error", "Permission error · using cache");
       requestRender();
       showToast("Firebase error: " + err.message);
@@ -181,6 +194,7 @@ export async function startOrdersSync() {
     state.cloudEnabled = false;
     state.orders = loadLocalOrders();
     state.catalog = loadLocalCatalog();
+    enrichOrdersWithCatalogPricing();
     notifySyncStatus("error", "Offline · using cache");
     requestRender();
     showToast("Could not sync: " + err.message);
@@ -191,6 +205,7 @@ export function hydrateFromBrowserCache() {
   state.orders = loadLocalOrders();
   state.catalog = loadLocalCatalog();
   saveLocalCatalog(state.catalog);
+  enrichOrdersWithCatalogPricing();
   notifyCatalogChanged();
   requestRender();
   const meta = readSyncMeta();

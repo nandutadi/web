@@ -2,7 +2,15 @@ import { SHAPE_ICONS, KIND_ICONS } from "../core/constants.js";
 import { esc } from "../core/escape.js";
 import { formatOrderedAt } from "../core/dates.js";
 import { typeMeta } from "../domain/catalog.js";
-import { normalizeOrder, orderTitle, orderOptionImage, unitCount } from "../domain/order.js";
+import {
+  normalizeOrder,
+  orderTitle,
+  orderOptionImage,
+  unitCount,
+  formatMoney,
+  parseMoney,
+  resolveOrderPricing
+} from "../domain/order.js";
 import { state } from "../app/state.js";
 import { removeOrder } from "../data/orders-repository.js";
 import { showToast } from "./toast.js";
@@ -11,7 +19,9 @@ import { openDialog } from "./order-form.js";
 
 export function openViewDialog(order) {
   const viewDlg = document.getElementById("viewDlg");
-  state.viewingOrder = order ? normalizeOrder(order, order.id) : null;
+  state.viewingOrder = order
+    ? resolveOrderPricing(normalizeOrder(order, order.id), state.catalog)
+    : null;
   if (!state.viewingOrder) return;
   const o = state.viewingOrder;
   const kindClass = o.kind === "resin" ? "resin" : o.kind === "pipeCleaner" ? "pipe" : "candle";
@@ -38,10 +48,18 @@ export function openViewDialog(order) {
   document.getElementById("viewSub").textContent =
     `${o.person || "Unnamed"} · Ordered ${formatOrderedAt(o.createdAt)}`;
 
+  const amount = parseMoney(o.amount);
+  const unitPrice = parseMoney(o.unitPrice);
+  const amountLabel = amount === null
+    ? null
+    : qty > 1 && unitPrice !== null
+      ? `${formatMoney(amount)} (${formatMoney(unitPrice)} × ${qty})`
+      : formatMoney(amount);
   const rows = [
     ["Customer", o.person || "Unnamed"],
     ["Type", o.kindName || typeMeta(o.kind).name],
     ["Quantity", String(qty)],
+    ["Amount", amountLabel],
     ["Shape", o.shape || o.candleType || "—"],
     ["Size", o.size || "—"],
     ["Color", o.color || "—"],

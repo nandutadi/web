@@ -342,6 +342,10 @@
     grid-template-columns: 56px 1fr auto auto; gap: 8px; align-items: center;
   }
   .cat-row.shape-row.simple { grid-template-columns: 56px 1fr auto; }
+  .cat-row.with-price.simple,
+  .cat-row.shape-row.with-price.simple {
+    grid-template-columns: 56px minmax(0, 1fr) 88px auto;
+  }
   .cat-thumb-wrap {
     position: relative; width: 36px; height: 36px; flex: none;
   }
@@ -380,6 +384,9 @@
   }
   .cat-row input[type="text"]:focus { border-color: var(--accent); }
   .cat-row input[type="text"]::placeholder { color: var(--muted); }
+  .cat-row input.cat-price {
+    width: 88px; min-width: 72px; text-align: right; font-variant-numeric: tabular-nums;
+  }
   .cat-nest {
     margin: 2px 0 6px 18px; padding-left: 10px;
     border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
@@ -444,6 +451,11 @@
     flex: none; border-radius: 999px; padding: 2px 7px; font-size: 10px; font-weight: 800;
     letter-spacing: .02em; color: var(--accent-strong); background: var(--accent-soft);
     border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  }
+  .price-badge {
+    flex: none; border-radius: 999px; padding: 2px 7px; font-size: 10px; font-weight: 800;
+    letter-spacing: .01em; color: var(--text); background: var(--panel-soft);
+    border: 1px solid var(--border); font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   .order-meta { margin-top: 3px; font-size: 10.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
   .order-kind { display: inline-flex; margin-top: 5px; border-radius: 6px; padding: 2px 6px; font-size: 8.5px; text-transform: uppercase; letter-spacing: .08em; font-weight: 850; }
@@ -513,6 +525,11 @@
     flex: 1; display: grid; place-items: center;
     border-left: 1px solid var(--border); border-right: 1px solid var(--border);
     font-size: 15px; font-weight: 780; color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .amount-value {
+    display: block; width: 100%; border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 12px; color: var(--text); background: var(--panel-soft);
+    font-size: 15px; font-weight: 780; font-variant-numeric: tabular-nums;
   }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .field .hint { font-size: 10.5px; color: var(--muted); }
@@ -659,9 +676,14 @@
       grid-template-columns: 48px minmax(0, 1fr) auto auto; gap: 7px;
     }
     .cat-row.simple { grid-template-columns: 40px minmax(0, 1fr) auto; }
+    .cat-row.with-price.simple,
+    .cat-row.shape-row.with-price.simple {
+      grid-template-columns: 48px minmax(0, 1fr) 80px auto;
+    }
     .cat-thumb-wrap { width: 40px; height: 40px; }
     .cat-row.shape-row .cat-thumb-wrap { width: 48px; height: 48px; }
     .cat-row input[type="text"] { padding: 10px; font-size: 16px; }
+    .cat-row input.cat-price { width: 80px; min-width: 72px; }
     .cat-nest { margin-left: 8px; padding-left: 8px; }
     .field input, .field textarea, .field select { font-size: 16px; }
     .toast {
@@ -680,6 +702,11 @@
     .cat-row.shape-row.simple {
       grid-template-columns: 44px minmax(0, 1fr) auto; gap: 6px;
     }
+    .cat-row.with-price.simple,
+    .cat-row.shape-row.with-price.simple {
+      grid-template-columns: 44px minmax(0, 1fr) 72px auto; gap: 6px;
+    }
+    .cat-row input.cat-price { width: 72px; min-width: 64px; padding-left: 8px; padding-right: 8px; }
     .cat-row .btn-icon { width: 34px; height: 34px; font-size: 14px; }
     .cat-section-meta { gap: 6px; }
     .cat-section-toggle p { display: none; }

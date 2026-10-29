@@ -13,10 +13,97 @@ import {
   orderOptionImage,
   clampQty,
   resizeUnits,
-  unitCount
+  unitCount,
+  candleUnitPrice,
+  calcOrderAmount,
+  formatMoney,
+  parseMoney
 } from "../domain/order.js";
 import { upsertOrder } from "../data/orders-repository.js";
 import { showToast } from "./toast.js";
+
+function hideCandleAmountField() {
+  const field = document.getElementById("amountField");
+  const out = document.getElementById("f-amount");
+  if (field) field.hidden = true;
+  if (out) {
+    out.textContent = "—";
+    out.dataset.unitPrice = "";
+    out.dataset.amount = "";
+  }
+}
+
+function hideResinPriceField() {
+  const field = document.getElementById("resinPriceField");
+  if (field) field.hidden = true;
+}
+
+function syncResinAmountDisplay() {
+  const field = document.getElementById("resinPriceField");
+  const input = document.getElementById("f-resin-price");
+  const hint = document.getElementById("resinPriceHint");
+  if (!field || !input) return { unitPrice: null, amount: null };
+
+  hideCandleAmountField();
+  field.hidden = false;
+  const qty = readQty();
+  const unitPrice = parseMoney(input.value);
+  const amount = calcOrderAmount(unitPrice, qty);
+  if (hint) {
+    if (unitPrice === null) {
+      hint.textContent = "Enter price per piece. Saved as price × quantity.";
+    } else if (qty > 1) {
+      hint.textContent = `Total ${formatMoney(amount)} (${formatMoney(unitPrice)} × ${qty})`;
+    } else {
+      hint.textContent = `Total ${formatMoney(amount)} — saved with the order.`;
+    }
+  }
+  return { unitPrice, amount };
+}
+
+function syncOrderAmountDisplay() {
+  const field = document.getElementById("amountField");
+  const out = document.getElementById("f-amount");
+  if (!field || !out) return { unitPrice: null, amount: null };
+
+  const kind = normalizeKind(document.getElementById("f-kind")?.value);
+  if (kind === "resin") {
+    return syncResinAmountDisplay();
+  }
+
+  hideResinPriceField();
+  if (kind !== "candle") {
+    hideCandleAmountField();
+    return { unitPrice: null, amount: null };
+  }
+
+  field.hidden = false;
+  const attrs = readOrderAttrsFromForm();
+  const qty = readQty();
+  const unitPrice = candleUnitPrice(state.catalog, attrs.shape.id, attrs.shape.name);
+  const amount = calcOrderAmount(unitPrice, qty);
+  out.dataset.unitPrice = unitPrice === null ? "" : String(unitPrice);
+  out.dataset.amount = amount === null ? "" : String(amount);
+  if (amount === null) {
+    out.textContent = attrs.shape.id ? "No price set for this shape" : "Choose a shape";
+  } else if (qty > 1 && unitPrice !== null) {
+    out.textContent = `${formatMoney(amount)} (${formatMoney(unitPrice)} × ${qty})`;
+  } else {
+    out.textContent = formatMoney(amount);
+  }
+  return { unitPrice, amount };
+}
+
+function setResinPriceInput(value) {
+  const input = document.getElementById("f-resin-price");
+  if (!input) return;
+  if (value === null || value === undefined || value === "") {
+    input.value = "";
+    return;
+  }
+  const n = parseMoney(value);
+  input.value = n === null ? String(value) : String(n);
+}
 
 export function populateKindSelect(selectedId) {
   const el = document.getElementById("f-kind");
@@ -76,7 +163,10 @@ export function updateKindFields(preset = null) {
         "f-shape", "Shape", catalog.candle.shapes,
         values.shapeId || values.shape?.id,
         values.shapeName || values.shape?.name || values.shape,
-        { required: !!catalog.candle.shapes.length }
+        {
+          required: !!catalog.candle.shapes.length,
+          onChange: () => syncOrderAmountDisplay()
+        }
       ),
       makeAttrSelect(
         "f-color", "Color", catalog.candle.colors,
@@ -89,8 +179,11 @@ export function updateKindFields(preset = null) {
         values.scentName || values.scent?.name || values.scent
       )
     );
+    syncOrderAmountDisplay();
     return;
   }
+
+  syncOrderAmountDisplay();
 
   if (kind === "resin") {
     const shapes = resinShapes(catalog);
@@ -183,6 +276,7 @@ function setQty(value) {
   if (el) el.textContent = String(qty);
   if (minus) minus.disabled = qty <= 1;
   if (plus) plus.disabled = qty >= 99;
+  syncOrderAmountDisplay();
   return qty;
 }
 
@@ -196,9 +290,32 @@ export function openDialog(order) {
     isEdit ? (order.createdAt || Date.now()) : Date.now()
   );
   populateKindSelect(isEdit ? order.kind : "candle");
-  setQty(isEdit ? unitCount(order) : 1);
   document.getElementById("f-notes").value = isEdit ? (order.notes ?? "") : "";
+
+  const editKind = isEdit ? normalizeKind(order.kind) : "candle";
+  if (editKind === "resin") {
+    const storedUnit = parseMoney(order.unitPrice);
+    const storedAmount = parseMoney(order.amount);
+    const qty = unitCount(order);
+    if (storedUnit !== null) setResinPriceInput(storedUnit);
+    else if (storedAmount !== null && qty > 0) setResinPriceInput(storedAmount / qty);
+    else setResinPriceInput("");
+  } else {
+    setResinPriceInput("");
+  }
+
+  setQty(isEdit ? unitCount(order) : 1);
   updateKindFields(isEdit ? attrsFromOrder(order) : null);
+  if (isEdit && editKind === "candle") {
+    const out = document.getElementById("f-amount");
+    const storedAmount = parseMoney(order.amount);
+    const storedUnit = parseMoney(order.unitPrice);
+    if (out && storedAmount !== null && candleUnitPrice(state.catalog, order.shapeId, order.shape) === null) {
+      out.dataset.unitPrice = storedUnit === null ? "" : String(storedUnit);
+      out.dataset.amount = String(storedAmount);
+      out.textContent = formatMoney(storedAmount);
+    }
+  }
   dlg.showModal();
   if (!isEdit && order?.person) document.getElementById("f-kind").focus();
   else document.getElementById("f-person").focus();
@@ -206,13 +323,27 @@ export function openDialog(order) {
 
 export function bindOrderForm() {
   const dlg = document.getElementById("dlg");
-  document.getElementById("f-kind").addEventListener("change", () => updateKindFields(null));
+  document.getElementById("f-kind").addEventListener("change", () => {
+    if (normalizeKind(document.getElementById("f-kind").value) !== "resin") {
+      setResinPriceInput("");
+    }
+    updateKindFields(null);
+  });
   document.getElementById("add").onclick = () => openDialog(null);
   document.getElementById("cancel").onclick = () => dlg.close();
   document.getElementById("closeDialog").onclick = () => dlg.close();
 
   document.getElementById("qtyMinus").onclick = () => setQty(readQty() - 1);
   document.getElementById("qtyPlus").onclick = () => setQty(readQty() + 1);
+
+  const resinPriceInput = document.getElementById("f-resin-price");
+  if (resinPriceInput) {
+    resinPriceInput.addEventListener("input", () => {
+      if (normalizeKind(document.getElementById("f-kind")?.value) === "resin") {
+        syncResinAmountDisplay();
+      }
+    });
+  }
 
   document.getElementById("form").addEventListener("submit", async e => {
     e.preventDefault();
@@ -249,6 +380,9 @@ export function bindOrderForm() {
           : [],
       qty
     );
+    const pricing = (kind === "candle" || kind === "resin")
+      ? syncOrderAmountDisplay()
+      : { unitPrice: null, amount: null };
     const order = normalizeOrder({
       id: state.editingId || crypto.randomUUID(),
       createdAt: fromDatetimeLocalValue(document.getElementById("f-ordered").value),
@@ -266,6 +400,8 @@ export function bindOrderForm() {
       candleType: kind === "candle" ? attrs.shape.name : "",
       units,
       qty,
+      unitPrice: pricing.unitPrice === null ? "" : pricing.unitPrice,
+      amount: pricing.amount === null ? "" : pricing.amount,
       notes: document.getElementById("f-notes").value.trim(),
       image: existing?.image || orderOptionImage(state.catalog, kind, {
         shapeId: attrs.shape.id,

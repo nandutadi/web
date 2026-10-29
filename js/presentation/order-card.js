@@ -1,11 +1,20 @@
 import { CANDLE_COLOR_HEX, SHAPE_ICONS, KIND_ICONS } from "../core/constants.js";
 import { typeMeta } from "../domain/catalog.js";
-import { isFullyDone, orderTitle, orderOptionImage, unitCount } from "../domain/order.js";
+import {
+  isFullyDone,
+  orderTitle,
+  orderOptionImage,
+  unitCount,
+  formatMoney,
+  parseMoney,
+  resolveOrderPricing
+} from "../domain/order.js";
 import { state } from "../app/state.js";
 import { renderUnitChecks } from "./checks.js";
 import { openViewDialog } from "./view-dialog.js";
 
-export function orderCard(o) {
+export function orderCard(raw) {
+  const o = resolveOrderPricing(raw, state.catalog) || raw;
   const el = document.createElement("article");
   el.className = "order" + (isFullyDone(o) ? " done" : "");
   const colorHint = o.color || "";
@@ -23,13 +32,13 @@ export function orderCard(o) {
   );
   el.addEventListener("click", e => {
     if (e.target.closest("button, label, input, a")) return;
-    openViewDialog(o);
+    openViewDialog(raw);
   });
   el.addEventListener("keydown", e => {
     if (e.target !== el) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      openViewDialog(o);
+      openViewDialog(raw);
     }
   });
 
@@ -66,6 +75,16 @@ export function orderCard(o) {
     badge.textContent = `×${qty}`;
     badge.title = `${qty} items`;
     titleRow.appendChild(badge);
+  }
+  const amount = parseMoney(o.amount);
+  if (amount !== null) {
+    const priceBadge = document.createElement("span");
+    priceBadge.className = "price-badge";
+    priceBadge.textContent = formatMoney(amount);
+    priceBadge.title = parseMoney(o.unitPrice) !== null && qty > 1
+      ? `${formatMoney(o.unitPrice)} × ${qty}`
+      : "Order amount";
+    titleRow.appendChild(priceBadge);
   }
   content.appendChild(titleRow);
 

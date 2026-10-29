@@ -1,10 +1,34 @@
 import { state, requestRender } from "../app/state.js";
-import { normalizeOrder, orderPayload } from "../domain/order.js";
+import {
+  normalizeOrder,
+  orderPayload,
+  applyCatalogPricingToOrders
+} from "../domain/order.js";
 import { cacheLocalOrders, loadLocalOrders } from "./local-storage.js";
 
 export function loadOrdersIntoState() {
   state.orders = loadLocalOrders();
+  enrichOrdersWithCatalogPricing();
   return state.orders;
+}
+
+/**
+ * Fill missing candle amounts from catalog prices (covers orders created before pricing).
+ * Optionally writes the updated amounts back to Firebase.
+ */
+export async function enrichOrdersWithCatalogPricing({ persistCloud = false } = {}) {
+  const { orders, changed } = applyCatalogPricingToOrders(state.orders, state.catalog);
+  if (!changed.length) return [];
+  state.orders = orders;
+  cacheLocalOrders(state.orders);
+  if (persistCloud && state.cloudEnabled && state.db) {
+    await Promise.all(
+      changed.map(o =>
+        state.db.collection("orders").doc(o.id).set(orderPayload(o), { merge: true })
+      )
+    );
+  }
+  return changed;
 }
 
 export async function upsertOrder(order) {

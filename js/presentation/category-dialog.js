@@ -30,7 +30,8 @@ function renderOptPoll(list, container, {
   withSizes = false,
   sizeLabel = "Sizes",
   placeholder = "Add option…",
-  shapeImages = false
+  shapeImages = false,
+  withPrice = false
 } = {}) {
   container.innerHTML = "";
   ensureTrailingPlaceholder(list, withSizes);
@@ -38,7 +39,8 @@ function renderOptPoll(list, container, {
     const row = document.createElement("div");
     row.className = "cat-row"
       + (withSizes ? "" : " simple")
-      + (shapeImages ? " shape-row" : "");
+      + (shapeImages ? " shape-row" : "")
+      + (withPrice ? " with-price" : "");
 
     const thumbWrap = document.createElement("div");
     thumbWrap.className = "cat-thumb-wrap" + (node.image ? " has-image" : "");
@@ -55,7 +57,7 @@ function renderOptPoll(list, container, {
     } else {
       thumb.textContent = shapeImages ? "IMG" : "＋";
     }
-    const pollOpts = { withSizes, sizeLabel, placeholder, shapeImages };
+    const pollOpts = { withSizes, sizeLabel, placeholder, shapeImages, withPrice };
     thumb.onclick = () => pickCatImage({ node, list, container, ...pollOpts });
     thumbWrap.appendChild(thumb);
     if (node.image) {
@@ -76,9 +78,27 @@ function renderOptPoll(list, container, {
 
     const input = document.createElement("input");
     input.type = "text";
+    input.className = "cat-name";
     input.value = node.name || "";
     input.placeholder = index === list.length - 1 ? placeholder : "Name";
     input.autocomplete = "off";
+
+    let priceInput = null;
+    if (withPrice) {
+      if (node.price === undefined || node.price === null) node.price = "";
+      priceInput = document.createElement("input");
+      priceInput.type = "text";
+      priceInput.className = "cat-price";
+      priceInput.value = node.price || "";
+      priceInput.placeholder = "Price";
+      priceInput.inputMode = "decimal";
+      priceInput.autocomplete = "off";
+      priceInput.setAttribute("aria-label", "Price");
+      priceInput.addEventListener("input", () => {
+        node.price = priceInput.value;
+        node.placeholder = false;
+      });
+    }
 
     let nestBtn = null;
     if (withSizes) {
@@ -105,7 +125,7 @@ function renderOptPoll(list, container, {
         ensureTrailingPlaceholder(list, withSizes);
         renderOptPoll(list, container, pollOpts);
         const rows = [...container.children].filter(el => el.classList.contains("cat-row"));
-        const focusInput = rows[index]?.querySelector("input[type='text']");
+        const focusInput = rows[index]?.querySelector("input.cat-name");
         if (focusInput) {
           focusInput.focus();
           const len = focusInput.value.length;
@@ -126,6 +146,7 @@ function renderOptPoll(list, container, {
     };
 
     if (withSizes) row.append(thumbWrap, input, nestBtn, delBtn);
+    else if (withPrice) row.append(thumbWrap, input, priceInput, delBtn);
     else row.append(thumbWrap, input, delBtn);
     container.appendChild(row);
 
@@ -151,6 +172,7 @@ function makeCatSection(title, hint, list, {
   withSizes = false,
   sizeLabel = "Sizes / dimensions",
   shapeImages = false,
+  withPrice = false,
   openByDefault = false
 } = {}) {
   const key = `${state.activeTypeId}:${title}`;
@@ -189,6 +211,7 @@ function makeCatSection(title, hint, list, {
     withSizes,
     sizeLabel,
     shapeImages,
+    withPrice,
     placeholder: `Add ${title.toLowerCase().replace(/s$/, "")}…`
   });
   body.appendChild(poll);
@@ -222,9 +245,9 @@ function renderCatTypeEditor() {
     editor.append(
       makeCatSection(
         "Shapes",
-        "Candle moulds — also offered on Resin orders (images included)",
+        "Candle moulds — set a price per shape (also offered on Resin orders)",
         state.draftCatalog.candle.shapes,
-        { shapeImages: true }
+        { shapeImages: true, withPrice: true }
       ),
       makeCatSection("Colors", "Candle colors", state.draftCatalog.candle.colors),
       makeCatSection("Scents", "Candle scents", state.draftCatalog.candle.scents)
@@ -285,7 +308,8 @@ export function bindCategoryDialog() {
         withSizes: state.catImageTarget.withSizes,
         sizeLabel: state.catImageTarget.sizeLabel,
         placeholder: state.catImageTarget.placeholder,
-        shapeImages: state.catImageTarget.shapeImages
+        shapeImages: state.catImageTarget.shapeImages,
+        withPrice: state.catImageTarget.withPrice
       });
       showToast("Shape image added");
     } catch (err) {

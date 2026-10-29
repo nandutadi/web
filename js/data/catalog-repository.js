@@ -2,6 +2,7 @@ import { state, requestRender } from "../app/state.js";
 import { notifyCatalogChanged } from "../app/ui-hooks.js";
 import { cleanCatalog, categoriesPayload } from "../domain/catalog.js";
 import { loadLocalCatalog, saveLocalCatalog } from "./local-storage.js";
+import { enrichOrdersWithCatalogPricing } from "./orders-repository.js";
 import { showToast } from "../core/toast.js";
 
 export function loadCatalogIntoState() {
@@ -15,6 +16,11 @@ export async function persistCategories(data, { quiet = false } = {}) {
   saveLocalCatalog(state.catalog);
   if (state.cloudEnabled && state.db) {
     await state.db.collection("settings").doc("categories").set(categoriesPayload(state.catalog));
+  }
+  try {
+    await enrichOrdersWithCatalogPricing({ persistCloud: !!state.cloudEnabled });
+  } catch (err) {
+    console.error(err);
   }
   notifyCatalogChanged();
   requestRender();
