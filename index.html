@@ -6,6 +6,8 @@
 <meta name="color-scheme" content="light dark" />
 <meta name="description" content="Thanvis Art Gallery — order tracking and studio modules." />
 <title>Thanvis · Order Tracking</title>
+<link rel="icon" type="image/png" href="logo.png" />
+<link rel="apple-touch-icon" href="logo.png" />
 <link rel="stylesheet" href="live-bg.css" />
 <style>
   :root {
@@ -53,6 +55,22 @@
     gap: 16px;
     margin-bottom: 36px;
   }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+  .brand-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: none;
+    box-shadow: var(--shadow);
+    background: #fff;
+  }
+  .brand-copy { min-width: 0; }
   .brand h1 {
     margin: 0;
     font-size: clamp(28px, 5vw, 40px);
@@ -148,6 +166,8 @@
   }
   @media (max-width: 420px) {
     .grid { grid-template-columns: 1fr; }
+    .brand { gap: 12px; }
+    .brand-logo { width: 52px; height: 52px; }
     .brand h1 { font-size: clamp(24px, 8vw, 32px); }
     .brand p { font-size: 13px; }
     a.card, .card.soon { min-height: 140px; padding: 18px; }
@@ -186,8 +206,11 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <h1>Thanvis Art Gallery</h1>
-        <p>Order tracking for the studio — more modules coming here next.</p>
+        <img class="brand-logo" src="logo.png" alt="Thanvis Art Gallery" width="64" height="64" />
+        <div class="brand-copy">
+          <h1>Thanvis Art Gallery</h1>
+          <p>Order tracking for the studio — more modules coming here next.</p>
+        </div>
       </div>
       <button class="theme-btn" id="theme" type="button" title="Toggle theme" aria-label="Toggle theme">☾</button>
   </header>

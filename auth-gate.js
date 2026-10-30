@@ -76,6 +76,11 @@
         background: #241e1d;
         border-color: #3a2f2d;
       }
+      #auth-gate .auth-logo {
+        width: 88px; height: 88px; border-radius: 50%; object-fit: cover;
+        margin: 0 auto 14px; display: block; background: #fff;
+        box-shadow: 0 6px 18px rgba(90,55,50,.12);
+      }
       #auth-gate h1 { margin: 0 0 8px; font-size: clamp(20px, 5vw, 24px); letter-spacing: -.03em; word-break: break-word; }
       #auth-gate p { margin: 0 0 18px; color: #8a6f6a; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
       html[data-theme="dark"] #auth-gate p { color: #b79b95; }
@@ -120,6 +125,7 @@
     if (state === "loading") {
       gate.innerHTML = `
         <div class="card">
+          <img class="auth-logo" src="logo.png" alt="" width="88" height="88" />
           <h1>Thanvis Art Gallery</h1>
           <p>Checking access…</p>
         </div>`;
@@ -148,6 +154,7 @@
 
     gate.innerHTML = `
       <div class="card">
+        <img class="auth-logo" src="logo.png" alt="" width="88" height="88" />
         <h1>Thanvis Art Gallery</h1>
         <p>Sign in with an approved Google account to continue.</p>
         <div class="actions">
